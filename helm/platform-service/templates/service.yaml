@@ -1,0 +1,28 @@
+{{/*
+Create the name of the service to use
+*/}}
+{{- define "platform-service.serviceName" -}}
+  {{ include "platform-service.name" . }}
+{{- end -}}
+{{- if not .Values.deploymentOnly -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "platform-service.serviceName" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "platform-service.name" . }}
+    helm.sh/chart: {{ include "platform-service.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ required "service.port must be specified" .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ include "platform-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{ .Values.app }}
+{{- end}}

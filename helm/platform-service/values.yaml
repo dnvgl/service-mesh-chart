@@ -1,0 +1,136 @@
+# Default values for platform-service
+# Likely you will make a copy of this for your own platform service
+
+# ToDo - Parameterize and/or include:
+# mtlsEnabled=true
+# other tls stuff
+# routing rules for service
+
+# application name - required
+app: 
+
+version: v1
+replicaCount: 1
+
+# sample extra label, you can add as many as you want
+#additionalPodLabels: |
+#  saml-idp-forward-auth-filter: enabled
+
+image:
+  #registry and repository (no tag): platformteam.azurecr.io/myimage
+  repository:
+  # image tag (i.e. 105389)
+  tag:
+  pullPolicy: IfNotPresent
+  # name of the pullSecret for the registry if used
+  pullSecret:
+  containerPort: 80
+
+fullnameOverride: ""
+
+forwardAuthentication:
+  enabled: false # whether the login redirect & callback envoy filter should be applied
+  createFilter: false 
+
+# this probably isn't really needed anymore?
+# apiAuthentication:
+#  enabled: false
+# createFilter: false 
+
+jwt:
+  createPolicy: false # whether JWT authorization policy should be applied
+  issuer: # "https://sts.windows.net/.../"
+  jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
+
+service:
+  # unspecified for default microservice (for now at least)
+  type:
+  # port number - is required 15383
+  port: 5000
+  # provide access to other services
+
+serviceAccount:
+  # Specifies whether a ServiceAccount should be created
+  create: true
+  # Prefixes the service account with the release name
+  useReleasePrefix: false
+  # The name of the ServiceAccount to use (the actual service account name
+  # will still be prefixed by the release prefix if that option is enabled.
+  # If not set and create is true, a name is generated from the app
+  name: 
+
+defaultServiceBindings:
+  # Create a default (full access) role
+  createFullAccessRole: true
+
+  # gives the default role access to these services (only if serviceAccount.Create)
+  # todo: throw error if this is specified without serviceAccount.Create to reduce surprises
+  createBindingsToServiceRoles: 
+   # i.e., if this is service A
+   # - serviceB-full-access
+   # - serviceC-readonly-access
+
+# toDo: rename section to serviceAccess
+gateway:
+  # map virtual service to a gateway expose this service
+  exposeService: true
+  # gateway name (fully qualified if in a different namespace)
+  name: gateway/one-gateway
+
+defaultRouting:
+  enabled: true
+  # rewrite url to '/'
+  rewriteUrl: true
+  urlPrefixes:
+   
+  hosts:
+    - myhost.dnvgl.com
+
+# enable to specify volume mounted configmap settings from a file (i.e. appsettings.json)
+settingsConfigMap:
+  enabled: false
+  configMapName:
+  volumeName: settings-volume
+  mountPath: /app/secrets
+
+# enable to specify volume mounted secrets from a file (i.e. appsettings.json as secrets)
+settingsSecret:
+  enabled: false
+  secretName:
+  volumeName: settings-secrets-volume
+  mountPath: /app/secrets
+
+# put any environment variables here as a string
+#environmentVariables: |
+#  - name: Serilog__MinimumLevel
+#    value: Debug
+#    valueFrom:
+#      secretKeyRef:
+#        name: mysecret
+#        key: username
+
+# Declare any volumes: name and mountPath are used for volumeMount at the container level
+# volumeDefinition string underneath is copied verbatim into volumes
+volumes:
+#  - name: 
+#    mountPath: 
+#    volumeDefinition: |
+#      azureFile:
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

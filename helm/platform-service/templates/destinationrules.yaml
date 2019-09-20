@@ -1,0 +1,15 @@
+{{- if not .Values.deploymentOnly -}}
+{{- if .Values.defaultRouting.enabled}}
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ include "platform-service.fullname" . }}-destinationrule
+spec:
+  host: {{ include "platform-service.serviceName" . }}
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM
+    tls:
+      mode: ISTIO_MUTUAL
+{{- end}}
+{{- end}}

@@ -1,0 +1,109 @@
+{{- $initContainersImageTag := .Values.image.tag -}}
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "platform-service.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "platform-service.name" . }}
+    helm.sh/chart: {{ include "platform-service.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app: {{ required "app is required" .Values.app }}
+    version: {{ .Values.version }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "platform-service.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "platform-service.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app: {{ required "app is required" .Values.app }}
+        version: {{ .Values.version }}
+        {{- if .Values.forwardAuthentication.enabled }}
+        authn-req-client: enabled
+        {{ end }}
+        {{- if .Values.additionalPodLabels }}
+{{- with .Values.additionalPodLabels }}
+{{ tpl . $ | indent 8 }}
+{{- end }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "platform-service.serviceAccountName" . }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      initContainers:
+      {{- range .Values.initContainers }}
+        - name: {{ .name }}
+          image: "{{ .image.repository }}:{{ $initContainersImageTag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          env:
+{{- with .envVariables }}
+{{ tpl . $ | indent 12 }}
+{{- end }}
+      {{- end }}
+      containers:
+        - name: {{ include "platform-service.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+{{- with .Values.environmentVariables }}
+{{ tpl . $ | indent 12 }}
+{{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.image.containerPort }}
+              protocol: TCP
+          volumeMounts:
+          {{- range .Values.volumes }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+
+          {{- if .Values.settingsConfigMap.enabled }}
+            - name: {{ .Values.settingsConfigMap.volumeName }}
+              mountPath: {{ .Values.settingsConfigMap.mountPath }}
+              readOnly: true
+          {{ end }}
+          {{- if .Values.settingsSecret.enabled }}
+            - name: {{ .Values.settingsSecret.volumeName }}
+              mountPath: {{ .Values.settingsSecret.mountPath }}
+              readOnly: true
+          {{ end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+      - name: "{{ .Values.image.pullSecret }}"
+      {{- end }}
+      volumes:
+{{- range .Values.volumes }}
+        - name: {{ .name }}
+{{ tpl .volumeDefinition $ | indent 10 }}
+{{- end }}
+
+{{- if .Values.settingsConfigMap.enabled }}
+      - name: {{ .Values.settingsConfigMap.volumeName }}
+        configMap:
+          name: {{required "settings.ConfigMap.configMapName is required" .Values.settingsConfigMap.configMapName }}
+{{- end }}
+{{- if .Values.settingsSecret.enabled }}
+      - name: {{ .Values.settingsSecret.volumeName }}
+        secret:
+          secretName: {{required "settings.settingsSecret.secretName is required" .Values.settingsSecret.secretName }}
+{{- end }}

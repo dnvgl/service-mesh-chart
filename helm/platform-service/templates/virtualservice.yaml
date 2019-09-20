@@ -1,0 +1,48 @@
+{{- if not .Values.deploymentOnly -}}
+{{- if .Values.defaultRouting.enabled}}
+{{- $fullName := include "platform-service.fullname" . -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "platform-service.serviceName" . }}
+spec:
+  hosts:
+  - {{ include "platform-service.serviceName" . }}
+  {{- range .Values.defaultRouting.hosts }}
+  - {{ . }}
+  {{- end }}
+
+{{- if .Values.gateway.exposeService }}
+  gateways:
+  - {{ required "A valid .Values.gateway.name entry required!" .Values.gateway.name }}
+{{- end}}
+  http:
+  - route:
+    - destination:
+        host: {{ include "platform-service.serviceName" . | quote }}
+{{- if .Values.gateway.exposeService }}
+{{- if .Values.defaultRouting.urlPrefixes }}
+    match:
+    {{- range .Values.defaultRouting.urlPrefixes }}
+    - uri:
+        prefix: {{ . }}
+    {{- end }}
+{{- else }}
+    match:
+    - uri:
+        prefix: "/{{ .Values.app }}/"
+    - uri:
+        prefix: "/{{ .Values.app }}"
+{{- end}}
+{{- if .Values.defaultRouting.rewriteUrl }}
+    rewrite:
+      uri: "/"
+{{- end}}
+{{- end}}
+    appendHeaders:
+      x-appname: {{ .Values.app }} #  {{ default .Values.app .Values.urlPrefixes }}
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+{{- end}}
+{{- end}}

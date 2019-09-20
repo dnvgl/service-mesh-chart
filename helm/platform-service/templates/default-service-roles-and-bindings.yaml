@@ -1,0 +1,30 @@
+{{- if not .Values.deploymentOnly -}}
+{{- if .Values.defaultServiceBindings.createFullAccessRole -}}
+{{- $serviceName := include "platform-service.serviceName" . -}}
+apiVersion: 'rbac.istio.io/v1alpha1'
+kind: ServiceRole
+metadata:
+  name: {{ $serviceName }}-full-access
+spec:
+  rules:
+  - services:
+    - {{ $serviceName }}
+---
+apiVersion: 'rbac.istio.io/v1alpha1'
+kind: ServiceRoleBinding
+metadata:
+  name: {{ $serviceName }}-full-gateway-access
+spec:
+  subjects:
+    - user: "cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"
+  roleRef:
+    kind: ServiceRole
+    name: {{ $serviceName }}-default-role
+{{- end -}}
+
+{{range .Values.defaultServiceBindings.createBindingsToServiceRoles -}}
+{{ $roleName := . }}
+---
+   - {{ . }}
+{{- end }}
+{{- end }}
