@@ -129,6 +129,14 @@ resources: {}
   #  cpu: 100m
   #  memory: 128Mi
 
+# Adjust resources requested for proxy sidecar (see https://istio.io/docs/concepts/performance-and-scalability/#cpu-and-memory)
+proxyResources:
+  # request values are passed to the envoy proxy through annotations
+  requests:
+    cpu: 100m
+    memory: 128mi
+  # limits are not currently supported
+
 nodeSelector: {}
 
 tolerations: []
