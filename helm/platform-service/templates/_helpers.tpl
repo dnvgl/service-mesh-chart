@@ -3,7 +3,7 @@
 Expand the name of the chart.
 */}}
 {{- define "platform-service.name" -}}
-{{- default .Values.app .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- default (required "app value is required" .Values.app) .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -15,7 +15,8 @@ If release name contains chart name it will be used as a full name.
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- $name := required "A valid .Values.app entry required!" .Values.app -}}
+{{- $name := include "platform-service.name" . -}}
+{{- $name := required "app value is required" .Values.app -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
