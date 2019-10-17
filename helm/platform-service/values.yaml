@@ -133,8 +133,8 @@ resources: {}
 proxyResources:
   # request values are passed to the envoy proxy through annotations
   requests:
-    cpu: 100m
-    memory: 128mi
+    cpu: 10m
+    memory: 64Mi
   # limits are not currently supported
 
 nodeSelector: {}
