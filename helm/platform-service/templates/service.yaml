@@ -23,6 +23,5 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: {{ include "platform-service.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
     app: {{ .Values.app }}
 {{- end}}
