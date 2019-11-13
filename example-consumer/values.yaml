@@ -1,0 +1,5 @@
+
+#  platform service details go under a nested section in the values
+platform-service:
+  app: your-unique-app-identifier
+  # additional values - see platform-service/values.yaml for full details
