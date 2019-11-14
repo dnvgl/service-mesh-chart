@@ -78,11 +78,17 @@ gateway:
   name: gateway/one-gateway
 
 defaultRouting:
+  # Generate default virtual services and destination rules
   enabled: true
-  # rewrite url to '/'
-  rewriteUrl: true
+  # Rewrite the routing prefix to the rewriteUri
+  enableRewrite: true
+  # Replace the routing prefix with this uri
+  rewriteUri: "/"
+  # legacy rewrite flag - obsolete
+  rewriteUrl: false 
+  # list of prefixes in routing rules
   urlPrefixes:
-   
+  # hosts to take into account for routing rules    
   hosts:
     - myhost.dnvgl.com
 

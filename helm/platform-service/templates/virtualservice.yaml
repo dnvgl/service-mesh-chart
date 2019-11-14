@@ -35,8 +35,12 @@ spec:
         prefix: "/{{ .Values.app }}"
 {{- end}}
 {{- if .Values.defaultRouting.rewriteUrl }}
+    # legacy rewrite
     rewrite:
       uri: "/"
+{{- else if .Values.defaultRouting.enableRewrite }}
+    rewrite:
+      uri: {{ required "rewriteUri is required" .Values.defaultRouting.rewriteUri }}
 {{- end}}
 {{- end}}
     appendHeaders:
