@@ -16,24 +16,28 @@ spec:
   gateways:
   - {{ required "A valid .Values.gateway.name entry required!" .Values.gateway.name }}
 {{- end}}
+{{- $prefixes := default (list .Values.app) .Values.defaultRouting.urlPrefixes }}
   http:
+{{- if .Values.defaultRouting.redirectOnNoTrailingSlash }}
+  # redirect on prefixes without trailing slashes
+  {{- range $prefixes }}
+  - route:
+    match:
+    - uri:
+        exact: {{ . }}
+    redirect:
+      uri: {{ . }}/
+  {{- end}}
+{{- end}}
+  # routes to service
   - route:
     - destination:
         host: {{ include "platform-service.serviceName" . | quote }}
-{{- if .Values.gateway.exposeService }}
-{{- if .Values.defaultRouting.urlPrefixes }}
     match:
-    {{- range .Values.defaultRouting.urlPrefixes }}
+    {{- range $prefixes }}
     - uri:
-        prefix: {{ . }}
+        prefix: {{ . }}/
     {{- end }}
-{{- else }}
-    match:
-    - uri:
-        prefix: "/{{ .Values.app }}/"
-    - uri:
-        prefix: "/{{ .Values.app }}"
-{{- end}}
 {{- if .Values.defaultRouting.rewriteUrl }}
     # legacy rewrite
     rewrite:
@@ -42,9 +46,8 @@ spec:
     rewrite:
       uri: {{ required "rewriteUri is required" .Values.defaultRouting.rewriteUri }}
 {{- end}}
-{{- end}}
     appendHeaders:
-      x-appname: {{ .Values.app }} #  {{ default .Values.app .Values.urlPrefixes }}
+      x-appname: {{ .Values.app }} #  {{ first $prefixes }}
     retries:
       attempts: 3
       perTryTimeout: 2s

@@ -84,9 +84,12 @@ defaultRouting:
   enableRewrite: true
   # Replace the routing prefix with this uri
   rewriteUri: "/"
+  # Redirect when a trailing slash is not included in the URL prefix
+  # This is applied for each provided urlPrefix or the default prefix if none provided
+  redirectOnNoTrailingSlash: false
   # legacy rewrite flag - obsolete
   rewriteUrl: false 
-  # list of prefixes in routing rules
+  # list of prefixes for route matching - overrides the default prefix (app)
   urlPrefixes:
   # hosts to take into account for routing rules    
   hosts:
