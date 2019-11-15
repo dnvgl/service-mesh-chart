@@ -21,10 +21,11 @@ spec:
 {{- if .Values.defaultRouting.redirectOnNoTrailingSlash }}
   # redirect on prefixes without trailing slashes
   {{- range $prefixes }}
+  {{- $slashPrefix := printf "/%s" . }}
   - route:
     match:
     - uri:
-        exact: {{ . }}
+        exact: {{ $slashPrefix }}
     redirect:
       uri: {{ . }}/
   {{- end}}
@@ -35,8 +36,12 @@ spec:
         host: {{ include "platform-service.serviceName" . | quote }}
     match:
     {{- range $prefixes }}
+    {{- if hasPrefix "/" . }}
+      {{ fail "url prefixes must not include leading slash"}}
+    {{- end}}
+    {{- $slashPrefix := printf "/%s" . }}
     - uri:
-        prefix: {{ . }}/
+        prefix: {{ $slashPrefix }}/
     {{- end }}
 {{- if .Values.defaultRouting.rewriteUrl }}
     # legacy rewrite
