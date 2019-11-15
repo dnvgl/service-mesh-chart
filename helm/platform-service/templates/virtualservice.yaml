@@ -52,7 +52,7 @@ spec:
       uri: {{ required "rewriteUri is required" .Values.defaultRouting.rewriteUri }}
 {{- end}}
     appendHeaders:
-      x-appname: {{ .Values.app }} #  {{ first $prefixes }}
+      x-appname: {{ first $prefixes }}
     retries:
       attempts: 3
       perTryTimeout: 2s
