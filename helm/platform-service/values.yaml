@@ -91,7 +91,9 @@ defaultRouting:
   rewriteUrl: false 
   # list of prefixes for route matching - overrides the default prefix (app)
   urlPrefixes:
-  # hosts to take into account for routing rules    
+  # route from all hosts (typically only common services)
+  allHosts: false
+  # hosts to take into account for routing rules (ignored if allHosts = true)
   hosts:
     - myhost.dnvgl.com
 

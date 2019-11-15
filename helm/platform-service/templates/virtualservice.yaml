@@ -7,10 +7,14 @@ metadata:
   name: {{ include "platform-service.serviceName" . }}
 spec:
   hosts:
+{{- if .Values.defaultRouting.allHosts }}
+  - "*"
+{{- else }}
   - {{ include "platform-service.serviceName" . }}
   {{- range .Values.defaultRouting.hosts }}
-  - {{ . }}
+  - {{ . | quote }}
   {{- end }}
+{{- end }}
 
 {{- if .Values.gateway.exposeService }}
   gateways:

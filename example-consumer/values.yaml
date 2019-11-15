@@ -3,3 +3,7 @@
 platform-service:
   app: your-unique-app-identifier
   # additional values - see platform-service/values.yaml for full details
+
+  defaultRouting:
+    hosts:
+    - ecosystem-dev.dnvgl.com
