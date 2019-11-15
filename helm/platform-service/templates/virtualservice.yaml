@@ -27,7 +27,7 @@ spec:
     - uri:
         exact: {{ $slashPrefix }}
     redirect:
-      uri: {{ . }}/
+      uri: {{ $slashPrefix }}/
   {{- end}}
 {{- end}}
   # routes to service
