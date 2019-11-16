@@ -1,11 +1,6 @@
 # Default values for platform-service
 # Likely you will make a copy of this for your own platform service
 
-# ToDo - Parameterize and/or include:
-# mtlsEnabled=true
-# other tls stuff
-# routing rules for service
-
 # application name - required
 app: 
 
@@ -70,7 +65,6 @@ defaultServiceBindings:
    # - serviceB-full-access
    # - serviceC-readonly-access
 
-# toDo: rename section to serviceAccess
 gateway:
   # map virtual service to a gateway expose this service
   exposeService: true
@@ -84,11 +78,14 @@ defaultRouting:
   enableRewrite: true
   # Replace the routing prefix with this uri
   rewriteUri: "/"
+  # legacy rewrite flag - obsolete
+  rewriteUrl: false 
+  # catch-all route - anything not routed elsewhere will be routed here
+  # When this is used, urlPrefixes are ignored (there should be only catch-all route for this host & gateway)
+  catchAll: false
   # Redirect when a trailing slash is not included in the URL prefix
   # This is applied for each provided urlPrefix or the default prefix if none provided
   redirectOnNoTrailingSlash: false
-  # legacy rewrite flag - obsolete
-  rewriteUrl: false 
   # list of prefixes for route matching - overrides the default prefix (app)
   urlPrefixes:
   # route from all hosts (typically only common services)
