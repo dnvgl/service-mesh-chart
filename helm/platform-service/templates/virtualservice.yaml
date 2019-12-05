@@ -38,6 +38,7 @@ spec:
   - route:
     - destination:
         host: {{ include "platform-service.serviceName" . | quote }}
+  {{- if not .Values.defaultRouting.catchAll }}
     match:
     {{- range $prefixes }}
     {{- if hasPrefix "/" . }}
@@ -47,6 +48,7 @@ spec:
     - uri:
         prefix: {{ $slashPrefix }}/
     {{- end }}
+  {{- end }}
 {{- if .Values.defaultRouting.rewriteUrl }}
     # legacy rewrite
     rewrite:
