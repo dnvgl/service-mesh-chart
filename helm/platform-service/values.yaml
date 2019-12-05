@@ -97,6 +97,14 @@ defaultRouting:
   hosts:
     - myhost.dnvgl.com
 
+# default network policy configuration
+# limits access to only listed app keys to the specified container port
+defaultNetworkIsolation:
+  enabled: true
+  appsAllowedAccess:
+  #  - app1
+  #  - app2
+
 # enable to specify volume mounted configmap settings from a file (i.e. appsettings.json)
 settingsConfigMap:
   enabled: false

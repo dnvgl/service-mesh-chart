@@ -1,9 +1,14 @@
 
 #  platform service details go under a nested section in the values
 platform-service:
-  app: your-unique-app-identifier
+  app: httpbin
   # additional values - see platform-service/values.yaml for full details
 
   defaultRouting:
     hosts:
     - ecosystem-dev.dnvgl.com
+
+  defaultNetworkIsolation:
+    enabled: true
+    appsAllowedAccess:
+      - sleep
