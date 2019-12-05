@@ -97,7 +97,7 @@ defaultRouting:
 # default network policy configuration
 # limits access to only listed app keys to the specified container port
 defaultNetworkIsolation:
-  enabled: true
+  enabled: false # default off until we've tested it together with authorization
   appsAllowedAccess:
   #  - app1
   #  - app2
