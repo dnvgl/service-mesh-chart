@@ -1,9 +1,9 @@
-{{- if .Values.defaultNetworkIsolation.enabled -}}
+{{- if .Values.accessPolicy.networkPolicyEnabled -}}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: {{ .Values.app }}-network-policy
-  namespace: {{ .Release.Namepsace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   podSelector:
     matchLabels:
@@ -12,7 +12,7 @@ spec:
   policyTypes:
     - Ingress
   ingress:
-{{- range .Values.defaultNetworkIsolation.appsAllowedAccess }}
+{{- range .Values.accessPolicy.appsAllowedAccess }}
   - from:
     - podSelector:
         matchLabels:
@@ -20,5 +20,25 @@ spec:
     ports:
     - protocol: TCP
       port: {{ $.Values.image.containerPort }}
+{{- end }}      
+{{- range .Values.accessPolicy.appsAllowedAccess }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ . }}-egress-to-{{ $.Values.app }}-network-policy
+  namespace: {{ $.Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ . }}
+  policyTypes:
+    - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: {{ $.Values.app }}
+          version: {{ $.Values.version }}
 {{- end }}      
 {{- end }}      

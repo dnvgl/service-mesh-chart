@@ -94,13 +94,25 @@ defaultRouting:
   hosts:
     - myhost.dnvgl.com
 
-# default network policy configuration
-# limits access to only listed app keys to the specified container port
-defaultNetworkIsolation:
-  enabled: false # default off until we've tested it together with authorization
+  # Specify network and authorization policies
+  # insufficient
+  accessPolicy:
+    # Enable default network policy (set false and create your own if needed)
+    networkPolicyEnabled: true
+    # Enable default authorization policy (set false and create your own if needed)
+    authorizationPolicyEnabled: true
+    # List of workloads allowed access to this workload
   appsAllowedAccess:
+         # App identifier for workload
   #  - app1
   #  - app2
+  #       # Service account name - use the default Specify service account name if you use a an alternate name
+  #       alternateServiceAccountName:
+  #       authorizedTo:
+  #         - operation:
+  #             methods: ["GET"]
+  #             paths: ["/info"]
+
 
 # enable to specify volume mounted configmap settings from a file (i.e. appsettings.json)
 settingsConfigMap:
