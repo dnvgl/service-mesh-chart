@@ -102,8 +102,8 @@ spec:
       {{- end }}
       volumes:
 {{- range .Values.volumes }}
-        - name: {{ .name }}
-{{ tpl .volumeDefinition $ | indent 10 }}
+      - name: {{ .name }}
+{{ tpl .volumeDefinition $ | indent 8 }}
 {{- end }}
 
 {{- if .Values.settingsConfigMap.enabled }}
