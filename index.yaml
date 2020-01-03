@@ -3,7 +3,16 @@ entries:
   platform-service:
   - apiVersion: v1
     appVersion: "1.0"
-    created: 2019-12-05T15:21:24.2635082-08:00
+    created: 2020-01-03T09:52:25.1438391-08:00
+    description: Platform service chart
+    digest: 6485e1c11853912f27899874578f0fead30c38dfe25de64fb2ce2bd24f40c27e
+    name: platform-service
+    urls:
+    - platform-service-0.13.0.tgz
+    version: 0.13.0
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: 2020-01-03T09:52:25.1429004-08:00
     description: Platform service chart
     digest: 98cc5230c57f60d0cc69408645b88fb6ce1c100b9a634eea588fa9094ac12c35
     name: platform-service
@@ -12,7 +21,7 @@ entries:
     version: 0.12.3
   - apiVersion: v1
     appVersion: "1.0"
-    created: 2019-12-05T15:21:24.2622194-08:00
+    created: 2020-01-03T09:52:25.1413042-08:00
     description: Platform service chart
     digest: 100a98d5f670e2d1c238dd298d991edcfa3243055fac456cce35ab65b4876e19
     name: platform-service
@@ -21,7 +30,7 @@ entries:
     version: 0.12.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: 2019-12-05T15:21:24.2608694-08:00
+    created: 2020-01-03T09:52:25.1014352-08:00
     description: Platform service chart
     digest: c8b039ddbf60d04f8bf938d06fa23894624b18e99bc4753b205d85d385ce894d
     name: platform-service
@@ -30,7 +39,7 @@ entries:
     version: 0.12.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: 2019-12-05T15:21:24.2595877-08:00
+    created: 2020-01-03T09:52:25.0602689-08:00
     description: Platform service chart
     digest: ac0581fe933920ca0ce9ad023807b0a0b061bf4a284b12de86a7d982b1fda93e
     name: platform-service
@@ -39,7 +48,7 @@ entries:
     version: 0.12.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: 2019-12-05T15:21:24.2582628-08:00
+    created: 2020-01-03T09:52:25.0265003-08:00
     description: Platform service chart
     digest: c3d995ab80b0a850f5295ee40134d80f9f3b1421c7ff481811393375051a10a5
     name: platform-service
@@ -48,7 +57,7 @@ entries:
     version: 0.11.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: 2019-12-05T15:21:24.2569531-08:00
+    created: 2020-01-03T09:52:25.0136502-08:00
     description: Platform service chart
     digest: 7e43368db65ba451704d7282dfe6d3973a1a05f8c1b50fe6c1ffa358a9782643
     name: platform-service
@@ -57,7 +66,7 @@ entries:
     version: 0.10.9
   - apiVersion: v1
     appVersion: "1.0"
-    created: 2019-12-05T15:21:24.2556626-08:00
+    created: 2020-01-03T09:52:24.9956529-08:00
     description: Platform service chart
     digest: 04903140f00b1e59d1b50a1d91e14dbc25758c384dfc407ce4b8c0579f5a8305
     name: platform-service
@@ -66,11 +75,11 @@ entries:
     version: 0.10.8
   - apiVersion: v1
     appVersion: "1.0"
-    created: 2019-12-05T15:21:24.2543282-08:00
+    created: 2020-01-03T09:52:24.9767189-08:00
     description: Platform service chart
     digest: 499c0394de858fa742806617a0b77d032e47e45832a967573ab71122b47272bd
     name: platform-service
     urls:
     - platform-service-0.10.7.tgz
     version: 0.10.7
-generated: 2019-12-05T15:21:24.2525772-08:00
+generated: 2020-01-03T09:52:24.9592886-08:00
