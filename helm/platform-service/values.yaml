@@ -114,19 +114,21 @@ appsAllowedAccess:
 #             paths: ["/info"]
 
 
+# deprecated - use volumes instead
 # enable to specify volume mounted configmap settings from a file (i.e. appsettings.json)
 settingsConfigMap:
   enabled: false
-  configMapName:
-  volumeName: settings-volume
-  mountPath: /app/secrets
+#  configMapName:
+#  volumeName: settings-volume
+#  mountPath: /app/secrets
 
+# deprecated - use volumes instead
 # enable to specify volume mounted secrets from a file (i.e. appsettings.json as secrets)
 settingsSecret:
   enabled: false
-  secretName:
-  volumeName: settings-secrets-volume
-  mountPath: /app/secrets
+#  secretName:
+#  volumeName: settings-secrets-volume
+#  mountPath: /app/secrets
 
 # put any environment variables here as a string
 #environmentVariables: |

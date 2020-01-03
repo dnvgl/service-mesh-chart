@@ -73,11 +73,13 @@ spec:
           {{- end }}
 
           {{- if .Values.settingsConfigMap.enabled }}
+            # This is deprecated - please replace with equivalent volumes definition
             - name: {{ .Values.settingsConfigMap.volumeName }}
               mountPath: {{ .Values.settingsConfigMap.mountPath }}
               readOnly: true
           {{ end }}
           {{- if .Values.settingsSecret.enabled }}
+            # This is deprecated - please replace with equivalent volumes definition
             - name: {{ .Values.settingsSecret.volumeName }}
               mountPath: {{ .Values.settingsSecret.mountPath }}
               readOnly: true
@@ -107,6 +109,7 @@ spec:
 {{- end }}
 
 {{- if .Values.settingsConfigMap.enabled }}
+      # This is deprecated - please replace with equivalent volumes definition
       - name: {{ .Values.settingsConfigMap.volumeName }}
         configMap:
           name: {{required "settings.ConfigMap.configMapName is required" .Values.settingsConfigMap.configMapName }}
