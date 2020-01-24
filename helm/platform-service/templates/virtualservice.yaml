@@ -26,8 +26,7 @@ spec:
   # redirect on prefixes without trailing slashes
   {{- range $prefixes }}
   {{- $slashPrefix := printf "/%s" . }}
-  - route:
-    match:
+  - match:
     - uri:
         exact: {{ $slashPrefix }}
     redirect:
