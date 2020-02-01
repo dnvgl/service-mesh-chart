@@ -10,6 +10,10 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app: {{ required "app is required" .Values.app }}
     version: {{ .Values.version }}
+  annotations:
+    {{- if .Values.service.liveness.enabled }}  
+    sidecar.istio.io/rewriteAppHTTPProbers: "true"
+    {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -38,9 +42,6 @@ spec:
         {{- end }}
         {{- if .Values.proxyResources.requests.memory }}  
         sidecar.istio.io/proxyMemory: {{ .Values.proxyResources.requests.memory }}
-        {{- end }}
-        {{- if .Values.service.liveness.enabled }}  
-        sidecar.istio.io/rewriteAppHTTPProbers: "true"
         {{- end }}
       {{- end }}
     spec:
