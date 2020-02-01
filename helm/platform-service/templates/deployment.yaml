@@ -69,12 +69,14 @@ spec:
             - name: http
               containerPort: {{ .Values.image.containerPort }}
               protocol: TCP
+          {{- if .Values.service.liveness.enabled }} 
           livenessProbe:
             httpGet:
               path: /healthz
               port: {{ .Values.image.containerPort }}
             initialDelaySeconds: 5
             periodSeconds: 5
+          {{- end }}
           volumeMounts:
           {{- range .Values.volumes }}
             - name: {{ .name }}
