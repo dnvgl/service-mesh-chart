@@ -1,0 +1,12 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sleep-network-policy
+  namespace: test
+spec:
+  podSelector:
+    matchLabels:
+      app: sleep
+  policyTypes:
+    - Ingress
+  ingress:

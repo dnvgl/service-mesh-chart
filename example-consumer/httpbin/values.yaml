@@ -1,12 +1,25 @@
-
-#  platform service details go under a nested section in the values
 platform-service:
   app: httpbin
-  # additional values - see platform-service/values.yaml for full details
+  version: v1
 
+  image:
+    registry: docker.io
+    repository: kennethreitz/httpbin
+    pullPolicy: IfNotPresent
+    tag: latest
+    containerPort: 80
+
+  service:
+    port: 8000
+
+  gateway:
+    exposeService: true
+  
   defaultRouting:
-    hosts:
-    - ecosystem-dev.dnvgl.com
+    allHosts: true
+
+  defaultServiceBindings:
+    createFullAccessRole: false
 
   # Specify network and authorization policies
   # insufficient
@@ -14,10 +27,10 @@ platform-service:
     # Enable default network policy (set false and create your own if needed)
     networkPolicyEnabled: true
     # Enable default authorization policy (set false and create your own if needed)
-    authorizationPolicyEnabled: true
+    authorizationPolicyEnabled: false
     # List of workloads allowed access to this workload
     appsAllowedAccess:
-        # App identifier for workload
+      # App identifier for workload
       - sleep
   #       # Service account name - use the default Specify service account name if you use a an alternate name
   #       alternateServiceAccountName:
