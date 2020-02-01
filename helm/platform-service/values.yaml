@@ -43,6 +43,8 @@ service:
   # port number - is required 15383
   port: 5000
   # provide access to other services
+  liveness:
+    enabled: false
 
 serviceAccount:
   # Specifies whether a ServiceAccount should be created

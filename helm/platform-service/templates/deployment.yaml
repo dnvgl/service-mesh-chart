@@ -39,6 +39,9 @@ spec:
         {{- if .Values.proxyResources.requests.memory }}  
         sidecar.istio.io/proxyMemory: {{ .Values.proxyResources.requests.memory }}
         {{- end }}
+        {{- if .Values.service.liveness.enabled }}  
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+        {{- end }}
       {{- end }}
     spec:
       serviceAccountName: {{ include "platform-service.serviceAccountName" . }}
@@ -66,6 +69,12 @@ spec:
             - name: http
               containerPort: {{ .Values.image.containerPort }}
               protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.image.containerPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
           volumeMounts:
           {{- range .Values.volumes }}
             - name: {{ .name }}
