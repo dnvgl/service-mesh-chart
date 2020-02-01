@@ -31,7 +31,6 @@ spec:
 {{ tpl . $ | indent 8 }}
 {{- end }}
         {{- end }}
-      {{- if .Values.proxyResources.requests }}  
       annotations:
         {{- if .Values.proxyResources.requests.cpu }}  
         sidecar.istio.io/proxyCPU: {{ .Values.proxyResources.requests.cpu }}
@@ -42,7 +41,6 @@ spec:
         {{- if .Values.service.liveness.enabled }}  
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
         {{- end }}
-      {{- end }}
     spec:
       serviceAccountName: {{ include "platform-service.serviceAccountName" . }}
       imagePullSecrets:
