@@ -32,11 +32,13 @@ spec:
 {{- end }}
         {{- end }}
       annotations:
+        {{- if .Values.proxyResources.requests }}  
         {{- if .Values.proxyResources.requests.cpu }}  
         sidecar.istio.io/proxyCPU: {{ .Values.proxyResources.requests.cpu }}
         {{- end }}
         {{- if .Values.proxyResources.requests.memory }}  
         sidecar.istio.io/proxyMemory: {{ .Values.proxyResources.requests.memory }}
+        {{- end }}
         {{- end }}
         {{- if .Values.service.liveness.enabled }}  
         sidecar.istio.io/rewriteAppHTTPProbers: "true"

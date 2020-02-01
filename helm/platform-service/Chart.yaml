@@ -2,4 +2,4 @@ apiVersion: v1
 appVersion: "1.0"
 description: Platform service chart
 name: platform-service
-version: 0.13.7
+version: 0.13.8
