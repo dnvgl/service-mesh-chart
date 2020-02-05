@@ -7,19 +7,34 @@ metadata:
   name: {{ include "platform-service.serviceName" . }}
 spec:
   hosts:
+  - {{ include "platform-service.serviceName" . }}
+
+  http:
+  - route:
+    - destination:
+        host: {{ include "platform-service.serviceName" . | quote }}
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+
+{{- if .Values.gateway.exposeService }}
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "platform-service.serviceName" . }}-external
+spec:
+  hosts:
 {{- if .Values.defaultRouting.allHosts }}
   - "*"
 {{- else }}
-  - {{ include "platform-service.serviceName" . }}
   {{- range .Values.defaultRouting.hosts }}
   - {{ . | quote }}
   {{- end }}
 {{- end }}
-
-{{- if .Values.gateway.exposeService }}
   gateways:
   - {{ required "A valid .Values.gateway.name entry required!" .Values.gateway.name }}
-{{- end}}
 {{- $prefixes := default (list .Values.app) .Values.defaultRouting.urlPrefixes }}
   http:
 {{- if .Values.defaultRouting.redirectOnNoTrailingSlash }}
@@ -61,5 +76,6 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
+{{- end}}
 {{- end}}
 {{- end}}
