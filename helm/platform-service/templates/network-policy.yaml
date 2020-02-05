@@ -12,6 +12,15 @@ spec:
   policyTypes:
     - Ingress
   ingress:
+{{- if .Values.gateway.exposeService }}
+  - from:
+    - podSelector:
+        matchLabels:
+          istio: ingressgateway
+    ports:
+    - protocol: TCP
+      port: {{ $.Values.image.containerPort }}
+{{- end }}      
 {{- range .Values.accessPolicy.appsAllowedAccess }}
   - from:
     - podSelector:
@@ -21,6 +30,7 @@ spec:
     - protocol: TCP
       port: {{ $.Values.image.containerPort }}
 {{- end }}      
+
 
 # This egress policy doesn't support DNS lookup yet, and might be overkill anyway
 #{{- range .Values.accessPolicy.appsAllowedAccess }}
