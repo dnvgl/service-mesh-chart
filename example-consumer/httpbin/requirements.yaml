@@ -1,4 +1,6 @@
-dependencies:
-  - name: platform-service
-    version: 0.12.0
-    repository: "@platformteam"
+# Here only for reference, this is typically how charts are deployed
+# but for these examples we use symlinks to the current version in the same repo
+#dependencies:
+#  - name: platform-service
+#    version: 0.12.0
+#    repository: "@platformteam"
