@@ -12,14 +12,21 @@ spec:
   policyTypes:
     - Ingress
   ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          istio: pilot
+      namespaceSelector:
+        matchLabels:
+          istio-operator-managed: Reconcile
 {{- if .Values.gateway.exposeService }}
   - from:
     - podSelector:
         matchLabels:
           istio: ingressgateway
-    ports:
-    - protocol: TCP
-      port: {{ $.Values.image.containerPort }}
+      namespaceSelector:
+        matchLabels:
+          istio-operator-managed: Reconcile
 {{- end }}      
 {{- range .Values.accessPolicy.appsAllowedAccess }}
   - from:
