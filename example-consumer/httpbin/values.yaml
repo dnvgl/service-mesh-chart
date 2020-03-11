@@ -18,9 +18,6 @@ platform-service:
   defaultRouting:
     allHosts: true
 
-  defaultServiceBindings:
-    createFullAccessRole: false
-
   # Specify network and authorization policies
   # Experimental - do not use outside of testing
   accessPolicy:

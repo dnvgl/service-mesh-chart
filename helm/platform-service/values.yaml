@@ -56,18 +56,6 @@ serviceAccount:
   # If not set and create is true, a name is generated from the app
   name: 
 
-# deprecated?
-defaultServiceBindings:
-  # Create a default (full access) role
-  createFullAccessRole: true
-
-  # gives the default role access to these services (only if serviceAccount.Create)
-  # todo: throw error if this is specified without serviceAccount.Create to reduce surprises
-  createBindingsToServiceRoles: 
-   # i.e., if this is service A
-   # - serviceB-full-access
-   # - serviceC-readonly-access
-
 gateway:
   # map virtual service to a gateway expose this service
   exposeService: true
