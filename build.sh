@@ -34,5 +34,5 @@ echo "Updating indexes..."
 helm repo index .
 echo "Updating git..."
 git add .
-git commit -m "Update chart to version $RES"
-git push
+git commit -m "Update chart to version $VER"
+#git push
