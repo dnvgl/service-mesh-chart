@@ -83,12 +83,14 @@ spec:
               mountPath: {{ .mountPath }}
           {{- end }}
 
+          # v1 - remove - provide examples of migration
           {{- if .Values.settingsConfigMap.enabled }}
             # This is deprecated - please replace with equivalent volumes definition
             - name: {{ .Values.settingsConfigMap.volumeName }}
               mountPath: {{ .Values.settingsConfigMap.mountPath }}
               readOnly: true
           {{ end }}
+          # v1 - remove - provide examples of migration
           {{- if .Values.settingsSecret.enabled }}
             # This is deprecated - please replace with equivalent volumes definition
             - name: {{ .Values.settingsSecret.volumeName }}
@@ -119,12 +121,14 @@ spec:
 {{ tpl .volumeDefinition $ | indent 8 }}
 {{- end }}
 
+# v1 - remove - provide examples of migration
 {{- if .Values.settingsConfigMap.enabled }}
       # This is deprecated - please replace with equivalent volumes definition
       - name: {{ .Values.settingsConfigMap.volumeName }}
         configMap:
           name: {{required "settings.ConfigMap.configMapName is required" .Values.settingsConfigMap.configMapName }}
 {{- end }}
+# v1 - remove - provide examples of migration
 {{- if .Values.settingsSecret.enabled }}
       - name: {{ .Values.settingsSecret.volumeName }}
         secret:

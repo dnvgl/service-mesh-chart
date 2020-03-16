@@ -13,6 +13,7 @@ replicaCount: 1
 
 image:
   #registry and repository (no tag): platformteam.azurecr.io/myimage
+  # v1 - consider splitting registry and repository to better mirror common usage and get better flux support
   repository:
   # image tag (i.e. 105389)
   tag:
@@ -21,18 +22,16 @@ image:
   pullSecret:
   containerPort: 80
 
+# v1 - propose we remove this
 fullnameOverride: ""
 
+# v1 - how does this need to change?
 forwardAuthentication:
   enabled: false # whether the login redirect & callback envoy filter should be applied
   createFilter: false 
 
-# this probably isn't really needed anymore?
-# apiAuthentication:
-#  enabled: false
-# createFilter: false 
-
 jwt:
+  # v1 question - do we want to support multiple issuers?
   createPolicy: false # whether JWT authorization policy should be applied
   issuer: # "https://sts.windows.net/.../"
   jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
@@ -70,12 +69,14 @@ defaultRouting:
   # Replace the routing prefix with this uri
   rewriteUri: "/"
   # legacy rewrite flag - obsolete
+  # deprecated - document and remove for v1
   rewriteUrl: false 
   # catch-all route - anything not routed elsewhere will be routed here
   # When this is used, urlPrefixes are ignored (there should be only catch-all route for this host & gateway)
   catchAll: false
   # Redirect when a trailing slash is not included in the URL prefix
   # This is applied for each provided urlPrefix or the default prefix if none provided
+  # v1 - propose making this true by default
   redirectOnNoTrailingSlash: false
   # list of prefixes for route matching - overrides the default prefix (app)
   urlPrefixes:
@@ -92,6 +93,7 @@ accessPolicy:
   # Experimental - do not use outside of testing
   networkPolicyEnabled: false
   # List of workloads allowed access to this workload
+  # v1 - clean up this list to match what we really support
   appsAllowedAccess:
        # App identifier for workload
   #  - app1
@@ -120,6 +122,7 @@ settingsSecret:
 #  volumeName: settings-secrets-volume
 #  mountPath: /app/secrets
 
+# v1 - can we do this as a list intead of a string? Strings suck for this as you can't override sections in config (i.e. HelmRelease)
 # put any environment variables here as a string
 #environmentVariables: |
 #  - name: Serilog__MinimumLevel
@@ -137,17 +140,14 @@ volumes:
 #    volumeDefinition: |
 #      azureFile:
 
+# Resource requests and limits for primary container in pod
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
+#  requests:
+#    cpu: 250m
+#    memory: 64Mi
+#  limits:
+#    cpu: 500m
+#    memory: 128Mi
 
 # Adjust resources requested for proxy sidecar (see https://istio.io/docs/concepts/performance-and-scalability/#cpu-and-memory)
 proxyResources: {}

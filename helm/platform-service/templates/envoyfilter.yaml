@@ -1,3 +1,4 @@
+# v1 - replace
 {{- if not .Values.deploymentOnly -}}
 {{- if .Values.forwardAuthentication.createFilter -}}
 apiVersion: networking.istio.io/v1alpha3
