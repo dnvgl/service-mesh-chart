@@ -25,13 +25,24 @@ image:
 # v1 - propose we remove this
 fullnameOverride: ""
 
-# v1 - how does this need to change?
+# v1 - obsolete - remove
 forwardAuthentication:
   enabled: false # whether the login redirect & callback envoy filter should be applied
   createFilter: false 
 
+# v1 - new api
+defaultJwtpolicy:
+  enabled: true
+  origins:
+      # required
+    - issuer: # "https://sts.windows.net/.../"
+      # required
+      jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
+      # required?
+      audience: # Guid
+
+# v1 see above
 jwt:
-  # v1 question - do we want to support multiple issuers?
   createPolicy: false # whether JWT authorization policy should be applied
   issuer: # "https://sts.windows.net/.../"
   jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
