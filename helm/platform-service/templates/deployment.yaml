@@ -23,9 +23,6 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app: {{ required "app is required" .Values.app }}
         version: {{ .Values.version }}
-        {{- if .Values.forwardAuthentication.enabled }}
-        authn-req-client: enabled
-        {{ end }}
         {{- if .Values.additionalPodLabels }}
 {{- with .Values.additionalPodLabels }}
 {{ tpl . $ | indent 8 }}

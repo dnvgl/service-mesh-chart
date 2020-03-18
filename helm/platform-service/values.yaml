@@ -22,11 +22,6 @@ image:
   pullSecret:
   containerPort: 80
 
-# v1 - obsolete - remove
-forwardAuthentication:
-  enabled: false # whether the login redirect & callback envoy filter should be applied
-  createFilter: false 
-
 # v1 - new api
 defaultJwtpolicy:
   enabled: true
