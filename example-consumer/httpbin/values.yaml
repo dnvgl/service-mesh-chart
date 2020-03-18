@@ -48,24 +48,23 @@ platform-service:
           name: plant-storage-postgres-secret
           key: POSTGRES_PASSWORD
 
-
-  #environmentVariables:
-  #  - name: MONGO_ROOT
-  #    valueFrom:
-  #      secretKeyRef:
-  #        name: mongo
-  #        key: mongodb-root-password
-  #  - name: MONGO_USER
-  #    valueFrom:
-  #      secretKeyRef:
-  #        name: cas-mongo-secrets
-  #        key: usersMongoUser
-  #  - name: MONGO_PASS
-  #    valueFrom:
-  #      secretKeyRef:
-  #        name: cas-mongo-secrets
-  #        key: usersMongoPass
-
+  volumes:
+    - name: asset-registry-eventstore-volume
+      mountPath: "/credentials/asset-registry-eventstore"
+      volumeDefinition: |
+        secret:
+          secretName: asset-registry-eventstore-secrets
+    - name: asset-registry-viewcache-volume
+      mountPath: "/credentials/asset-registry-viewcache"
+      volumeDefinition: |
+        secret:
+          secretName: asset-registry-viewcache-secrets
+    - name: service-secrets
+      mountPath: "/secrets"
+      volumeDefinition: |
+        secret:
+          secretName: cascade-secrets
+        
 
   # Specify network and authorization policies
   # Experimental - do not use outside of testing
