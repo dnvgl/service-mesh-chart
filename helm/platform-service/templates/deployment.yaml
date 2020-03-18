@@ -54,7 +54,7 @@ spec:
           imagePullPolicy: {{ .image.pullPolicy }}
           env:
 {{- with .envVariables }}
-{{ tpl . $ | indent 12 }}
+{{ toYaml . | indent 12 }}
 {{- end }}
       {{- end }}
       containers:
@@ -63,7 +63,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
 {{- with .Values.environmentVariables }}
-{{ tpl . $ | indent 12 }}
+{{ toYaml . | indent 12 }}
 {{- end }}
           ports:
             - name: http

@@ -18,6 +18,55 @@ platform-service:
   defaultRouting:
     allHosts: true
 
+  environmentVariables:
+    - name: var1
+      value: abc
+    - name: "var2"
+      value: "def"
+    - name: database__usessl
+      value: "false"
+    - name: database__provider
+      value: postgres
+    - name: database__server
+      valueFrom:
+        secretKeyRef:
+          name: plant-storage-postgres-secret
+          key: PG_SERVER
+    - name: database__databasename
+      valueFrom:
+        secretKeyRef:
+          name: plant-storage-postgres-secret
+          key: PG_DB
+    - name: database__username
+      valueFrom:
+        secretKeyRef:
+          name: plant-storage-postgres-secret
+          key: PG_USER
+    - name: database__password
+      valueFrom:
+        secretKeyRef:
+          name: plant-storage-postgres-secret
+          key: POSTGRES_PASSWORD
+
+
+  #environmentVariables:
+  #  - name: MONGO_ROOT
+  #    valueFrom:
+  #      secretKeyRef:
+  #        name: mongo
+  #        key: mongodb-root-password
+  #  - name: MONGO_USER
+  #    valueFrom:
+  #      secretKeyRef:
+  #        name: cas-mongo-secrets
+  #        key: usersMongoUser
+  #  - name: MONGO_PASS
+  #    valueFrom:
+  #      secretKeyRef:
+  #        name: cas-mongo-secrets
+  #        key: usersMongoPass
+
+
   # Specify network and authorization policies
   # Experimental - do not use outside of testing
   accessPolicy:
