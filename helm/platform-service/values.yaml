@@ -125,9 +125,8 @@ settingsSecret:
 #  volumeName: settings-secrets-volume
 #  mountPath: /app/secrets
 
-# v1 - can we do this as a list intead of a string? Strings suck for this as you can't override sections in config (i.e. HelmRelease)
-# put any environment variables here as a string
-#environmentVariables: |
+# Provide environment variable yaml
+#environmentVariables:
 #  - name: Serilog__MinimumLevel
 #    value: Debug
 #    valueFrom:
