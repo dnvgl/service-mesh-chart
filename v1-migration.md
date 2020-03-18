@@ -2,6 +2,15 @@
 
 ## Behavior changes
 
+### defaultRouting.redirectOnNoTrailingSlash
+
+Used together with prefix routing, this option ensures that 
+
+`...dnvgl.com/prefix` will be redirected to: `...dnvgl.com/prefix/`
+
+This option is now enabled by default.
+  
+
 ## Syntax changes
 
 ### Environment variables

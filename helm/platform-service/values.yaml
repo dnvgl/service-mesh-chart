@@ -79,8 +79,7 @@ defaultRouting:
   catchAll: false
   # Redirect when a trailing slash is not included in the URL prefix
   # This is applied for each provided urlPrefix or the default prefix if none provided
-  # v1 - propose making this true by default
-  redirectOnNoTrailingSlash: false
+  redirectOnNoTrailingSlash: true
   # list of prefixes for route matching - overrides the default prefix (app)
   urlPrefixes:
   # route from all hosts (typically only common services)
