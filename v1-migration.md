@@ -42,6 +42,40 @@ environmentVariables:
 
 ```
 
+### Improved syntax for rewriting URL prefixes
+
+The new api for rewriting prefixes combines the previous two approaches while also grouping the options together for clarity
+
+Here is the new syntax, with the defaults as shown:
+``` yaml
+defaultRouting:
+
+  # ...
+
+  # options for rewriting the URL to remove the routing prefix before delivering
+  # the request to the target pod
+  rewriteUrlPrefix:
+    # replace the routing prefix when enabled (when disabled, the URL is not adjusted)
+    enabled: true
+    # replace the routing prefix with the provided string
+    # alternate prefixes should begin and end with a "/"
+    # examples: "/", "/api/"
+    replaceWith: "/"
+```
+
+This replaces two older methods:
+
+``` yaml
+defaultRouting:
+
+  # ...
+  # old method 1
+  enableRewrite: true
+  rewriteUri: "/"
+
+  # old method 2
+  rewriteUrl: true #always rewrites to "/"
+```
 
 ### settingsSecret and settingsConfigMap
 

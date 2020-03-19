@@ -65,23 +65,31 @@ gateway:
   name: gateway/one-gateway
 
 defaultRouting:
+
   # Generate default virtual services and destination rules
   enabled: true
-  # Rewrite the routing prefix to the rewriteUri
-  enableRewrite: true
-  # Replace the routing prefix with this uri
-  rewriteUri: "/"
-  # legacy rewrite flag - obsolete
-  # deprecated - document and remove for v1
-  rewriteUrl: false 
+
+  # list of prefixes for route matching - overrides the default prefix (app)
+  urlPrefixes:
+
   # catch-all route - anything not routed elsewhere will be routed here
   # When this is used, urlPrefixes are ignored (there should be only catch-all route for this host & gateway)
   catchAll: false
+
   # Redirect when a trailing slash is not included in the URL prefix
   # This is applied for each provided urlPrefix or the default prefix if none provided
   redirectOnNoTrailingSlash: true
-  # list of prefixes for route matching - overrides the default prefix (app)
-  urlPrefixes:
+
+  # options for rewriting the URL to remove the routing prefix before delivering
+  # the request to the target pod
+  rewriteUrlPrefix:
+    # replace the routing prefix when enabled (when disabled, the URL is not adjusted)
+    enabled: true
+    # replace the routing prefix with the provided string
+    # alternate prefixes should begin and end with a "/"
+    # examples: "/", "/api/"
+    replaceWith: "/"
+
   # route from all hosts (typically only common services)
   allHosts: false
   # hosts to take into account for routing rules (ignored if allHosts = true)

@@ -63,14 +63,9 @@ spec:
         prefix: {{ $slashPrefix }}/
     {{- end }}
   {{- end }}
-# deprecated - document and remove for v1 (defaultRouting.rewriteUrl)
-{{- if .Values.defaultRouting.rewriteUrl }}
-    # legacy rewrite
+{{- if .Values.defaultRouting.rewriteUrlPrefix.enabled }}
     rewrite:
-      uri: "/"
-{{- else if .Values.defaultRouting.enableRewrite }}
-    rewrite:
-      uri: {{ required "rewriteUri is required" .Values.defaultRouting.rewriteUri }}
+      uri: {{ required "rewriteUri is required" .Values.defaultRouting.rewriteUrlPrefix.replaceWith }}
 {{- end}}
     # deprecated - document and remove for v1
     headers:
