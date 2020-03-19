@@ -42,8 +42,8 @@ jwt:
 service:
   # unspecified for default microservice (for now at least)
   type:
-  # port number - is required 15383
-  port: 5000
+  # port number
+  port: 80
   # provide access to other services
   liveness:
     enabled: false
