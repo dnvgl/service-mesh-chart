@@ -13,21 +13,37 @@ This option is now enabled by default.
 
 ## Syntax changes
 
-### Environment variables
+### Jwt policy
 
-The format for specifying environment variables has changed. Previously, a string-based approach was used in the yaml. This meant that to override any environment variables specified in the chart, you needed to override them all since it was basically one large string. Now, you specify the environment variables as normal yaml. The only difference from a syntax perspective is that you leave the `|` character out.
+The format and supported options for jtw policy have changed. We now support multiple origins as well as an audience for each.
+
+New syntax:
+``` yaml
+# Settings for creating default jwt AuthenticationPolicy
+defaultJwtpolicy:
+  # Only creates the policy if enabled - disable to create custom policy
+  enabled: true
+  # Supports a set of origins
+  origins:
+      # required
+    - issuer: # "https://sts.windows.net/.../"
+      # required
+      jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
+      # required
+      audience: # Guid
+```
 
 Previous syntax:
 ``` yaml
-environmentVariables: |
- - name: Serilog__MinimumLevel
-   value: Debug
-   valueFrom:
-     secretKeyRef:
-       name: mysecret
-       key: username
-
+jwt:
+  createPolicy: false # whether JWT authorization policy should be applied
+  issuer: # "https://sts.windows.net/.../"
+  jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
 ```
+
+### Environment variables
+
+The format for specifying environment variables has changed. Previously, a string-based approach was used in the yaml. This meant that to override any environment variables specified in the chart, you needed to override them all since it was basically one large string. Now, you specify the environment variables as normal yaml. The only difference from a syntax perspective is that you leave the `|` character out.
 
 New syntax:
 
@@ -41,6 +57,19 @@ environmentVariables:
        key: username
 
 ```
+
+Previous syntax:
+``` yaml
+environmentVariables: |
+ - name: Serilog__MinimumLevel
+   value: Debug
+   valueFrom:
+     secretKeyRef:
+       name: mysecret
+       key: username
+
+```
+
 
 ### Improved syntax for rewriting URL prefixes
 
@@ -81,6 +110,16 @@ defaultRouting:
 
 These options are now desupported. The replacement syntax is to use the regular volume syntax. For example:
 
+New syntax:
+``` yaml
+  volumes:
+    - name: service-secrets
+      mountPath: "/secrets"
+      volumeDefinition: |
+        secret:
+          secretName: service-secrets
+```
+
 Previous syntax:
 ``` yaml
   settingsSecret:
@@ -89,15 +128,6 @@ Previous syntax:
     mountPath: "/secrets"
     secretName: cascade-secrets
 
-```
-
-``` yaml
-  volumes:
-    - name: service-secrets
-      mountPath: "/secrets"
-      volumeDefinition: |
-        secret:
-          secretName: service-secrets
 ```
 
 ## De-supported options

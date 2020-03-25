@@ -23,14 +23,17 @@ image:
   containerPort: 80
 
 # v1 - new api
-defaultJwtpolicy:
+# Settings for creating default jwt AuthenticationPolicy
+defaultJwtPolicy:
+  # Only creates the policy if enabled - disable to create custom policy
   enabled: true
+  # Supports a set of origins
   origins:
       # required
     - issuer: # "https://sts.windows.net/.../"
       # required
       jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
-      # required?
+      # required
       audience: # Guid
 
 # v1 see above

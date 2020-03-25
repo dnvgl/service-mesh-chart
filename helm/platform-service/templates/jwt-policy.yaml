@@ -1,6 +1,6 @@
 # v1 - should we support multiple origins?
 {{- if not .Values.deploymentOnly -}}
-{{- if .Values.jwt.createPolicy -}}
+{{- if .Values.defaultJwtPolicy.enabled -}}
 apiVersion: "authentication.istio.io/v1alpha1"
 kind: "Policy"
 metadata:
@@ -11,9 +11,12 @@ spec:
   peers:
   - mtls: {}
   origins:
+  {{- range .Values.defaultJwtPolicy.origins }}
   - jwt:
-      issuer: {{ .Values.jwt.issuer }}
-      jwksUri: {{ .Values.jwt.jwksUri }}
+      issuer: {{ required "issuer is required" .issuer }}
+      jwksUri: {{ required "jkwsUri is required" .jwksUri }}
+      audience: {{ required "audience is required" .audience }}
+ {{- end }}
   principalBinding: USE_ORIGIN
 {{- end }}
 {{- end }}
