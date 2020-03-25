@@ -91,25 +91,15 @@ defaultRouting:
   hosts:
     - myhost.dnvgl.com
 
-# Specify network and authorization policies
-# Experimental - do not use outside of testing
+# Specify network policies
 accessPolicy:
   # Enable default network policy (set false and create your own if needed)
-  # Experimental - do not use outside of testing
   networkPolicyEnabled: false
   # List of workloads allowed access to this workload
-  # v1 - clean up this list to match what we really support
   appsAllowedAccess:
-       # App identifier for workload
+  # App identifiers for workload
   #  - app1
   #  - app2
-  #       # Service account name - use the default Specify service account name if you use a an alternate name
-  #       alternateServiceAccountName:
-  #       authorizedTo:
-  #         - operation:
-  #             methods: ["GET"]
-  #             paths: ["/info"]
-
 
 # Provide environment variable yaml
 #environmentVariables:

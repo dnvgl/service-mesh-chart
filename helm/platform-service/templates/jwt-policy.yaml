@@ -1,4 +1,3 @@
-# v1 - should we support multiple origins?
 {{- if not .Values.deploymentOnly -}}
 {{- if .Values.defaultJwtPolicy.enabled -}}
 apiVersion: "authentication.istio.io/v1alpha1"

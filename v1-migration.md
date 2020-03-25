@@ -29,7 +29,7 @@ defaultJwtpolicy:
     - issuer: # "https://sts.windows.net/.../"
       # required
       jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
-      # required
+      # recommended
       audience: # Guid
 ```
 
@@ -133,8 +133,9 @@ Previous syntax:
 ## De-supported options
 
 ### fullnameOverride
+
 Full name override has been removed. We don't believe this was used.
 
 ### forwardAuthentication
 
-While we are not removing forward authentication, this option has been moved from the service-level configuration to application/namespace level. All options under the `forwardAuthentication` setting have been removed from the service level chart.
+While we are not removing forward authentication in general, this option has been moved from the service-level configuration to application/namespace level. All options under the `forwardAuthentication` setting have been removed from the service level chart.

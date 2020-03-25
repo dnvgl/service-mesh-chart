@@ -74,18 +74,10 @@ platform-service:
         
 
   # Specify network and authorization policies
-  # Experimental - do not use outside of testing
   accessPolicy:
     # Enable default network policy (set false and create your own if needed)
-    # Experimental - do not use outside of testing
     networkPolicyEnabled: true
     # List of workloads allowed access to this workload
     appsAllowedAccess:
       # App identifier for workload
       - sleep
-  #       # Service account name - use the default Specify service account name if you use a an alternate name
-  #       alternateServiceAccountName:
-  #       authorizedTo:
-  #         - operation:
-  #             methods: ["GET"]
-  #             paths: ["/info"]

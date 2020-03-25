@@ -67,7 +67,7 @@ spec:
     rewrite:
       uri: {{ required "rewriteUri is required" .Values.defaultRouting.rewriteUrlPrefix.replaceWith }}
 {{- end}}
-    # deprecated - document and remove for v1
+    # deprecated
     headers:
       request:
         add:
