@@ -15,7 +15,7 @@ spec:
   - jwt:
       issuer: {{ required "issuer is required" .issuer }}
       jwksUri: {{ required "jkwsUri is required" .jwksUri }}
-      audience: {{ required "audience is required" .audience }}
+      audience: {{ .audience }}
  {{- end }}
   principalBinding: USE_ORIGIN
 {{- end }}

@@ -13,7 +13,6 @@ replicaCount: 1
 
 image:
   #registry and repository (no tag): platformteam.azurecr.io/myimage
-  # v1 - consider splitting registry and repository to better mirror common usage and get better flux support
   repository:
   # image tag (i.e. 105389)
   tag:
@@ -22,7 +21,6 @@ image:
   pullSecret:
   containerPort: 80
 
-# v1 - new api
 # Settings for creating default jwt AuthenticationPolicy
 defaultJwtPolicy:
   # Only creates the policy if enabled - disable to create custom policy
@@ -33,14 +31,8 @@ defaultJwtPolicy:
     - issuer: # "https://sts.windows.net/.../"
       # required
       jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
-      # required
+      # recommended, but not requiring right now for backward compatibility
       audience: # Guid
-
-# v1 see above
-jwt:
-  createPolicy: false # whether JWT authorization policy should be applied
-  issuer: # "https://sts.windows.net/.../"
-  jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
 
 service:
   # unspecified for default microservice (for now at least)
