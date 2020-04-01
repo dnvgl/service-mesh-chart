@@ -22,9 +22,10 @@ image:
   containerPort: 80
 
 # Settings for creating default jwt AuthenticationPolicy
+# deprecated before its time
 defaultJwtPolicy:
   # Only creates the policy if enabled - disable to create custom policy
-  enabled: true
+  enabled: false
   # Supports a set of origins
   origins:
       # required
@@ -95,11 +96,37 @@ defaultRouting:
 accessPolicy:
   # Enable default network policy (set false and create your own if needed)
   networkPolicyEnabled: false
+  authorizationPolicyEnabled: true
   # List of workloads allowed access to this workload
   appsAllowedAccess:
   # App identifiers for workload
   #  - app1
   #  - app2
+
+#sources:
+#  - source:
+#    principals: ["cluster.local/ns/default/sa/a"]
+#  - source:
+#    principals: ["cluster.local/ns/default/sa/b"]
+#    requestPrincipals: ["*"]
+
+
+  authorizedServices:
+    - servicePricipal: 
+      requireJwt: false # defaults to true
+    - servicePricipal: 
+
+  enablePeerAuthentication: true
+  
+  jwtPolicy:
+    # Supports a set of origins
+    origins:
+        # required
+      - issuer: # "https://sts.windows.net/.../"
+        # required
+        jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
+        # recommended, but not requiring right now for backward compatibility
+        audience: # Guid
 
 # Provide environment variable yaml
 #environmentVariables:

@@ -81,3 +81,12 @@ platform-service:
     appsAllowedAccess:
       # App identifier for workload
       - sleep
+    authorizedServices:
+      - servicePrincipal: sleep
+        requireJwt: false
+      - servicePrincipal: httpbin
+    jwtPolicy:
+      origins:
+        - issuer: "https://sts.windows.net/.../"
+          jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
+          audience: "aud-1234-5678"
