@@ -13,6 +13,8 @@ spec:
 {{- range .Values.accessPolicy.jwtPolicy.origins }}
   - issuer: {{ required "issuer is required" .issuer  | quote }}
     jwksUri: {{ required "jkwsUri is required" .jwksUri  | quote }}
+    {{- if .audience }}
     audiences: [{{ .audience | quote }}]
+    {{- end }}
 {{- end }}
 {{- end }}

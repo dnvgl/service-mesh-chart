@@ -82,11 +82,12 @@ platform-service:
       # App identifier for workload
       - sleep
     authorizedServices:
-      - servicePrincipal: sleep
+      - servicePrincipalName: sleep
         requireJwt: false
-      - servicePrincipal: httpbin
+      - servicePrincipalName: httpbin
     jwtPolicy:
       origins:
-        - issuer: "https://sts.windows.net/.../"
-          jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
-          audience: "aud-1234-5678"
+        - issuer: "https://login.microsoftonline.com/a68572e3-63ce-4bc1-acdc-b64943502e9d/v2.0/"
+          jwksUri: "https://login.microsoftonline.com/te/dnvglb2cprod.onmicrosoft.com/b2c_1a_signinwithadfsidp/discovery/v2.0/keys"
+          #audience: "aud-1234-5678"
+      

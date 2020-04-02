@@ -4,15 +4,23 @@ kind: AuthorizationPolicy
 metadata:
   name: {{ .Values.app }}
   namespace: {{ .Release.Namespace }}
- spec:
- action: ALLOW
- rules:
+spec:
+  action: ALLOW
+  rules:
 {{- range .Values.accessPolicy.authorizedServices }}
- - from:
-   - source:
-     principals: [{{ required "servicePrincipal is required" .servicePrincipal }}]
-{{- if ( .requireJwt | default true ) }}
-     requestPrincipals: ["*"]
+  {{- $servicePrincipalName := required "servicePrincipalName is required" .servicePrincipalName }}
+  {{- $namespace := default $.Release.Namespace .servicePrincipalNamespace }}
+  {{- $fullSpName := printf "cluster.local/ns/%s/sa/%s" $namespace $servicePrincipalName | quote }}
+  - from:
+    - source:
+        principals: [{{ $fullSpName }}]
+{{- /* workaround for default value not working with bool */ -}}
+{{- if or (.requireJwt) (eq (.requireJwt | toString) "<nil>") }}
+        requestPrincipals: ["*"]
 {{- end }}
 {{- end }}
+  - from:
+    - source:
+        namespaces: ["istio-system"]
+        requestPrincipals: ["*"]
 {{- end }}
