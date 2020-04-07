@@ -5,20 +5,29 @@ metadata:
   name: {{ .Values.app }}
   namespace: {{ .Release.Namespace }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.app }}
+      version: {{ .Values.version }}
   action: ALLOW
   rules:
-{{- range .Values.accessPolicy.authorizedServices }}
-  {{- $servicePrincipalName := required "servicePrincipalName is required" .servicePrincipalName }}
-  {{- $namespace := default $.Release.Namespace .servicePrincipalNamespace }}
-  {{- $fullSpName := printf "cluster.local/ns/%s/sa/%s" $namespace $servicePrincipalName | quote }}
+  {{- range .Values.accessPolicy.authorizedServices }}
   - from:
     - source:
+      {{- if .servicePrincipalFullName }}
+        {{- $fullSpName := .servicePrincipalFullName }}
+        principals: [{{ .servicePrincipalFullName | quote }}]
+      {{- else }}
+        {{- $servicePrincipalName := required "servicePrincipalName is required" .servicePrincipalName }}
+        {{- $namespace := default $.Release.Namespace .servicePrincipalNamespace }}
+        {{- $fullSpName := printf "cluster.local/ns/%s/sa/%s" $namespace $servicePrincipalName | quote }}
         principals: [{{ $fullSpName }}]
-{{- /* workaround for default value not working with bool */ -}}
-{{- if or (.requireJwt) (eq (.requireJwt | toString) "<nil>") }}
+      {{- end }}
+      {{- /* workaround for default value not working with bool */ -}}
+      {{- if or (.requireJwt) (eq (.requireJwt | toString) "<nil>") }}
         requestPrincipals: ["*"]
-{{- end }}
-{{- end }}
+      {{- end }}
+  {{- end }}
   - from:
     - source:
         namespaces: ["istio-system"]

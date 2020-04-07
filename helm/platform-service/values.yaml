@@ -21,20 +21,6 @@ image:
   pullSecret:
   containerPort: 80
 
-# Settings for creating default jwt AuthenticationPolicy
-# deprecated before its time
-defaultJwtPolicy:
-  # Only creates the policy if enabled - disable to create custom policy
-  enabled: false
-  # Supports a set of origins
-  origins:
-      # required
-    - issuer: # "https://sts.windows.net/.../"
-      # required
-      jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
-      # recommended, but not requiring right now for backward compatibility
-      audience: # Guid
-
 service:
   # unspecified for default microservice (for now at least)
   type:
@@ -94,39 +80,55 @@ defaultRouting:
 
 # Specify network policies
 accessPolicy:
+  # Settings for request authentication (Jwt authentication)
+  requestAuthentication:
+    # Generate RequestAuthentication
+    enabled: true
+
+    # JwtRules - list of rules
+    jwtRules:
+      # JWT Rule body - these are typical
+      # For full api see https://istio.io/docs/reference/config/security/jwt/#JWTRule
+      - issuer:  "https://sts.windows.net/.../"
+        jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
+        audiences: [""]
+
   # Enable default network policy (set false and create your own if needed)
   networkPolicyEnabled: false
-  authorizationPolicyEnabled: true
-  # List of workloads allowed access to this workload
+
+  # List of workloads allowed access to this workload. Identifiers are matched
+  # to the app label.
   appsAllowedAccess:
-  # App identifiers for workload
   #  - app1
   #  - app2
 
-#sources:
-#  - source:
-#    principals: ["cluster.local/ns/default/sa/a"]
-#  - source:
-#    principals: ["cluster.local/ns/default/sa/b"]
-#    requestPrincipals: ["*"]
+  # Generate default authorization policy
+  authorizationPolicyEnabled: true
 
-
+  # List of authorized service principals. Valid map values are
+  #   servicePrincipalName - short name to service account (required if full name not used)
+  #   servicePrincipalNamespace - namespace defaults to current
+  #   servicePrincipalFullName - alternative to first two - provide full service
+  #     principal name (i.e. cluster.local/ns/mynamespace/sa/myserviceaccount)
+  #   requireJwt - (default true) set to false to allow peer connections from 
+  #     this service principal without a jwt
   authorizedServices:
-    - servicePricipal: 
-      requireJwt: false # defaults to true
-    - servicePricipal: 
+    # Examples:
+    # 1) allow access from app "myapp" with default service account only with jwt
+    # - servicePrincipalName: myapp
+    #
+    # 2) allow access from app "myapp" with default service account without jwt
+    # - servicePrincipalName: myapp
+    #   requireJwt: false
+    #
+    # 3) allow access from service account "myotherappsa" in namespace "other" (only with jwt)
+    # - servicePrincipalName: myotherappsa
+    #   servicePrincipalNamespace: other
+    #
+    # 4) alternate form of 3
+    # - servicePrincipalFullName: "cluster.local/ns/other/sa/myotherappsa"
+    #   servicePrincipalNamespace: other
 
-  enablePeerAuthentication: true
-  
-  jwtPolicy:
-    # Supports a set of origins
-    origins:
-        # required
-      - issuer: # "https://sts.windows.net/.../"
-        # required
-        jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
-        # recommended, but not requiring right now for backward compatibility
-        audience: # Guid
 
 # Provide environment variable yaml
 #environmentVariables:

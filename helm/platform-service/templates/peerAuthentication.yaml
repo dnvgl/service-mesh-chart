@@ -1,4 +1,6 @@
-{{- if .Values.accessPolicy.enablePeerAuthentication }}
+{{- /* disabling peer authentication is not meant to be exposed to values.yaml */ -}}
+{{- /* workaround for default value not working with bool */ -}}
+{{- if or (.Values.accessPolicy.enablePeerAuthentication) (eq (.Values.accessPolicy.enablePeerAuthentication | toString) "<nil>") }}
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
