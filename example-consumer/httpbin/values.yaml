@@ -15,13 +15,6 @@ platform-service:
   gateway:
     exposeService: true
 
-  defaultJwtPolicy:
-    enabled: false
-    origins:
-      - issuer: "https://login.microsoftonline.com/a68572e3-63ce-4bc1-acdc-b64943502e9d/v2.0/"
-        jwksUri: "https://login.microsoftonline.com/te/dnvglb2cprod.onmicrosoft.com/b2c_1a_signinwithadfsidp/discovery/v2.0/keys"
-        audience: "guid"
-
   defaultRouting:
     allHosts: true
 
@@ -34,44 +27,13 @@ platform-service:
       value: "false"
     - name: database__provider
       value: postgres
-    - name: database__server
-      valueFrom:
-        secretKeyRef:
-          name: plant-storage-postgres-secret
-          key: PG_SERVER
-    - name: database__databasename
-      valueFrom:
-        secretKeyRef:
-          name: plant-storage-postgres-secret
-          key: PG_DB
-    - name: database__username
-      valueFrom:
-        secretKeyRef:
-          name: plant-storage-postgres-secret
-          key: PG_USER
-    - name: database__password
-      valueFrom:
-        secretKeyRef:
-          name: plant-storage-postgres-secret
-          key: POSTGRES_PASSWORD
 
   volumes:
-    - name: asset-registry-eventstore-volume
-      mountPath: "/credentials/asset-registry-eventstore"
-      volumeDefinition: |
-        secret:
-          secretName: asset-registry-eventstore-secrets
-    - name: asset-registry-viewcache-volume
-      mountPath: "/credentials/asset-registry-viewcache"
-      volumeDefinition: |
-        secret:
-          secretName: asset-registry-viewcache-secrets
     - name: service-secrets
       mountPath: "/secrets"
       volumeDefinition: |
         secret:
-          secretName: cascade-secrets
-        
+          secretName: test-secrets
 
   # Specify network and authorization policies
   accessPolicy:
@@ -89,8 +51,8 @@ platform-service:
       jwtRules:
         - issuer: "https://login.microsoftonline.com/a68572e3-63ce-4bc1-acdc-b64943502e9d/v2.0/"
           jwksUri: "https://login.microsoftonline.com/te/dnvglb2cprod.onmicrosoft.com/b2c_1a_signinwithadfsidp/discovery/v2.0/keys"
-          audience: ["aud-1234-5678"]
-        - issuer: "https://login.microsoftonline.com/a68572e3-63ce-4bc1-acdc-b64943502e9d/v2.0/"
+          audience: ["fe494c14-85d2-4bfa-bb43-92b0ab0a4f72"]
+        - issuer: "https://login.microsoftonline.com/a12372e3-63ce-4bc1-acdc-b64943502e9d/v2.0/"
           jwksUri: "https://login.microsoftonline.com/te/dnvglb2cprod.onmicrosoft.com/b2c_1a_signinwithadfsidp/discovery/v2.0/keys"
-          audience: ["aud-1234-5678"]
+          audience: ["22b9c23f-4a41-4729-8a5d-793f7601dfdb"]
       

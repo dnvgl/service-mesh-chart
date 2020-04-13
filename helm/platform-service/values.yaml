@@ -75,8 +75,8 @@ defaultRouting:
   # route from all hosts (typically only common services)
   allHosts: false
   # hosts to take into account for routing rules (ignored if allHosts = true)
-  hosts:
-    - myhost.dnvgl.com
+  hosts: {}
+    #- myhost.dnvgl.com
 
 # Specify network policies
 accessPolicy:
@@ -91,7 +91,9 @@ accessPolicy:
       # For full api see https://istio.io/docs/reference/config/security/jwt/#JWTRule
       - issuer:  "https://sts.windows.net/.../"
         jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
-        audiences: [""]
+        audiences: 
+          - 22b9c23f-4a41-4729-8a5d-793f7601dfdb
+          - fe494c14-85d2-4bfa-bb43-92b0ab0a4f72
 
   # Enable default network policy (set false and create your own if needed)
   networkPolicyEnabled: false
