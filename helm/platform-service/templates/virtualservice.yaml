@@ -8,7 +8,8 @@ metadata:
 spec:
   hosts:
   - {{ include "platform-service.serviceName" . }}
-
+  gateways:
+  - mesh
   http:
   - route:
     - destination:
