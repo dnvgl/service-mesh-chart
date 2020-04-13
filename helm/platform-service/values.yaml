@@ -21,27 +21,11 @@ image:
   pullSecret:
   containerPort: 80
 
-fullnameOverride: ""
-
-forwardAuthentication:
-  enabled: false # whether the login redirect & callback envoy filter should be applied
-  createFilter: false 
-
-# this probably isn't really needed anymore?
-# apiAuthentication:
-#  enabled: false
-# createFilter: false 
-
-jwt:
-  createPolicy: false # whether JWT authorization policy should be applied
-  issuer: # "https://sts.windows.net/.../"
-  jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
-
 service:
   # unspecified for default microservice (for now at least)
   type:
-  # port number - is required 15383
-  port: 5000
+  # port number
+  port: 80
   # provide access to other services
   liveness:
     enabled: false
@@ -63,65 +47,93 @@ gateway:
   name: gateway/one-gateway
 
 defaultRouting:
+
   # Generate default virtual services and destination rules
   enabled: true
-  # Rewrite the routing prefix to the rewriteUri
-  enableRewrite: true
-  # Replace the routing prefix with this uri
-  rewriteUri: "/"
-  # legacy rewrite flag - obsolete
-  rewriteUrl: false 
+
+  # list of prefixes for route matching - overrides the default prefix (app)
+  urlPrefixes:
+
   # catch-all route - anything not routed elsewhere will be routed here
   # When this is used, urlPrefixes are ignored (there should be only catch-all route for this host & gateway)
   catchAll: false
+
   # Redirect when a trailing slash is not included in the URL prefix
   # This is applied for each provided urlPrefix or the default prefix if none provided
-  redirectOnNoTrailingSlash: false
-  # list of prefixes for route matching - overrides the default prefix (app)
-  urlPrefixes:
+  redirectOnNoTrailingSlash: true
+
+  # options for rewriting the URL to remove the routing prefix before delivering
+  # the request to the target pod
+  rewriteUrlPrefix:
+    # replace the routing prefix when enabled (when disabled, the URL is not adjusted)
+    enabled: true
+    # replace the routing prefix with the provided string
+    # alternate prefixes should begin and end with a "/"
+    # examples: "/", "/api/"
+    replaceWith: "/"
+
   # route from all hosts (typically only common services)
   allHosts: false
   # hosts to take into account for routing rules (ignored if allHosts = true)
-  hosts:
-    - myhost.dnvgl.com
+  hosts: {}
+    #- myhost.dnvgl.com
 
-# Specify network and authorization policies
-# Experimental - do not use outside of testing
+# Specify network policies
 accessPolicy:
+  # Settings for request authentication (Jwt authentication)
+  requestAuthentication:
+    # Generate RequestAuthentication
+    enabled: true
+
+    # JwtRules - list of rules
+    jwtRules:
+      # JWT Rule body - these are typical
+      # For full api see https://istio.io/docs/reference/config/security/jwt/#JWTRule
+      - issuer:  "https://sts.windows.net/.../"
+        jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
+        audiences: 
+          - 22b9c23f-4a41-4729-8a5d-793f7601dfdb
+          - fe494c14-85d2-4bfa-bb43-92b0ab0a4f72
+
   # Enable default network policy (set false and create your own if needed)
-  # Experimental - do not use outside of testing
   networkPolicyEnabled: false
-  # List of workloads allowed access to this workload
+
+  # List of workloads allowed access to this workload. Identifiers are matched
+  # to the app label.
   appsAllowedAccess:
-       # App identifier for workload
   #  - app1
   #  - app2
-  #       # Service account name - use the default Specify service account name if you use a an alternate name
-  #       alternateServiceAccountName:
-  #       authorizedTo:
-  #         - operation:
-  #             methods: ["GET"]
-  #             paths: ["/info"]
+
+  # Generate default authorization policy
+  authorizationPolicyEnabled: true
+
+  # List of authorized service principals. Valid map values are
+  #   servicePrincipalName - short name to service account (required if full name not used)
+  #   servicePrincipalNamespace - namespace defaults to current
+  #   servicePrincipalFullName - alternative to first two - provide full service
+  #     principal name (i.e. cluster.local/ns/mynamespace/sa/myserviceaccount)
+  #   requireJwt - (default true) set to false to allow peer connections from 
+  #     this service principal without a jwt
+  authorizedServices:
+    # Examples:
+    # 1) allow access from app "myapp" with default service account only with jwt
+    # - servicePrincipalName: myapp
+    #
+    # 2) allow access from app "myapp" with default service account without jwt
+    # - servicePrincipalName: myapp
+    #   requireJwt: false
+    #
+    # 3) allow access from service account "myotherappsa" in namespace "other" (only with jwt)
+    # - servicePrincipalName: myotherappsa
+    #   servicePrincipalNamespace: other
+    #
+    # 4) alternate form of 3
+    # - servicePrincipalFullName: "cluster.local/ns/other/sa/myotherappsa"
+    #   servicePrincipalNamespace: other
 
 
-# deprecated - use volumes instead
-# enable to specify volume mounted configmap settings from a file (i.e. appsettings.json)
-settingsConfigMap:
-  enabled: false
-#  configMapName:
-#  volumeName: settings-volume
-#  mountPath: /app/secrets
-
-# deprecated - use volumes instead
-# enable to specify volume mounted secrets from a file (i.e. appsettings.json as secrets)
-settingsSecret:
-  enabled: false
-#  secretName:
-#  volumeName: settings-secrets-volume
-#  mountPath: /app/secrets
-
-# put any environment variables here as a string
-#environmentVariables: |
+# Provide environment variable yaml
+#environmentVariables:
 #  - name: Serilog__MinimumLevel
 #    value: Debug
 #    valueFrom:
@@ -137,17 +149,14 @@ volumes:
 #    volumeDefinition: |
 #      azureFile:
 
+# Resource requests and limits for primary container in pod
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
+#  requests:
+#    cpu: 250m
+#    memory: 64Mi
+#  limits:
+#    cpu: 500m
+#    memory: 128Mi
 
 # Adjust resources requested for proxy sidecar (see https://istio.io/docs/concepts/performance-and-scalability/#cpu-and-memory)
 proxyResources: {}

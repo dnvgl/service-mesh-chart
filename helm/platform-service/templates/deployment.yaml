@@ -23,9 +23,6 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app: {{ required "app is required" .Values.app }}
         version: {{ .Values.version }}
-        {{- if .Values.forwardAuthentication.enabled }}
-        authn-req-client: enabled
-        {{ end }}
         {{- if .Values.additionalPodLabels }}
 {{- with .Values.additionalPodLabels }}
 {{ tpl . $ | indent 8 }}
@@ -54,7 +51,7 @@ spec:
           imagePullPolicy: {{ .image.pullPolicy }}
           env:
 {{- with .envVariables }}
-{{ tpl . $ | indent 12 }}
+{{ toYaml . | indent 12 }}
 {{- end }}
       {{- end }}
       containers:
@@ -63,7 +60,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
 {{- with .Values.environmentVariables }}
-{{ tpl . $ | indent 12 }}
+{{ toYaml . | indent 12 }}
 {{- end }}
           ports:
             - name: http
@@ -83,18 +80,6 @@ spec:
               mountPath: {{ .mountPath }}
           {{- end }}
 
-          {{- if .Values.settingsConfigMap.enabled }}
-            # This is deprecated - please replace with equivalent volumes definition
-            - name: {{ .Values.settingsConfigMap.volumeName }}
-              mountPath: {{ .Values.settingsConfigMap.mountPath }}
-              readOnly: true
-          {{ end }}
-          {{- if .Values.settingsSecret.enabled }}
-            # This is deprecated - please replace with equivalent volumes definition
-            - name: {{ .Values.settingsSecret.volumeName }}
-              mountPath: {{ .Values.settingsSecret.mountPath }}
-              readOnly: true
-          {{ end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
@@ -117,16 +102,4 @@ spec:
 {{- range .Values.volumes }}
       - name: {{ .name }}
 {{ tpl .volumeDefinition $ | indent 8 }}
-{{- end }}
-
-{{- if .Values.settingsConfigMap.enabled }}
-      # This is deprecated - please replace with equivalent volumes definition
-      - name: {{ .Values.settingsConfigMap.volumeName }}
-        configMap:
-          name: {{required "settings.ConfigMap.configMapName is required" .Values.settingsConfigMap.configMapName }}
-{{- end }}
-{{- if .Values.settingsSecret.enabled }}
-      - name: {{ .Values.settingsSecret.volumeName }}
-        secret:
-          secretName: {{required "settings.settingsSecret.secretName is required" .Values.settingsSecret.secretName }}
 {{- end }}

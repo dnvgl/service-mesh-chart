@@ -8,7 +8,8 @@ metadata:
 spec:
   hosts:
   - {{ include "platform-service.serviceName" . }}
-
+  gateways:
+  - mesh
   http:
   - route:
     - destination:
@@ -63,14 +64,11 @@ spec:
         prefix: {{ $slashPrefix }}/
     {{- end }}
   {{- end }}
-{{- if .Values.defaultRouting.rewriteUrl }}
-    # legacy rewrite
+{{- if .Values.defaultRouting.rewriteUrlPrefix.enabled }}
     rewrite:
-      uri: "/"
-{{- else if .Values.defaultRouting.enableRewrite }}
-    rewrite:
-      uri: {{ required "rewriteUri is required" .Values.defaultRouting.rewriteUri }}
+      uri: {{ required "rewriteUri is required" .Values.defaultRouting.rewriteUrlPrefix.replaceWith }}
 {{- end}}
+    # deprecated
     headers:
       request:
         add:
