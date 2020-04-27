@@ -75,7 +75,7 @@ defaultRouting:
   # route from all hosts (typically only common services)
   allHosts: false
   # hosts to take into account for routing rules (ignored if allHosts = true)
-  hosts: {}
+  hosts: []
     #- myhost.dnvgl.com
 
 # Specify network policies
