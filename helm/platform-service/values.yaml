@@ -2,7 +2,7 @@
 # Likely you will make a copy of this for your own platform service
 
 # application name - required
-app: 
+app: appname
 
 version: v1
 replicaCount: 1
@@ -50,6 +50,9 @@ defaultRouting:
 
   # Generate default virtual services and destination rules
   enabled: true
+
+  # Load balancer policy
+  loadBalancerPolicy: RANDOM
 
   # list of prefixes for route matching - overrides the default prefix (app)
   urlPrefixes:

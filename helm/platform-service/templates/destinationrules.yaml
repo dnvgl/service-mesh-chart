@@ -7,7 +7,7 @@ spec:
   host: {{ include "platform-service.serviceName" . }}
   trafficPolicy:
     loadBalancer:
-      simple: RANDOM
+      simple: {{ default "RANDOM" .Values.defaultRouting.loadBalancerPolicy }}
     tls:
       mode: ISTIO_MUTUAL
 {{- end}}
