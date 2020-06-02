@@ -1,0 +1,16 @@
+{{- if .Values.hpa.enabled }}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: {{ required "app is required" .Values.app }}
+  name: {{ required "app is required" .Values.app }}-hpa
+spec:
+  maxReplicas: {{.Values.hpa.maxReplicas}}
+  minReplicas: {{.Values.hpa.minReplicas}}
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "platform-service.fullname" . }}
+  targetCPUUtilizationPercentage: 80
+{{- end }}

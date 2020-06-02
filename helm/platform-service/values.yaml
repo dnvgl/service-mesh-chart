@@ -46,6 +46,11 @@ gateway:
   # gateway name (fully qualified if in a different namespace)
   name: gateway/one-gateway
 
+hpa:
+  enabled: false
+  maxReplicas: 3
+  minReplicas: 1
+
 defaultRouting:
 
   # Generate default virtual services and destination rules
