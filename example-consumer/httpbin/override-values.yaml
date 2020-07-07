@@ -1,0 +1,15 @@
+platform-service:
+  env:
+    definedInBaseAndDuplicatedInOverride: sharedValue
+    noBase: newValue
+    definedInBaseAndOverridden: "newValue"
+    definedInBaseAndOverriddenValue: 
+      valueFrom:
+        secretKeyRef:
+          name: newSecret
+          key: username
+    noBaseValue: 
+      valueFrom:
+        secretKeyRef:
+          name: newSecret
+          key: username

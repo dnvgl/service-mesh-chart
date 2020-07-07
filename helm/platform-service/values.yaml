@@ -140,7 +140,8 @@ accessPolicy:
     #   servicePrincipalNamespace: other
 
 
-# Provide environment variable yaml
+# Environment variables are given as a map - key is the name - either followed by the actual value
+# or a valueFrom component which is literally translated
 # env:
 #   valueName: "the value"
 #   mySecret:
