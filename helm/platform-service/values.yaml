@@ -141,13 +141,23 @@ accessPolicy:
 
 
 # Provide environment variable yaml
-#environmentVariables:
+# env:
+#   valueName: "the value"
+#   mySecret:
+#     valueFrom:
+#       secretKeyRef:
+#         name: mysecret
+#         key: username
+
+# deprecated
+environmentVariables:
 #  - name: Serilog__MinimumLevel
 #    value: Debug
 #    valueFrom:
 #      secretKeyRef:
 #        name: mysecret
 #        key: username
+
 
 # Declare any volumes: name and mountPath are used for volumeMount at the container level
 # volumeDefinition string underneath is copied verbatim into volumes

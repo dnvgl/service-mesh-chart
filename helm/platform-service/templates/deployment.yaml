@@ -59,9 +59,20 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+{{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+{{- if contains "valueFrom" ($value | toString) }}
+{{ $value | toYaml | trim | indent 14 }}
+{{- else }}
+              value: {{ $value }}
+{{- end }}
+{{- end }}
+
+{{- /* deprecated - use env instead */}}
 {{- with .Values.environmentVariables }}
 {{ toYaml . | indent 12 }}
 {{- end }}
+
           ports:
             - name: http
               containerPort: {{ .Values.image.containerPort }}

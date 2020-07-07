@@ -18,15 +18,20 @@ platform-service:
   defaultRouting:
     allHosts: true
 
-  environmentVariables:
-    - name: var1
-      value: abc
-    - name: "var2"
-      value: "def"
-    - name: database__usessl
-      value: "false"
-    - name: database__provider
-      value: postgres
+  env:
+    baseLevel: only set at base
+    definedInBaseAndDuplicatedInOverride: sharedValue
+    definedInBaseAndOverridden: "baseValue"
+    definedInBaseAndOverriddenValue: 
+      valueFrom:
+        secretKeyRef:
+          name: baseSecret
+          key: username
+    onlyDefinedInBaseValue: 
+      valueFrom:
+        secretKeyRef:
+          name: baseSecret
+          key: username
 
   volumes:
     - name: service-secrets
