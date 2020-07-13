@@ -1,4 +1,4 @@
-{{- if .Values.accessPolicy.requestAuthentication.enabled -}}
+{{- if .Values.requestAuthentication.enabled -}}
 apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
 metadata:
@@ -10,5 +10,5 @@ spec:
       app: {{ .Values.app }}
       version: {{ .Values.version }}
   jwtRules:
-{{ .Values.accessPolicy.requestAuthentication.jwtRules | toYaml | indent 2 }}
+{{ .Values.requestAuthentication.jwtRules | toYaml | indent 2 }}
 {{- end }}

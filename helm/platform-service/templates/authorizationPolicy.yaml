@@ -1,4 +1,4 @@
-{{- if .Values.accessPolicy.authorizationPolicyEnabled }}
+{{- if .Values.authorizationPolicy.enabled }}
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -11,7 +11,7 @@ spec:
       version: {{ .Values.version }}
   action: ALLOW
   rules:
-  {{- range .Values.accessPolicy.authorizedServices }}
+  {{- range .Values.authorizationPolicy.authorizedServices }}
   - from:
     - source:
       {{- if .servicePrincipalFullName }}

@@ -1,4 +1,4 @@
-{{- if .Values.accessPolicy.networkPolicyEnabled -}}
+{{- if .Values.networkPolicy.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -28,7 +28,7 @@ spec:
         matchLabels:
           istio-operator-managed: Reconcile
 {{- end }}      
-{{- range .Values.accessPolicy.appsAllowedAccess }}
+{{- range .Values.networkPolicy.appsAllowedAccess }}
   - from:
     - podSelector:
         matchLabels:

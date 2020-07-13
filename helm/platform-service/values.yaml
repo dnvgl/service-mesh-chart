@@ -21,6 +21,9 @@ image:
   pullSecret:
   containerPort: 80
 
+# deploymentOnly -- This workload is an addon to another for the same app - only create the deployment and destination rule
+deploymentOnly: false
+
 service:
   # unspecified for default microservice (for now at least)
   type:
@@ -87,24 +90,9 @@ defaultRouting:
     #- myhost.dnvgl.com
 
 # Specify network policies
-accessPolicy:
-  # Settings for request authentication (Jwt authentication)
-  requestAuthentication:
-    # Generate RequestAuthentication
-    enabled: true
-
-    # JwtRules - list of rules
-    jwtRules:
-      # JWT Rule body - these are typical
-      # For full api see https://istio.io/docs/reference/config/security/jwt/#JWTRule
-      - issuer:  "https://sts.windows.net/.../"
-        jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
-        audiences: 
-          - 22b9c23f-4a41-4729-8a5d-793f7601dfdb
-          - fe494c14-85d2-4bfa-bb43-92b0ab0a4f72
-
+networkPolicy:
   # Enable default network policy (set false and create your own if needed)
-  networkPolicyEnabled: false
+  enabled: false
 
   # List of workloads allowed access to this workload. Identifiers are matched
   # to the app label.
@@ -112,8 +100,24 @@ accessPolicy:
   #  - app1
   #  - app2
 
+# Settings for request authentication (Jwt authentication)
+requestAuthentication:
+  # Generate RequestAuthentication
+  enabled: true
+
+  # JwtRules - list of rules
+  jwtRules:
+    # JWT Rule body - these are typical
+    # For full api see https://istio.io/docs/reference/config/security/jwt/#JWTRule
+    - issuer:  "https://sts.windows.net/.../"
+      jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
+      audiences: 
+        - 22b9c23f-4a41-4729-8a5d-793f7601dfdb
+        - fe494c14-85d2-4bfa-bb43-92b0ab0a4f72
+
+authorizationPolicy:
   # Generate default authorization policy
-  authorizationPolicyEnabled: true
+  enabled: true
 
   # List of authorized service principals. Valid map values are
   #   servicePrincipalName - short name to service account (required if full name not used)
