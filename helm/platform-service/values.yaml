@@ -12,7 +12,9 @@ replicaCount: 1
 #  saml-idp-forward-auth-filter: enabled
 
 image:
-  #registry and repository (no tag): platformteam.azurecr.io/myimage
+  # registry: platformteam.azurecr.io (ignored if not specified)
+  registry: 
+  # image name without the tag
   repository:
   # image tag (i.e. 105389)
   tag:

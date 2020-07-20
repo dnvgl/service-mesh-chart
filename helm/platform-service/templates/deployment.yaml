@@ -1,4 +1,10 @@
-{{- $initContainersImageTag := .Values.image.tag -}}
+{{- define "image" -}}
+{{- if .Values.image.registry -}}
+  {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+{{- else -}}
+  {{ .Values.image.repository }}:{{ .Values.image.tag }}
+{{- end -}}
+{{- end -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -47,7 +53,7 @@ spec:
       initContainers:
       {{- range .Values.initContainers }}
         - name: {{ .name }}
-          image: "{{ .image.repository }}:{{ $initContainersImageTag }}"
+          image: "{{ include "image" . }}"
           imagePullPolicy: {{ .image.pullPolicy }}
           env:
 {{- with .envVariables }}
@@ -56,7 +62,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ include "platform-service.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "image" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
 {{- range $key, $value := .Values.env }}

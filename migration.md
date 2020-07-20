@@ -113,9 +113,28 @@ environmentVariables: |
        key: username
 ```
 
-### Improved syntax for rewriting URL prefixes
+### Image repository
 
-The new api for rewriting prefixes combines the previous two approaches while also grouping the options together for clarity
+The registry has been separated from the image repository in order to simplify moving between environments.
+
+New syntax:
+
+``` yaml
+image:
+  registry: platformteam.azurecr.io
+  repository: sessionmanager
+```
+
+Previous syntax:
+
+``` yaml
+image:
+  repository: platformteam.azurecr.io/sessionmanager
+```
+
+### URL prefix rewrites
+
+We have improved the syntax for rewriting URL prefixes for clarity. The new api groups the options under a new rewriteUrlPrefix section, while also combining the previous two approaches.
 
 Here is the new syntax, with the defaults as shown:
 
@@ -148,6 +167,8 @@ defaultRouting:
   rewriteUrl: true #always rewrites to "/"
 ```
 
+## De-supported options
+
 ### settingsSecret and settingsConfigMap
 
 These options are now desupported. The replacement syntax is to use the regular volume syntax. For example:
@@ -173,8 +194,6 @@ Previous syntax:
     secretName: cascade-secrets
 
 ```
-
-## De-supported options
 
 ### fullnameOverride
 
