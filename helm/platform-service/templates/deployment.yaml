@@ -70,7 +70,7 @@ spec:
 {{- if contains "valueFrom" ($value | toString) }}
 {{ $value | toYaml | trim | indent 14 }}
 {{- else }}
-              value: {{ $value }}
+              value: {{ $value | quote }}
 {{- end }}
 {{- end }}
 
