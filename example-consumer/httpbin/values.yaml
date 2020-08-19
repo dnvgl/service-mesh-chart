@@ -25,12 +25,12 @@ platform-service:
     definedInBaseAndOverriddenValue: 
       valueFrom:
         secretKeyRef:
-          name: baseSecret
+          name: base-secret
           key: username
     onlyDefinedInBaseValue: 
       valueFrom:
         secretKeyRef:
-          name: baseSecret
+          name: base-secret
           key: username
 
   volumes:
