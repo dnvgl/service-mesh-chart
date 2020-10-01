@@ -18,27 +18,27 @@ platform-service:
   defaultRouting:
     allHosts: true
 
-  env:
-    baseLevel: only set at base
-    definedInBaseAndDuplicatedInOverride: sharedValue
-    definedInBaseAndOverridden: "baseValue"
-    definedInBaseAndOverriddenValue: 
-      valueFrom:
-        secretKeyRef:
-          name: base-secret
-          key: username
-    onlyDefinedInBaseValue: 
-      valueFrom:
-        secretKeyRef:
-          name: base-secret
-          key: username
+  # env:
+  #   baseLevel: only set at base
+  #   definedInBaseAndDuplicatedInOverride: sharedValue
+  #   definedInBaseAndOverridden: "baseValue"
+  #   definedInBaseAndOverriddenValue: 
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: base-secret
+  #         key: username
+  #   onlyDefinedInBaseValue: 
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: base-secret
+  #         key: username
 
-  volumes:
-    - name: service-secrets
-      mountPath: "/secrets"
-      volumeDefinition: |
-        secret:
-          secretName: test-secrets
+  # volumes:
+  #   - name: service-secrets
+  #     mountPath: "/secrets"
+  #     volumeDefinition: |
+  #       secret:
+  #         secretName: test-secrets
 
   # Specify network and authorization policies
 
@@ -60,6 +60,7 @@ platform-service:
       - issuer: "https://login.microsoftonline.com/a68572e3-63ce-4bc1-acdc-b64943502e9d/v2.0/"
         jwksUri: "https://login.microsoftonline.com/te/dnvglb2cprod.onmicrosoft.com/b2c_1a_signinwithadfsidp/discovery/v2.0/keys"
         audience: ["fe494c14-85d2-4bfa-bb43-92b0ab0a4f72"]
-      - issuer: "https://login.microsoftonline.com/a12372e3-63ce-4bc1-acdc-b64943502e9d/v2.0/"
-        jwksUri: "https://login.microsoftonline.com/te/dnvglb2cprod.onmicrosoft.com/b2c_1a_signinwithadfsidp/discovery/v2.0/keys"
-        audience: ["22b9c23f-4a41-4729-8a5d-793f7601dfdb"]
+        forwardOriginalToken: true
+      # - issuer: "https://login.microsoftonline.com/a12372e3-63ce-4bc1-acdc-b64943502e9d/v2.0/"
+      #   jwksUri: "https://login.microsoftonline.com/te/dnvglb2cprod.onmicrosoft.com/b2c_1a_signinwithadfsidp/discovery/v2.0/keys"
+      #   audience: ["22b9c23f-4a41-4729-8a5d-793f7601dfdb"]
