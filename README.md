@@ -11,6 +11,7 @@ More information on usage to follow...
 The recommended approach to using the platform-service chart is to reference it as a subchart:
 
 ### Create a Helm chart
+
 Create your own Helm chart for your app (see the example-consumer folder in this repository for the format).
 
 ### Download the referenced platform service
