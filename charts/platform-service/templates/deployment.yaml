@@ -48,8 +48,6 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ include "platform-service.serviceAccountName" . }}
-      imagePullSecrets:
-        - name: {{ .Values.image.pullSecret }}
       initContainers:
       {{- range .Values.initContainers }}
         - name: {{ .name }}
