@@ -7,7 +7,7 @@ spec:
   host: {{ include "platform-service.serviceName" . }}
   trafficPolicy:
     loadBalancer:
-      {{- if eq (.Values.defaultRouting.loadBalancerPolicy, 'STICKY_SESSIONS')}}
+      {{- if eq .Values.defaultRouting.loadBalancerPolicy 'STICKY_SESSIONS'}}
       consistentHash:
         httpCookie:
           name: onegateway_sessid
