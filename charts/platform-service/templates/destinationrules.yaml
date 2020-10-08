@@ -7,7 +7,14 @@ spec:
   host: {{ include "platform-service.serviceName" . }}
   trafficPolicy:
     loadBalancer:
+      {{- if eq (.Values.defaultRouting.loadBalancerPolicy, 'STICKY_SESSIONS')}}
+      consistentHash:
+        httpCookie:
+          name: onegateway_sessid
+          ttl: 0s
+      {{- else }}
       simple: {{ default "RANDOM" .Values.defaultRouting.loadBalancerPolicy }}
+      {{- end}}
     tls:
       mode: ISTIO_MUTUAL
 {{- end}}
