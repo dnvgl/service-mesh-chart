@@ -4,7 +4,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   labels:
     app: {{ required "app is required" .Values.app }}
-  name: {{ required "app is required" .Values.app }}-hpa
+  name: {{ include "platform-service.fullname" . }}-hpa
 spec:
   maxReplicas: {{.Values.hpa.maxReplicas}}
   minReplicas: {{.Values.hpa.minReplicas}}

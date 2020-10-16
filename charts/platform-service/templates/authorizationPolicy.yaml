@@ -2,7 +2,7 @@
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: {{ .Values.app }}
+  name: {{ include "platform-service.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
