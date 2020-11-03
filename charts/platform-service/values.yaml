@@ -26,6 +26,8 @@ image:
 # deploymentOnly -- This workload is an addon to another for the same app - only create the deployment and destination rule
 deploymentOnly: false
 
+updateStrategy: RollingUpdate
+
 service:
   # unspecified for default microservice (for now at least)
   type:
