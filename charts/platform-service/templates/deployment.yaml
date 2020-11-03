@@ -17,6 +17,11 @@ metadata:
     app: {{ required "app is required" .Values.app }}
     version: {{ .Values.version }}
 spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
