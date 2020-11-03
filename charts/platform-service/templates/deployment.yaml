@@ -17,11 +17,10 @@ metadata:
     app: {{ required "app is required" .Values.app }}
     version: {{ .Values.version }}
 spec:
+  {{- if eq .Values.updateStrategy "Recreate" }}
   strategy:
-    rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 1
-    type: RollingUpdate
+    type: Recreate
+  {{- end }}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
