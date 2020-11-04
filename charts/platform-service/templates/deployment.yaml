@@ -17,6 +17,13 @@ metadata:
     app: {{ required "app is required" .Values.app }}
     version: {{ .Values.version }}
 spec:
+  {{- if eq .Values.updateStrategy "NoSurge" }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  {{- end }}
   {{- if eq .Values.updateStrategy "Recreate" }}
   strategy:
     type: Recreate
