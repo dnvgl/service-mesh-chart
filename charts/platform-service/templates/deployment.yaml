@@ -101,7 +101,7 @@ spec:
           {{- if .Values.service.liveness.enabled }} 
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: {{ .Values.service.liveness.path }}
               port: {{ .Values.image.containerPort }}
             initialDelaySeconds: 5
             periodSeconds: 5

@@ -36,6 +36,7 @@ service:
   # provide access to other services
   liveness:
     enabled: false
+    path: /healthz
 
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
