@@ -89,9 +89,11 @@ spec:
 {{- end }}
 {{- end }}
 
-{{- /* deprecated - use env instead */}}
-{{- with .Values.environmentVariables }}
-{{ toYaml . | indent 12 }}
+{{- if .Values.command }}
+          command:
+            {{- range .Values.command }}
+            - {{ . }}
+            {{- end }}
 {{- end }}
 
           ports:
