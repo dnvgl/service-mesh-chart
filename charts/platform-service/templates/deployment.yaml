@@ -96,6 +96,10 @@ spec:
             {{- end }}
 {{- end }}
 
+{{- if .Values.workingDir }}
+          workingDir: .Values.workingDir
+{{- end }}
+
           ports:
             - name: http
               containerPort: {{ .Values.image.containerPort }}
