@@ -97,7 +97,7 @@ spec:
 {{- end }}
 
 {{- if .Values.workingDir }}
-          workingDir: .Values.workingDir
+          workingDir: {{ .Values.workingDir }}
 {{- end }}
 
           ports:
