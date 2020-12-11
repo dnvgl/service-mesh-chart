@@ -116,9 +116,9 @@ spec:
           {{- range .Values.volumes }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
-              {{- if .subPath }}
+{{- if .subPath }}
               subPath: {{ .subPath }}
-              {{- end }}
+{{- end }}
           {{- end }}
 
           resources:
