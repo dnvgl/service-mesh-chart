@@ -94,6 +94,14 @@ defaultRouting:
   hosts: []
     #- myhost.dnvgl.com
 
+  # configure retry settings - the defaults are provided in the template for backward compatibility
+  # providing any settings here will override the defaults
+  retries:
+    enabled: true
+    #settings:
+    #  attempts: 3
+    #  perTryTimeout: 2s
+
 # Specify network policies
 networkPolicy:
   # Enable default network policy (set false and create your own if needed)

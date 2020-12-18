@@ -18,6 +18,12 @@ platform-service:
   defaultRouting:
     allHosts: true
 
+    retries:
+      enabled: false
+      settings:
+        attempts: 3
+
+
   # env:
   #   baseLevel: only set at base
   #   definedInBaseAndDuplicatedInOverride: sharedValue

@@ -1,3 +1,14 @@
+{{- define "retries" -}}
+{{- if .Values.defaultRouting.retries.enabled }}
+    retries:
+{{- if .Values.defaultRouting.retries.settings }}
+{{ .Values.defaultRouting.retries.settings | toYaml | trim | indent 6 }}
+{{- else }}
+      attempts: 3
+      perTryTimeout: 2s
+{{- end -}}
+{{- end -}}
+{{- end -}}
 {{- if not .Values.deploymentOnly -}}
 {{- if .Values.defaultRouting.enabled}}
 {{- $fullName := include "platform-service.fullname" . -}}
@@ -14,9 +25,7 @@ spec:
   - route:
     - destination:
         host: {{ include "platform-service.serviceName" . | quote }}
-    retries:
-      attempts: 3
-      perTryTimeout: 2s
+{{- include "retries" . }}
 
 {{- if .Values.gateway.exposeService }}
 
@@ -73,9 +82,7 @@ spec:
       request:
         add:
           x-appname: {{ first $prefixes }}
-    retries:
-      attempts: 3
-      perTryTimeout: 2s
+{{- include "retries" . }}
 {{- end}}
 {{- end}}
 {{- end}}
