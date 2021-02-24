@@ -3,7 +3,6 @@ apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
 metadata:
   name: {{ include "platform-service.fullname" . }}
-  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
