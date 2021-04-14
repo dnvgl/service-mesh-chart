@@ -102,16 +102,16 @@ defaultRouting:
     #  attempts: 3
     #  perTryTimeout: 2s
 
-  corsPolicy:
-    allowOrigins:
-      - exact: https://example.com
-    allowMethods:
-      - POST
-      - GET
-    allowCredentials: false
-    allowHeaders:
-      - X-Foo-Bar
-    maxAge: "24h"
+  #corsPolicy:
+  #  allowOrigins:
+  #    - exact: https://example.com
+  #  allowMethods:
+  #    - POST
+  #    - GET
+  #  allowCredentials: false
+  #  allowHeaders:
+  #    - X-Foo-Bar
+  #  maxAge: "24h"
 
 # Specify network policies
 networkPolicy:
