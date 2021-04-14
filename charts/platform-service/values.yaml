@@ -13,7 +13,7 @@ replicaCount: 1
 
 image:
   # registry: platformteam.azurecr.io (ignored if not specified)
-  registry: 
+  registry:
   # image name without the tag
   repository:
   # image tag (i.e. 105389)
@@ -46,7 +46,7 @@ serviceAccount:
   # The name of the ServiceAccount to use (the actual service account name
   # will still be prefixed by the release prefix if that option is enabled.
   # If not set and create is true, a name is generated from the app
-  name: 
+  name:
 
 gateway:
   # map virtual service to a gateway expose this service
@@ -60,7 +60,6 @@ hpa:
   minReplicas: 1
 
 defaultRouting:
-
   # Generate default virtual services and destination rules
   enabled: true
 
@@ -91,7 +90,8 @@ defaultRouting:
   # route from all hosts (typically only common services)
   allHosts: false
   # hosts to take into account for routing rules (ignored if allHosts = true)
-  hosts: []
+  hosts:
+    []
     #- myhost.dnvgl.com
 
   # configure retry settings - the defaults are provided in the template for backward compatibility
@@ -101,6 +101,17 @@ defaultRouting:
     #settings:
     #  attempts: 3
     #  perTryTimeout: 2s
+
+  # corsPolicy:
+  #   allowOrigins:
+  #     - exact: https://example.com
+  #   allowMethods:
+  #     - POST
+  #     - GET
+  #   allowCredentials: false
+  #   allowHeaders:
+  #     - X-Foo-Bar
+  #  maxAge: "24h"
 
 # Specify network policies
 networkPolicy:
@@ -122,9 +133,9 @@ requestAuthentication:
   jwtRules:
     # JWT Rule body - these are typical
     # For full api see https://istio.io/docs/reference/config/security/jwt/#JWTRule
-    - issuer:  "https://sts.windows.net/.../"
+    - issuer: "https://sts.windows.net/.../"
       jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
-      audiences: 
+      audiences:
         - 22b9c23f-4a41-4729-8a5d-793f7601dfdb
         - fe494c14-85d2-4bfa-bb43-92b0ab0a4f72
 
@@ -137,7 +148,7 @@ authorizationPolicy:
   #   servicePrincipalNamespace - namespace defaults to current
   #   servicePrincipalFullName - alternative to first two - provide full service
   #     principal name (i.e. cluster.local/ns/mynamespace/sa/myserviceaccount)
-  #   requireJwt - (default true) set to false to allow peer connections from 
+  #   requireJwt - (default true) set to false to allow peer connections from
   #     this service principal without a jwt
   authorizedServices:
     # Examples:
@@ -155,7 +166,6 @@ authorizationPolicy:
     # 4) alternate form of 3
     # - servicePrincipalFullName: "cluster.local/ns/other/sa/myotherappsa"
     #   servicePrincipalNamespace: other
-
 
 # Environment variables are given as a map - key is the name - either followed by the actual value
 # or a valueFrom component which is literally translated
@@ -176,12 +186,11 @@ environmentVariables:
 #        name: mysecret
 #        key: username
 
-
 # Declare any volumes: name and mountPath are used for volumeMount at the container level
 # volumeDefinition string underneath is copied verbatim into volumes
 volumes:
-#  - name: 
-#    mountPath: 
+#  - name:
+#    mountPath:
 #    volumeDefinition: |
 #      azureFile:
 
@@ -195,12 +204,13 @@ resources: {}
 #    memory: 128Mi
 
 # Adjust resources requested for proxy sidecar (see https://istio.io/docs/concepts/performance-and-scalability/#cpu-and-memory)
-proxyResources: {}
+proxyResources:
+  {}
   # request values are passed to the envoy proxy through annotations
   # these may be set globally at the istio level, so only override by service if necessary
   # requests:
-    # cpu: 10m
-    # memory: 64Mi
+  # cpu: 10m
+  # memory: 64Mi
   # limits are not currently supported
 
 nodeSelector: {}

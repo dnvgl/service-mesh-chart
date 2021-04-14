@@ -26,6 +26,10 @@ spec:
     - destination:
         host: {{ include "platform-service.serviceName" . | quote }}
 {{- include "retries" . }}
+{{- if .Values.defaultRouting.corsPolicy }}
+    corsPolicy:
+{{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
+{{- end -}}
 
 {{- if .Values.gateway.exposeService }}
 
