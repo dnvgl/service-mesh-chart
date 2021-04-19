@@ -48,17 +48,17 @@ spec:
 {{- $prefixes := default (list .Values.app) .Values.defaultRouting.urlPrefixes }}
   http:
 {{- if .Values.defaultRouting.urlExactMatches }}
-  match:
+  - match:
   {{- range .Values.defaultRouting.urlExactMatches }}
   {{- if hasPrefix "/" . }}
     {{ fail "url matches must not include leading slash"}}
   {{- end}}
   {{- $slashMatch := printf "/%s" . }}
-  - uri:
-      exact: {{ $slashMatch }}
+    - uri:
+        exact: {{ $slashMatch }}
   {{- end }}
   # routes to service
-  - route:
+    route:
     - destination:
         host: {{ include "platform-service.serviceName" . | quote }}
 {{- if .Values.defaultRouting.corsPolicy }}
@@ -79,7 +79,7 @@ spec:
   {{- end}}
 {{- end}}
   # routes to service
-  - route:
+    route:
     - destination:
         host: {{ include "platform-service.serviceName" . | quote }}
 {{- if .Values.defaultRouting.corsPolicy }}
@@ -88,7 +88,7 @@ spec:
 {{- end -}}
 
   {{- if not .Values.defaultRouting.catchAll }}
-    match:
+  - match:
     {{- range $prefixes }}
     {{- if hasPrefix "/" . }}
       {{ fail "url prefixes must not include leading slash"}}
