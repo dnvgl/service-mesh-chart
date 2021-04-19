@@ -47,6 +47,25 @@ spec:
   - {{ required "A valid .Values.gateway.name entry required!" .Values.gateway.name }}
 {{- $prefixes := default (list .Values.app) .Values.defaultRouting.urlPrefixes }}
   http:
+{{- if .Values.defaultRouting.urlExactMatches }}
+  match:
+  {{- range .Values.defaultRouting.urlExactMatches }}
+  {{- if hasPrefix "/" . }}
+    {{ fail "url matches must not include leading slash"}}
+  {{- end}}
+  {{- $slashMatch := printf "/%s" . }}
+  - uri:
+      exact: {{ $slashMatch }}
+  {{- end }}
+  # routes to service
+  - route:
+    - destination:
+        host: {{ include "platform-service.serviceName" . | quote }}
+{{- if .Values.defaultRouting.corsPolicy }}
+    corsPolicy:
+{{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
+{{- end -}}
+
 {{- if .Values.defaultRouting.redirectOnNoTrailingSlash }}
   # redirect on prefixes without trailing slashes
   {{- range $prefixes }}
