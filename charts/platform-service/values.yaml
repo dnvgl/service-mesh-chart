@@ -60,6 +60,15 @@ hpa:
   minReplicas: 1
 
 defaultRouting:
+  hosts:
+    - rapid-models.dnvgl.com
+  rewriteUrlPrefix:
+    enabled: false
+  redirectOnNoTrailingSlash: false
+  urlExactMatches:
+    - api
+    - apidocs
+
   # Generate default virtual services and destination rules
   enabled: true
 
@@ -79,13 +88,13 @@ defaultRouting:
 
   # options for rewriting the URL to remove the routing prefix before delivering
   # the request to the target pod
-  rewriteUrlPrefix:
+  #rewriteUrlPrefix:
     # replace the routing prefix when enabled (when disabled, the URL is not adjusted)
-    enabled: true
+  #  enabled: true
     # replace the routing prefix with the provided string
     # alternate prefixes should begin and end with a "/"
     # examples: "/", "/api/"
-    replaceWith: "/"
+  #  replaceWith: "/"
 
   # route from all hosts (typically only common services)
   allHosts: false
