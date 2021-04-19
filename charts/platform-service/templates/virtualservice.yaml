@@ -64,7 +64,8 @@ spec:
 {{- if .Values.defaultRouting.corsPolicy }}
     corsPolicy:
 {{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
-{{- end -}}
+{{- end }}
+{{- end }}
 
 {{- if .Values.defaultRouting.redirectOnNoTrailingSlash }}
   # redirect on prefixes without trailing slashes
