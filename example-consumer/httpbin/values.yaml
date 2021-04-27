@@ -11,6 +11,10 @@ platform-service:
 
   service:
     port: 8000
+    liveness:
+      enabled: true
+      timeoutSeconds: 5
+      periodSeconds: 10
 
   gateway:
     exposeService: true

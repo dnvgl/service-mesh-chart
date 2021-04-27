@@ -37,6 +37,10 @@ service:
   liveness:
     enabled: false
     path: /healthz
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+    failureThreshold: 3
 
 serviceAccount:
   # Specifies whether a ServiceAccount should be created

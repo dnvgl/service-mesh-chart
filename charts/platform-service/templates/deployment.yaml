@@ -109,8 +109,11 @@ spec:
             httpGet:
               path: {{ .Values.service.liveness.path }}
               port: {{ .Values.image.containerPort }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: {{ .Values.service.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.service.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.service.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.service.liveness.failureThreshold }}
+
           {{- end }}
           volumeMounts:
           {{- range .Values.volumes }}
