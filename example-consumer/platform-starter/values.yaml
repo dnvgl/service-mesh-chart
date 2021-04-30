@@ -1,0 +1,6 @@
+platform-service:
+  app: 
+
+  image:
+    registry: platformservice.azurecr.io
+    repository: 

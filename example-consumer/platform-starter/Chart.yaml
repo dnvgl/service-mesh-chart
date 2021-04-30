@@ -1,0 +1,5 @@
+apiVersion: v1
+appVersion: "1.0"
+description: A minimal starter chart for using the platform-service
+name: platform-starter
+version: 0.0.1

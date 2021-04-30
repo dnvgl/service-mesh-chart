@@ -1,0 +1,4 @@
+dependencies:
+  - name: platform-service
+    version: 1.0.29
+    repository: "@platformteam"
