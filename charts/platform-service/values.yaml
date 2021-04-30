@@ -1,5 +1,4 @@
 # Default values for platform-service
-# Likely you will make a copy of this for your own platform service
 
 # application name - required
 app: appname
@@ -67,8 +66,10 @@ defaultRouting:
   # Generate default virtual services and destination rules
   enabled: true
 
-  # Load balancer policy
-  loadBalancerPolicy: RANDOM
+  # hosts to take into account for routing rules (ignored if allHosts = true)
+  hosts:
+    []
+    #- myhost.dnvgl.com
 
   # list of prefixes for route matching - overrides the default prefix (app)
   urlPrefixes:
@@ -91,12 +92,11 @@ defaultRouting:
     # examples: "/", "/api/"
     replaceWith: "/"
 
-  # route from all hosts (typically only common services)
-  allHosts: false
-  # hosts to take into account for routing rules (ignored if allHosts = true)
-  hosts:
-    []
-    #- myhost.dnvgl.com
+  # Load balancer policy
+  # Also supported are:
+  #   STICKY_SESSIONS: ensures each session will always hit the same pod.
+  #   ROUND_ROBIN: uses the round robin algorithm for load balancing
+  loadBalancerPolicy: RANDOM
 
   # configure retry settings - the defaults are provided in the template for backward compatibility
   # providing any settings here will override the defaults
@@ -105,6 +105,7 @@ defaultRouting:
     #settings:
     #  attempts: 3
     #  perTryTimeout: 2s
+
 
   #corsPolicy:
   #  allowOrigins:
@@ -116,6 +117,10 @@ defaultRouting:
   #  allowHeaders:
   #    - X-Foo-Bar
   #  maxAge: "24h"
+
+  # route from all hosts (typically only common services)
+  allHosts: false
+
 
 # Specify network policies
 networkPolicy:
