@@ -50,14 +50,16 @@ spec:
         {{- if .Values.proxyResources.requests.cpu }}  
         sidecar.istio.io/proxyCPU: {{ .Values.proxyResources.requests.cpu }}
         {{- end }}
-        {{- if .Values.proxyResources.requests.cpuLimit }}  
-        sidecar.istio.io/proxyCPULimit: {{ .Values.proxyResources.requests.cpuLimit }}
-        {{- end }}
         {{- if .Values.proxyResources.requests.memory }}  
         sidecar.istio.io/proxyMemory: {{ .Values.proxyResources.requests.memory }}
         {{- end }};
-        {{- if .Values.proxyResources.requests.memoryLimit }}  
-        sidecar.istio.io/proxyMemoryLimit: {{ .Values.proxyResources.requests.memoryLimit }}
+        {{- end }}
+        {{- if .Values.proxyResources.limits }}  
+        {{- if .Values.proxyResources.limits.cpu }}  
+        sidecar.istio.io/proxyCPULimit: {{ .Values.proxyResources.limits.cpu }}
+        {{- end }}
+        {{- if .Values.proxyResources.limits.memory }}  
+        sidecar.istio.io/proxyMemoryLimit: {{ .Values.proxyResources.limits.memory }}
         {{- end }};
         {{- end }}
         {{- if .Values.service.liveness.enabled }}  
