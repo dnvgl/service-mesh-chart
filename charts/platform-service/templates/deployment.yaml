@@ -70,28 +70,6 @@ spec:
 {{- end }}
       {{- end }}
       containers:
-{{ if .Values.opa.enabled }}
-        - name: opa-envoy
-          image: openpolicyagent/opa:0.28.0-envoy
-          imagePullPolicy: IfNotPresent          
-          volumeMounts:
-          - mountPath: /config
-            name: opa-envoy-config
-          args:
-          - run
-          - --server
-          - --addr=localhost:8181
-          - --diagnostic-addr=0.0.0.0:8282
-          - --config-file=/config/config.yaml
-          livenessProbe:
-            httpGet:
-              path: /health?plugins
-              port: 8282
-          readinessProbe:
-            httpGet:
-              path: /health?plugins
-              port: 8282
-{{ end }}
         - name: {{ include "platform-service.name" . }}
           image: "{{ include "image" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}

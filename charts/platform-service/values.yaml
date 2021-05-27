@@ -62,10 +62,6 @@ hpa:
   maxReplicas: 3
   minReplicas: 1
 
-opa:
-  # set to true to enable opa.  requires config in a config map called opa-envoy-config
-  enabled: false
-
 defaultRouting:
   # Generate default virtual services and destination rules
   enabled: true
