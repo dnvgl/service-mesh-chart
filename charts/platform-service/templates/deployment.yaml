@@ -178,10 +178,10 @@ spec:
 {{ if .Values.opa.enabled }}      
       - name: opa-istio-config
         configMap: 
-        - name: opa-istio-config
+          name: opa-istio-config
       - name: opa-policy
         configMap: 
-        - name: opa-policy
+          name: opa-policy
 {{ end }} 
 {{- range .Values.volumes }}
       - name: {{ .name }}
