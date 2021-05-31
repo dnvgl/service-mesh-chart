@@ -40,6 +40,9 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app: {{ required "app is required" .Values.app }}
         version: {{ .Values.version }}
+        {{- if .Values.opa.enabled }}
+        sidecar.opa-istio.io/inject: true
+        {{- end }}
         {{- if .Values.additionalPodLabels }}
 {{- with .Values.additionalPodLabels }}
 {{ tpl . $ | indent 8 }}
@@ -70,6 +73,34 @@ spec:
 {{- end }}
       {{- end }}
       containers:
+{{ if .Values.opa.enabled }}
+        - name: opa-istio
+          image: openpolicyagent/opa:0.28.0-istio
+          imagePullPolicy: IfNotPresent          
+          args:
+          - run
+          - --server
+          - --addr=localhost:8181
+          - --diagnostic-addr=0.0.0.0:8282
+          - --config-file=/config/config.yaml
+          volumeMounts:
+          - mountPath: /config
+            name: opa-istio-config
+          - mountPath: /policy
+            name: opa-policy
+          livenessProbe:
+            exec:
+              command:
+              - "/app/opa_envoy_linux_amd64"
+              - "eval"
+              - "1"
+          readinessProbe:
+            exec:
+              command:
+              - "/app/opa_envoy_linux_amd64"
+              - "eval"
+              - "1"
+{{ end }}      
         - name: {{ include "platform-service.name" . }}
           image: "{{ include "image" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}

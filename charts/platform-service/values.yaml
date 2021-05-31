@@ -57,6 +57,10 @@ gateway:
   # gateway name (fully qualified if in a different namespace)
   name: gateway/one-gateway
 
+opa:
+  # set to true to enable opa.  requires config in a config map called opa-istio-config and policy in a config map called opa-policy
+  enabled: false
+
 hpa:
   enabled: false
   maxReplicas: 3
