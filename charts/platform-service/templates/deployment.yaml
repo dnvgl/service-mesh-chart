@@ -88,6 +88,13 @@ spec:
             name: opa-istio-config
           - mountPath: /policy
             name: opa-policy
+          volumes:
+          - name: opa-istio-config
+            configMap: 
+            - name: opa-istio-config
+          - name: opa-policy
+            configMap: 
+            - name: opa-policy
           livenessProbe:
             exec:
               command:
