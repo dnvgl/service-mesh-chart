@@ -41,7 +41,7 @@ spec:
         app: {{ required "app is required" .Values.app }}
         version: {{ .Values.version }}
         {{- if .Values.opa.enabled }}
-        sidecar.opa-istio.io/inject: true
+        sidecar.opa-istio.io/inject: "true"
         {{- end }}
         {{- if .Values.additionalPodLabels }}
 {{- with .Values.additionalPodLabels }}
