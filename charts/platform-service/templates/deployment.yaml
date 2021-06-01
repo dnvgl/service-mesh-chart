@@ -83,6 +83,7 @@ spec:
           - --addr=localhost:8181
           - --diagnostic-addr=0.0.0.0:8282
           - --config-file=/config/config.yaml
+          - /policy/policy.rego
           volumeMounts:
           - mountPath: /config
             name: opa-istio-config
