@@ -30,4 +30,5 @@ spec:
   - from:
     - source:
         namespaces: ["istio-system"]
+        requestPrincipals: ["*"]
 {{- end }}
