@@ -41,6 +41,12 @@ service:
     timeoutSeconds: 1
     failureThreshold: 3
 
+# Health check configuration - exposes full k8s api for each probe type. See https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+health:
+  livenessProbe:
+  readinessProbe:
+  startupProbe:
+
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
   create: true

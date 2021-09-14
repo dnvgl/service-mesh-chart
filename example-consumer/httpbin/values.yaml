@@ -12,7 +12,7 @@ platform-service:
   service:
     port: 8000
     liveness:
-      enabled: true
+      enabled: false
       timeoutSeconds: 5
       periodSeconds: 10
 
@@ -27,6 +27,26 @@ platform-service:
       settings:
         attempts: 3
 
+  health:
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 80
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      timeoutSeconds: 1
+      failureThreshold: 3      
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: 80
+      successThreshold: 3
+    startupProbe:
+      httpGet:
+        path: /health/startup
+        port: 80
+      failureThreshold: 30
+      periodSeconds: 10
 
   # env:
   #   baseLevel: only set at base

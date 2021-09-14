@@ -148,6 +148,19 @@ spec:
             failureThreshold: {{ .Values.service.liveness.failureThreshold }}
 
           {{- end }}
+{{- if .Values.health.livenessProbe }}
+{{- if .Values.service.liveness.enabled -}} {{- fail "Liveness must either be defined in service or health but not both"}} {{- end }}
+          livenessProbe:
+{{ .Values.health.livenessProbe | toYaml | trim | indent 12 }}
+{{- end }}
+{{- if .Values.health.readinessProbe }}
+          readinessProbe:
+{{ .Values.health.readinessProbe | toYaml | trim | indent 12 }}
+{{- end }}
+{{- if .Values.health.startupProbe }}
+          startupProbe:
+{{ .Values.health.startupProbe | toYaml | trim | indent 12 }}
+{{- end }}
           volumeMounts:
           {{- range .Values.volumes }}
             - name: {{ .name }}
