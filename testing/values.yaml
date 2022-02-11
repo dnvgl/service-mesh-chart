@@ -1,0 +1,101 @@
+app: test
+version: v1
+
+image:
+  registry: test.io
+  repository: some/repository
+  pullPolicy: IfNotPresent
+  tag: latest
+  containerPort: 80
+
+service:
+  port: 8000
+  liveness:
+    enabled: false
+    timeoutSeconds: 5
+    periodSeconds: 10
+
+gateway:
+  exposeService: true
+
+defaultRouting:
+  enabled: true
+  allHosts: false
+
+  hosts:
+    - mysubdomain1.mydomain.com
+    - mysubdomain2.mydomain.com
+
+  urlPrefixes:
+    - prefix1
+    - prefix2
+
+  retries:
+    enabled: false
+    settings:
+      attempts: 3
+
+health:
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: 80
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3      
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 80
+    successThreshold: 3
+  startupProbe:
+    httpGet:
+      path: /health/startup
+      port: 80
+    failureThreshold: 30
+    periodSeconds: 10
+
+env:
+  baseLevel: only set at base
+  definedInBaseAndDuplicatedInOverride: sharedValue
+  definedInBaseAndOverridden: "baseValue"
+  definedInBaseAndOverriddenValue: 
+    valueFrom:
+      secretKeyRef:
+        name: base-secret
+        key: username
+  onlyDefinedInBaseValue: 
+    valueFrom:
+      secretKeyRef:
+        name: base-secret
+        key: username
+
+volumes:
+  - name: service-secrets
+    mountPath: "/secrets"
+    volumeDefinition: |
+      secret:
+        secretName: test-secrets
+
+# Specify network and authorization policies
+
+# Enable default network policy (set false and create your own if needed)
+networkPolicy:
+  enabled: true
+
+  # List of workloads allowed access to this workload
+  appsAllowedAccess:
+    # App identifier for workload
+    - consumer
+authorizationPolicy:
+  authorizedServices:
+    - servicePrincipalFullName: "cluster.local/ns/myns/sa/consumersp"
+      requireJwt: false
+    - servicePrincipalName: testsp
+requestAuthentication:
+  jwtRules:
+    - issuer: "https://login.microsoftonline.com/abcd/v2.0/"
+      jwksUri: "https://jwksuri/discovery/v2.0/keys"
+      audiences: ["test-audience"]
+      forwardOriginalToken: true

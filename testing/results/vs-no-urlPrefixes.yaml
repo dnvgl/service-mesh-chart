@@ -1,0 +1,48 @@
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test
+spec:
+  hosts:
+  - test
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: "test"
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-external
+spec:
+  hosts:
+  - "mysubdomain1.mydomain.com"
+  - "mysubdomain2.mydomain.com"
+  gateways:
+  - gateway/one-gateway
+  http:
+  # redirect on prefixes without trailing slashes
+  - match:
+    - uri:
+        exact: /test
+    redirect:
+      uri: /test/
+  # routes to service
+  - route:
+    - destination:
+        host: "test"
+    match:
+    - uri:
+        prefix: /test/
+    rewrite:
+      uri: /
+    # deprecated
+    headers:
+      request:
+        add:
+          x-appname: test

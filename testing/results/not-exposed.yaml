@@ -1,0 +1,213 @@
+---
+# Source: platform-service/templates/network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test-release-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: test
+      version: v1
+  policyTypes:
+    - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          istio: pilot
+      namespaceSelector:
+        matchLabels:
+          istio-operator-managed: Reconcile
+  - from:
+    - podSelector:
+        matchLabels:
+          app: consumer
+    ports:
+    - protocol: TCP
+      port: 80
+---
+# Source: platform-service/templates/service-account.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test
+---
+# Source: platform-service/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test
+  labels:
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.0.43
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: 
+  ports:
+    - port: 8000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: test
+    app: test
+---
+# Source: platform-service/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release
+  labels:
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.0.43
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/managed-by: Helm
+    app: test
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: test
+      app.kubernetes.io/instance: test-release
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: test
+        app.kubernetes.io/instance: test-release
+        app: test
+        version: v1
+        session-management: backend
+      annotations:
+    spec:
+      serviceAccountName: test
+      initContainers:
+      containers:
+      
+        - name: test
+          image: "test.io/some/repository:latest"
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: baseLevel
+              value: "only set at base"
+            - name: definedInBaseAndDuplicatedInOverride
+              value: "sharedValue"
+            - name: definedInBaseAndOverridden
+              value: "baseValue"
+            - name: definedInBaseAndOverriddenValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+            - name: onlyDefinedInBaseValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 80
+            successThreshold: 3
+          startupProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /health/startup
+              port: 80
+            periodSeconds: 10
+          volumeMounts:
+            - name: service-secrets
+              mountPath: /secrets
+
+          resources:
+            {}
+      volumes:
+
+      - name: service-secrets
+        secret:
+          secretName: test-secrets
+---
+# Source: platform-service/templates/authorizationPolicy.yaml
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: test-release
+spec:
+  selector:
+    matchLabels:
+      app: test
+      version: v1
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/myns/sa/consumersp"]
+  - from:
+    - source:
+        principals: ["cluster.local/ns/test-ns/sa/testsp"]
+        requestPrincipals: ["*"]
+  - from:
+    - source:
+        namespaces: ["istio-system"]
+        requestPrincipals: ["*"]
+---
+# Source: platform-service/templates/destinationrules.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: test-release-destinationrule
+spec:
+  host: test
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM
+    tls:
+      mode: ISTIO_MUTUAL
+---
+# Source: platform-service/templates/requestAuthentication.yaml
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: test-release
+spec:
+  selector:
+    matchLabels:
+      app: test
+      version: v1
+  jwtRules:
+  - audiences:
+    - test-audience
+    forwardOriginalToken: true
+    issuer: https://login.microsoftonline.com/abcd/v2.0/
+    jwksUri: https://jwksuri/discovery/v2.0/keys
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test
+spec:
+  hosts:
+  - test
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: "test"

@@ -1,0 +1,88 @@
+---
+# Source: platform-service/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release
+  labels:
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.0.43
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/managed-by: Helm
+    app: test
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: test
+      app.kubernetes.io/instance: test-release
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: test
+        app.kubernetes.io/instance: test-release
+        app: test
+        version: v1
+      annotations:
+    spec:
+      serviceAccountName: test
+      initContainers:
+      containers:
+      
+        - name: test
+          image: "test.io/some/repository:latest"
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: baseLevel
+              value: "only set at base"
+            - name: definedInBaseAndDuplicatedInOverride
+              value: "sharedValue"
+            - name: definedInBaseAndOverridden
+              value: "baseValue"
+            - name: definedInBaseAndOverriddenValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+            - name: onlyDefinedInBaseValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 80
+            successThreshold: 3
+          startupProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /health/startup
+              port: 80
+            periodSeconds: 10
+          volumeMounts:
+            - name: service-secrets
+              mountPath: /secrets
+
+          resources:
+            {}
+      volumes:
+
+      - name: service-secrets
+        secret:
+          secretName: test-secrets
