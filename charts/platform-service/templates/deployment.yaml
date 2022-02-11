@@ -43,6 +43,13 @@ spec:
         {{- if .Values.opa.enabled }}
         sidecar.opa-istio.io/inject: "true"
         {{- end }}
+        {{- if .Values.sessionManagement.enabled }}
+        {{- if .Values.sessionManagement.redirectToLogin }}
+        {{ .Values.sessionManagement.enabledWithRedirectLabel }}
+        {{- else }}
+        {{ .Values.sessionManagement.enabledWithoutRedirectLabel }}
+        {{- end }}
+        {{- end }}
         {{- if .Values.additionalPodLabels }}
 {{- with .Values.additionalPodLabels }}
 {{ tpl . $ | indent 8 }}

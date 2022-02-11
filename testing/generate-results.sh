@@ -9,6 +9,17 @@ helm template test-release ../charts/platform-service -n test-ns -f values.yaml 
     > results/not-exposed.yaml
 
 helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set sessionManagement.enabled=false \
+    --show-only templates/deployment.yaml \
+    > results/no-sessman.yaml
+
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set sessionManagement.redirectToLogin=true \
+    --show-only templates/deployment.yaml \
+    > results/sessman-with-redirect.yaml
+
+
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
     --set deploymentOnly=true \
     > results/deployment-only.yaml
 

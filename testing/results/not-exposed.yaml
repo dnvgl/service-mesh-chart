@@ -40,7 +40,7 @@ metadata:
   name: test
   labels:
     app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.0.42
+    helm.sh/chart: platform-service-1.0.43
     app.kubernetes.io/instance: test-release
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -61,7 +61,7 @@ metadata:
   name: test-release
   labels:
     app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.0.42
+    helm.sh/chart: platform-service-1.0.43
     app.kubernetes.io/instance: test-release
     app.kubernetes.io/managed-by: Helm
     app: test
@@ -79,6 +79,7 @@ spec:
         app.kubernetes.io/instance: test-release
         app: test
         version: v1
+        session-management: backend
       annotations:
     spec:
       serviceAccountName: test

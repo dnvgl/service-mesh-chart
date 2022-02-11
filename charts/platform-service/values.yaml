@@ -156,6 +156,12 @@ requestAuthentication:
         - 22b9c23f-4a41-4729-8a5d-793f7601dfdb
         - fe494c14-85d2-4bfa-bb43-92b0ab0a4f72
 
+sessionManagement:
+  enabled: true
+  redirectToLogin: false
+  enabledWithRedirectLabel: "session-management: frontend"
+  enabledWithoutRedirectLabel: "session-management: backend"
+
 authorizationPolicy:
   # Generate default authorization policy
   enabled: true

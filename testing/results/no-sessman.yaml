@@ -1,39 +1,4 @@
 ---
-# Source: platform-service/templates/network-policy.yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: test-release-network-policy
-spec:
-  podSelector:
-    matchLabels:
-      app: test
-      version: v1
-  policyTypes:
-    - Ingress
-  ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          istio: pilot
-      namespaceSelector:
-        matchLabels:
-          istio-operator-managed: Reconcile
-  - from:
-    - podSelector:
-        matchLabels:
-          istio: ingressgateway
-      namespaceSelector:
-        matchLabels:
-          istio-operator-managed: Reconcile
-  - from:
-    - podSelector:
-        matchLabels:
-          app: consumer
-    ports:
-    - protocol: TCP
-      port: 80
----
 # Source: platform-service/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -59,7 +24,6 @@ spec:
         app.kubernetes.io/instance: test-release
         app: test
         version: v1
-        session-management: backend
       annotations:
     spec:
       serviceAccountName: test
@@ -122,57 +86,3 @@ spec:
       - name: service-secrets
         secret:
           secretName: test-secrets
----
-# Source: platform-service/templates/authorizationPolicy.yaml
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: test-release
-spec:
-  selector:
-    matchLabels:
-      app: test
-      version: v1
-  action: ALLOW
-  rules:
-  - from:
-    - source:
-        principals: ["cluster.local/ns/myns/sa/consumersp"]
-  - from:
-    - source:
-        principals: ["cluster.local/ns/test-ns/sa/testsp"]
-        requestPrincipals: ["*"]
-  - from:
-    - source:
-        namespaces: ["istio-system"]
-        requestPrincipals: ["*"]
----
-# Source: platform-service/templates/destinationrules.yaml
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: test-release-destinationrule
-spec:
-  host: test
-  trafficPolicy:
-    loadBalancer:
-      simple: RANDOM
-    tls:
-      mode: ISTIO_MUTUAL
----
-# Source: platform-service/templates/requestAuthentication.yaml
-apiVersion: security.istio.io/v1beta1
-kind: RequestAuthentication
-metadata:
-  name: test-release
-spec:
-  selector:
-    matchLabels:
-      app: test
-      version: v1
-  jwtRules:
-  - audiences:
-    - test-audience
-    forwardOriginalToken: true
-    issuer: https://login.microsoftonline.com/abcd/v2.0/
-    jwksUri: https://jwksuri/discovery/v2.0/keys
