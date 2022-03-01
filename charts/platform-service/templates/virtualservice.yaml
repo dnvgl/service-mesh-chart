@@ -18,13 +18,13 @@ metadata:
   name: {{ include "platform-service.serviceName" . }}
 spec:
   hosts:
-  - {{ include "platform-service.serviceName" . }}
+  - {{ include "platform-service.fullQualifiedServiceName" . }}
   gateways:
   - mesh
   http:
   - route:
     - destination:
-        host: {{ include "platform-service.serviceName" . | quote }}
+        host: {{ include "platform-service.fullQualifiedServiceName" . | quote }}
 {{- include "retries" . }}
 
 {{- if .Values.gateway.exposeService }}
@@ -62,7 +62,7 @@ spec:
   # routes to service
     route:
     - destination:
-        host: {{ include "platform-service.serviceName" . | quote }}
+        host: {{ include "platform-service.fullQualifiedServiceName" . | quote }}
 {{- if .Values.defaultRouting.corsPolicy }}
     corsPolicy:
 {{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
@@ -83,7 +83,7 @@ spec:
   # routes to service
   - route:
     - destination:
-        host: {{ include "platform-service.serviceName" . | quote }}
+        host: {{ include "platform-service.fullQualifiedServiceName" . | quote }}
 {{- if .Values.defaultRouting.corsPolicy }}
     corsPolicy:
 {{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}

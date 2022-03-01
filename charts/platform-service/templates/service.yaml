@@ -1,9 +1,6 @@
 {{/*
 Create the name of the service to use
 */}}
-{{- define "platform-service.serviceName" -}}
-  {{ include "platform-service.name" . }}
-{{- end -}}
 {{- if not .Values.deploymentOnly -}}
 apiVersion: v1
 kind: Service

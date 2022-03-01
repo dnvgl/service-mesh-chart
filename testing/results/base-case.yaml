@@ -180,7 +180,7 @@ kind: DestinationRule
 metadata:
   name: test-release-destinationrule
 spec:
-  host: test
+  host: test.test-ns.svc.cluster.local
   trafficPolicy:
     loadBalancer:
       simple: RANDOM
@@ -211,13 +211,13 @@ metadata:
   name: test
 spec:
   hosts:
-  - test
+  - test.test-ns.svc.cluster.local
   gateways:
   - mesh
   http:
   - route:
     - destination:
-        host: "test"
+        host: "test.test-ns.svc.cluster.local"
 ---
 # Source: platform-service/templates/virtualservice.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -245,7 +245,7 @@ spec:
   # routes to service
   - route:
     - destination:
-        host: "test"
+        host: "test.test-ns.svc.cluster.local"
     match:
     - uri:
         prefix: /prefix1/

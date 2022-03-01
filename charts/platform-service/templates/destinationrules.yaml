@@ -4,7 +4,7 @@ kind: DestinationRule
 metadata:
   name: {{ include "platform-service.fullname" . }}-destinationrule
 spec:
-  host: {{ include "platform-service.serviceName" . }}
+  host: {{ include "platform-service.fullQualifiedServiceName" . }}
   trafficPolicy:
     loadBalancer:
       {{- if eq .Values.defaultRouting.loadBalancerPolicy "STICKY_SESSIONS"}}

@@ -21,6 +21,15 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 {{- end -}}
 
+{{- define "platform-service.serviceName" -}}
+  {{ include "platform-service.name" . }}
+{{- end -}}
+
+
+{{- define "platform-service.fullQualifiedServiceName" -}}
+  {{ include "platform-service.name" . }}.{{ .Release.Namespace }}.svc.cluster.local
+{{- end -}}
+
 {{/*
 Create chart name and version as used by the chart label.
 */}}
