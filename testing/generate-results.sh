@@ -64,6 +64,17 @@ helm template test-release ../charts/platform-service -n test-ns -f values.yaml 
     --show-only templates/virtualservice.yaml \
     > results/vs-exact-matches.yaml
 
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set opa.enabled=true \
+    --show-only templates/deployment.yaml \
+    > results/opa-enabled.yaml
+
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    -f opa-resource-values.yaml \
+    --set opa.enabled=true \
+    --show-only templates/deployment.yaml \
+    > results/opa-with-resources.yaml
+
 
 echo " *** kubeval results ***"
 kubeval --ignore-missing-schemas results/*.yaml

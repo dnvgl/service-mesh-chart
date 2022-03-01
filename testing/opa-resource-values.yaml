@@ -1,0 +1,8 @@
+opa:
+  resources:
+    requests:
+      memory: 250Mi
+      cpu: 200m
+    limits:
+      memory: 250Mi     
+      cpu: 300m

@@ -109,6 +109,13 @@ spec:
               - "/app/opa_envoy_linux_amd64"
               - "eval"
               - "1"
+
+{{ if .Values.opa.resources }}
+          resources:
+{{ toYaml .Values.opa.resources | indent 12 }}
+{{ end }}      
+
+
 {{ end }}      
         - name: {{ include "platform-service.name" . }}
           image: "{{ include "image" . }}"
