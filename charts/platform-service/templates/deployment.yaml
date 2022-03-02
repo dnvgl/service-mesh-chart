@@ -82,7 +82,7 @@ spec:
       containers:
 {{ if .Values.opa.enabled }}
         - name: opa-istio
-          image: openpolicyagent/opa:0.28.0-istio
+          image: {{ .Values.opa.image }}
           imagePullPolicy: IfNotPresent          
           args:
           - run

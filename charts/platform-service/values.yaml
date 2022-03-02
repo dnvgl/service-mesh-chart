@@ -66,6 +66,7 @@ gateway:
 opa:
   # set to true to enable opa.  requires config in a config map called opa-istio-config and policy in a config map called opa-policy
   enabled: false
+  image: openpolicyagent/opa:0.28.0-istio
 
 hpa:
   enabled: false
