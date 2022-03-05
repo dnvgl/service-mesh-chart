@@ -160,8 +160,8 @@ requestAuthentication:
 sessionManagement:
   enabled: true
   redirectToLogin: false
-  enabledWithRedirectLabel: "session-management: frontend"
-  enabledWithoutRedirectLabel: "session-management: backend"
+  #session-manager-app: session-manager-x
+  debugEnvoyFilters: false
 
 authorizationPolicy:
   # Generate default authorization policy

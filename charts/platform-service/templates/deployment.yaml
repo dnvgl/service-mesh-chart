@@ -45,9 +45,9 @@ spec:
         {{- end }}
         {{- if .Values.sessionManagement.enabled }}
         {{- if .Values.sessionManagement.redirectToLogin }}
-        {{ .Values.sessionManagement.enabledWithRedirectLabel }}
+        session-management: frontend
         {{- else }}
-        {{ .Values.sessionManagement.enabledWithoutRedirectLabel }}
+        session-management: backend
         {{- end }}
         {{- end }}
         {{- if .Values.additionalPodLabels }}

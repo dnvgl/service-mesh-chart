@@ -1,4 +1,66 @@
 ---
+# Source: platform-service/templates/network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test-release-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: test
+      version: v1
+  policyTypes:
+    - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          istio: pilot
+      namespaceSelector:
+        matchLabels:
+          istio-operator-managed: Reconcile
+  - from:
+    - podSelector:
+        matchLabels:
+          istio: ingressgateway
+      namespaceSelector:
+        matchLabels:
+          istio-operator-managed: Reconcile
+  - from:
+    - podSelector:
+        matchLabels:
+          app: consumer
+    ports:
+    - protocol: TCP
+      port: 80
+---
+# Source: platform-service/templates/service-account.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test
+---
+# Source: platform-service/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test
+  labels:
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.1.0
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: 
+  ports:
+    - port: 8000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: test
+    app: test
+---
 # Source: platform-service/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -6,7 +68,7 @@ metadata:
   name: test-release
   labels:
     app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.0.46
+    helm.sh/chart: platform-service-1.1.0
     app.kubernetes.io/instance: test-release
     app.kubernetes.io/managed-by: Helm
     app: test
@@ -87,3 +149,300 @@ spec:
       - name: service-secrets
         secret:
           secretName: test-secrets
+---
+# Source: platform-service/templates/authorizationPolicy.yaml
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: test-release
+spec:
+  selector:
+    matchLabels:
+      app: test
+      version: v1
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/myns/sa/consumersp"]
+  - from:
+    - source:
+        principals: ["cluster.local/ns/test-ns/sa/testsp"]
+        requestPrincipals: ["*"]
+  - from:
+    - source:
+        namespaces: ["istio-system"]
+        requestPrincipals: ["*"]
+---
+# Source: platform-service/templates/destinationrules.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: test-release-destinationrule
+spec:
+  host: test.test-ns.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM
+    tls:
+      mode: ISTIO_MUTUAL
+---
+# Source: platform-service/templates/session-filter.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: session-frontend-test-release
+spec:
+  workloadSelector:
+    labels:
+      app: test
+      version: v1
+  configPatches:
+    # adds the lua filter to the listener/http connection manager
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+            subFilter:
+              name: "envoy.filters.http.jwt_authn"
+    patch:
+      operation: INSERT_BEFORE
+      value: # lua filter specification
+        name: "envoy.filters.http.session-frontend-filter"
+
+        typed_config:
+          '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+          inlineCode: |
+            sessidCookieName = "onegateway_sessid";
+            sessionManagerNS = "test-ns";
+            returnUrlCookieName = "onegateway_returnurl";
+            sessionManagerRoutePrefix = "/session";
+            tokenRefresherRoutePrefix = "/tokens";
+            authCallbackRoutePrefix = sessionManagerRoutePrefix .. "/auth-callback/";
+            sessionManagerLoginRoute = sessionManagerRoutePrefix .. "/login";
+            sessionManagerLogoutRoute = sessionManagerRoutePrefix .. "/logout";
+            tokenRefresherRouteSuffix = "/refresh";
+            tokenRefresherKeepAliveRouteSuffix = "/envoykeepalive";
+            function startsWith(strToCheck, strSubsection)
+              local sub = strToCheck:sub(1, strSubsection:len())
+              return sub == strSubsection
+            end
+            function endsWith(str, ending)
+              return ending == "" or str:sub(-#ending) == ending
+            end
+            function logDebug(logger, message) 
+                logger:logDebug(message)
+            end
+
+            function trim(s)
+              return (s:gsub("^%s*(.-)%s*$", "%1"))
+            end
+            function stringSplit(inputstr, sep)
+              if sep == nil then
+                sep = "%s"
+              end
+              local t={}
+              for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+                table.insert(t, trim(str))
+              end
+              return t
+            end
+            function getMapFromString(str, separator)
+              local map = {}
+              if(str ~= nil) then
+                local kvPairs = stringSplit(str, separator)
+                for _, v in pairs(kvPairs) do
+                  local i, j = string.find(v, "=")
+                  if(j ~= nil) then
+                    local key = string.sub(v, 1, j - 1)
+                    local value = string.sub(v, j + 1)
+                    map[key] = value
+                  end
+                end
+              end
+              return map 
+            end
+            function computeSessionManagerClusterName(handle, hostname)
+              local escapedHost = string.gsub(hostname, "[.]", "-")
+              local clusterName = "outbound|80||session-manager-"..escapedHost.."."..sessionManagerNS..".svc.cluster.local"
+              logDebug(handle, clusterName)
+              return clusterName
+            end
+            function requestSessionData(handle, key)
+              local origRequestHost = handle:headers():get(":authority")
+              local sessionManagerClusterName = computeSessionManagerClusterName(handle, origRequestHost)
+              local headers, body = handle:httpCall(sessionManagerClusterName,
+              {
+                [":authority"] = origRequestHost,
+                [":path"] = tokenRefresherRoutePrefix .."/"..key..tokenRefresherKeepAliveRouteSuffix,
+                [":method"] = "POST",
+              },  nil, 5000)
+              if(startsWith(headers[":status"], "2")) then
+                return body
+              end
+              return nil
+            end
+
+            function requestRefreshedToken(handle, sessionId)
+              local origRequestHost = handle:headers():get(":authority")
+              local sessionManagerClusterName = computeSessionManagerClusterName(handle, origRequestHost)
+              logDebug(handle, "Requesting token refresh from "..sessionManagerClusterName)
+              local headers, body = handle:httpCall(sessionManagerClusterName,
+              {
+                [":authority"] = origRequestHost,
+                [":path"] = tokenRefresherRoutePrefix .. "/".. sessionId .. tokenRefresherRouteSuffix,
+                [":method"] = "POST",
+              },  nil, 15000)
+              return headers, body
+            end
+            function handleInternalRedirect(request, relativePath, setCookie)
+              local url = "https://" .. request:headers():get(":authority") .. relativePath
+              local headers = {
+                    [":status"] = "302",
+                    ["Location"] = url,
+                    ["Content-Security-Policy"] = "default-src 'none'"
+                    };
+              if(setCookie ~= nil) then
+                headers["Set-Cookie"] = setCookie;
+              end
+              logDebug(request, "Redirecting to " .. url)
+              request:respond(headers, nil)
+            end
+            function handleNoAuthHeader(request_handle, requestPath, headers)
+              -- Use session cookie if prvovided to lookup up token
+              local cookies = getMapFromString(request_handle:headers():get("cookie"), ";")
+              local sessid = cookies[sessidCookieName]
+              local error = nil
+              if(sessid ~= nil) then
+                local sessionData = requestSessionData(request_handle, sessid)
+                if(sessionData ~= nil) then
+                  local currentTime = os.time() + 30 -- add 30 seconds to ensure token is valid when it reaches the intended destination
+                  local session = getMapFromString(sessionData, ";")
+                  local accessToken = nil
+                  if(tonumber(session["AccessTokenExpirationTime"]) > currentTime) then
+                    accessToken = session["AccessToken"]
+                  else
+                    -- if token invalid, ask for refresh and wait
+                    local responseHeaders, responseBody = requestRefreshedToken(request_handle, sessid)
+                    if(startsWith(responseHeaders[":status"] , "2")) then
+                      accessToken = responseBody
+                    else
+                      error = responseBody
+                    end
+                  end
+                  if(accessToken ~= nil) then
+                    request_handle:headers():add("Authorization", "Bearer ".. accessToken) -- add access token to Authorization header
+                  end
+                end                
+              else
+                -- No session token, redirect to login
+                if(endsWith(requestPath, ".js") == true) then
+                  logDebug(request_handle, "Request for .js resource - doing nothing. (passthru)")
+                else
+                  logDebug(request_handle, "No session or access token. Redirecting to login.")
+                  handleInternalRedirect(request_handle, sessionManagerLoginRoute, returnUrlCookieName .. "=https://"..headers:get(":authority")..requestPath.."; HttpOnly; Secure; Path=/; SameSite=Lax")
+                end
+              end
+              return error
+            end
+            function envoy_on_request(request_handle)
+              local headers = request_handle:headers()
+              local authz = headers:get("authorization")
+              local path = headers:get(":path")
+              local originalPath = headers:get("x-envoy-original-path") -- this holds the path for rewritten routes
+              if(originalPath ~= nil) then
+                path = originalPath
+              end
+              local error = nil
+              
+              if(path == "/login") then
+                handleInternalRedirect(request_handle, sessionManagerLoginRoute, nil)
+              elseif(path == "/logout") then
+                handleInternalRedirect(request_handle, sessionManagerLogoutRoute, nil)
+              elseif(startsWith(path, authCallbackRoutePrefix)) then
+                logDebug(request_handle, "Authentication callback request detected - doing nothing (passthru)")
+              elseif(authz == nil) then
+                error = handleNoAuthHeader(request_handle, path, headers)
+              else
+                logDebug(request_handle, "Authorization header detected - doing nothing (passthru)")
+              end
+              if(error ~= nil) then
+                request_handle:logErr("Error while processing request: "..error)
+                request_handle:respond({[":status"] = "503"}, nil)
+              end
+            end
+---
+# Source: platform-service/templates/requestAuthentication.yaml
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: test-release
+spec:
+  selector:
+    matchLabels:
+      app: test
+      version: v1
+  jwtRules:
+  - audiences:
+    - test-audience
+    forwardOriginalToken: true
+    issuer: https://login.microsoftonline.com/abcd/v2.0/
+    jwksUri: https://jwksuri/discovery/v2.0/keys
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test
+spec:
+  hosts:
+  - test.test-ns.svc.cluster.local
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: "test.test-ns.svc.cluster.local"
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-external
+spec:
+  hosts:
+  - "mysubdomain1.mydomain.com"
+  - "mysubdomain2.mydomain.com"
+  gateways:
+  - gateway/one-gateway
+  http:
+  # redirect on prefixes without trailing slashes
+  - match:
+    - uri:
+        exact: /prefix1
+    redirect:
+      uri: /prefix1/
+  - match:
+    - uri:
+        exact: /prefix2
+    redirect:
+      uri: /prefix2/
+  # routes to service
+  - route:
+    - destination:
+        host: "test.test-ns.svc.cluster.local"
+    match:
+    - uri:
+        prefix: /prefix1/
+    - uri:
+        prefix: /prefix2/
+    rewrite:
+      uri: /
+    # deprecated
+    headers:
+      request:
+        add:
+          x-appname: prefix1

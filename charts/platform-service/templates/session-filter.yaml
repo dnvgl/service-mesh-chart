@@ -1,195 +1,14 @@
----
-# Source: platform-service/templates/network-policy.yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: test-release-network-policy
-spec:
-  podSelector:
-    matchLabels:
-      app: test
-      version: v1
-  policyTypes:
-    - Ingress
-  ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          istio: pilot
-      namespaceSelector:
-        matchLabels:
-          istio-operator-managed: Reconcile
-  - from:
-    - podSelector:
-        matchLabels:
-          app: consumer
-    ports:
-    - protocol: TCP
-      port: 80
----
-# Source: platform-service/templates/service-account.yaml
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: test
----
-# Source: platform-service/templates/service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: test
-  labels:
-    app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.1.0
-    app.kubernetes.io/instance: test-release
-    app.kubernetes.io/managed-by: Helm
-spec:
-  type: 
-  ports:
-    - port: 8000
-      targetPort: http
-      protocol: TCP
-      name: http
-  selector:
-    app.kubernetes.io/name: test
-    app: test
----
-# Source: platform-service/templates/deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: test-release
-  labels:
-    app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.1.0
-    app.kubernetes.io/instance: test-release
-    app.kubernetes.io/managed-by: Helm
-    app: test
-    version: v1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: test
-      app.kubernetes.io/instance: test-release
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: test
-        app.kubernetes.io/instance: test-release
-        app: test
-        version: v1
-        session-management: backend
-      annotations:
-    spec:
-      serviceAccountName: test
-      initContainers:
-      containers:
-      
-        - name: test
-          image: "test.io/some/repository:latest"
-          imagePullPolicy: IfNotPresent
-
-          env:
-            - name: baseLevel
-              value: "only set at base"
-            - name: definedInBaseAndDuplicatedInOverride
-              value: "sharedValue"
-            - name: definedInBaseAndOverridden
-              value: "baseValue"
-            - name: definedInBaseAndOverriddenValue
-              valueFrom:
-                secretKeyRef:
-                  key: username
-                  name: base-secret
-            - name: onlyDefinedInBaseValue
-              valueFrom:
-                secretKeyRef:
-                  key: username
-                  name: base-secret
-
-          ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
-          livenessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /healthz
-              port: 80
-            initialDelaySeconds: 0
-            periodSeconds: 10
-            timeoutSeconds: 1
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 80
-            successThreshold: 3
-          startupProbe:
-            failureThreshold: 30
-            httpGet:
-              path: /health/startup
-              port: 80
-            periodSeconds: 10
-          volumeMounts:
-            - name: service-secrets
-              mountPath: /secrets
-
-          resources:
-            {}
-      volumes:
-
-      - name: service-secrets
-        secret:
-          secretName: test-secrets
----
-# Source: platform-service/templates/authorizationPolicy.yaml
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: test-release
-spec:
-  selector:
-    matchLabels:
-      app: test
-      version: v1
-  action: ALLOW
-  rules:
-  - from:
-    - source:
-        principals: ["cluster.local/ns/myns/sa/consumersp"]
-  - from:
-    - source:
-        principals: ["cluster.local/ns/test-ns/sa/testsp"]
-        requestPrincipals: ["*"]
-  - from:
-    - source:
-        namespaces: ["istio-system"]
-        requestPrincipals: ["*"]
----
-# Source: platform-service/templates/destinationrules.yaml
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: test-release-destinationrule
-spec:
-  host: test.test-ns.svc.cluster.local
-  trafficPolicy:
-    loadBalancer:
-      simple: RANDOM
-    tls:
-      mode: ISTIO_MUTUAL
----
-# Source: platform-service/templates/session-filter.yaml
+{{ if .Values.sessionManagement.enabled }}
+{{ $frontBackDesc := ternary "frontend" "backend" .Values.sessionManagement.redirectToLogin }}
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: session-backend-test-release
+  name: session-{{ printf "%s-%s" $frontBackDesc (include "platform-service.fullname" . )}}
 spec:
   workloadSelector:
     labels:
-      app: test
-      version: v1
+      app: {{ .Values.app }}
+      version: {{ .Values.version }}
   configPatches:
     # adds the lua filter to the listener/http connection manager
   - applyTo: HTTP_FILTER
@@ -204,13 +23,13 @@ spec:
     patch:
       operation: INSERT_BEFORE
       value: # lua filter specification
-        name: "envoy.filters.http.session-backend-filter"
+        name: "envoy.filters.http.session-{{ $frontBackDesc }}-filter"
 
         typed_config:
           '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
           inlineCode: |
             sessidCookieName = "onegateway_sessid";
-            sessionManagerNS = "test-ns";
+            sessionManagerNS = {{ .Release.Namespace | quote }};
             returnUrlCookieName = "onegateway_returnurl";
             sessionManagerRoutePrefix = "/session";
             tokenRefresherRoutePrefix = "/tokens";
@@ -226,8 +45,12 @@ spec:
             function endsWith(str, ending)
               return ending == "" or str:sub(-#ending) == ending
             end
-            function logDebug(logger, message) 
+            function logDebug(logger, message)
+{{- if .Values.sessionManagement.debugEnvoyFilters }}
+                logger:logWarn(message)
+{{- else }} 
                 logger:logDebug(message)
+{{- end }}
             end
 
             function trim(s)
@@ -330,6 +153,16 @@ spec:
                     request_handle:headers():add("Authorization", "Bearer ".. accessToken) -- add access token to Authorization header
                   end
                 end
+{{- if .Values.sessionManagement.redirectToLogin }}                
+              else
+                -- No session token, redirect to login
+                if(endsWith(requestPath, ".js") == true) then
+                  logDebug(request_handle, "Request for .js resource - doing nothing. (passthru)")
+                else
+                  logDebug(request_handle, "No session or access token. Redirecting to login.")
+                  handleInternalRedirect(request_handle, sessionManagerLoginRoute, returnUrlCookieName .. "=https://"..headers:get(":authority")..requestPath.."; HttpOnly; Secure; Path=/; SameSite=Lax")
+                end
+{{- end }}
               end
               return error
             end
@@ -359,35 +192,4 @@ spec:
                 request_handle:respond({[":status"] = "503"}, nil)
               end
             end
----
-# Source: platform-service/templates/requestAuthentication.yaml
-apiVersion: security.istio.io/v1beta1
-kind: RequestAuthentication
-metadata:
-  name: test-release
-spec:
-  selector:
-    matchLabels:
-      app: test
-      version: v1
-  jwtRules:
-  - audiences:
-    - test-audience
-    forwardOriginalToken: true
-    issuer: https://login.microsoftonline.com/abcd/v2.0/
-    jwksUri: https://jwksuri/discovery/v2.0/keys
----
-# Source: platform-service/templates/virtualservice.yaml
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: test
-spec:
-  hosts:
-  - test.test-ns.svc.cluster.local
-  gateways:
-  - mesh
-  http:
-  - route:
-    - destination:
-        host: "test.test-ns.svc.cluster.local"
+  {{- end}}
