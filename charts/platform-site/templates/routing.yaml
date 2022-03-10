@@ -1,0 +1,172 @@
+
+
+{{ regexReplaceAll "\\W+" .Release.Name "_" }}
+{{ .Release.Name | regexReplaceAll "\\W+" "_" }}
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.name }}-external-routes
+  namespace: {{ $.Values.namespace }}
+spec:
+  hosts:
+{{- range .Values.hosts }}
+  - {{ . | quote }}
+{{- end }}
+
+  gateways:
+  - {{ required "A valid .Values.gateway entry required!" .Values.gateway }}
+
+{{- $catchAllRouteDefined := false }}
+
+  http:
+{{- range .Values.routes }}
+
+{{ $service := required "service is required" .service }}
+{{ $sanitizedServiceName := $service | replace "." "-" }}
+{{ $qualifiedServiceName := printf "%s.%s" $service (default $.Release.Namespace .namespace) -}}}}
+{{ $serviceSettings := . }}
+
+{{- $catchAllRouteDefined := false }}
+
+{{- range .versions }}
+
+{{- /* Remove default level for now due to template complications }}
+{{- if or .externalMatch .externalMatchConfig }}
+{{- include "platform-site.externalMatcher" . }}
+{{- else }}
+{{- include "platform-site.externalMatcher" $serviceSettings }}
+{{- end }}
+{{ */ -}}
+{{- include "platform-site.externalMatcher" . }}
+
+  - name: "{{ $sanitizedServiceName }}-routes"
+{{- if not (default $serviceSettings.catchAll .catchAll) }}
+    match:
+{{- if default $serviceSettings.match .match }} {{- /* Match Types */}}
+  # Explicitly specified match criteria
+{{- default $serviceSettings.match .match | toYaml | indent 4 }}
+
+{{- else if default $serviceSettings.urlExactMatches .urlExactMatches }} {{- /* Match Types */ -}}
+  # Exact matches
+  {{- range default $serviceSettings.urlExactMatches .urlExactMatches }}
+  {{- if hasPrefix "/" . }}
+    {{ fail "url matches must not include leading slash"}}
+  {{- end}}
+  {{- $slashMatch := printf "/%s" . }}
+    - uri:
+        exact: {{ $slashMatch }}
+    - uri:
+        prefix: {{ $slashMatch }}/
+  {{- end }} {{- /* End exact matches */ -}}
+
+{{- else }} {{- /* Match Types */ -}}
+  # prefix routing
+
+{{- $prefixes := default (list $service) (default $serviceSettings.urlPrefixes .urlPrefixes) }}
+{{- $redirectOnTrailingSlash := default $serviceSettings.redirectOnNoTrailingSlash .redirectOnNoTrailingSlash }}
+
+{{- range $prefixes }}
+{{- if hasPrefix "/" . }}
+  {{ fail "url prefixes must not include leading slash"}}
+{{- end}}
+{{- $slashPrefix := printf "/%s" . }}
+
+{{- if $redirectOnTrailingSlash }}
+    - name: "redirect-nts-{{ . }}"
+      uri:
+        exact: {{ $slashPrefix }}
+    redirect:
+      uri: {{ $slashPrefix }}/
+  # Set up for next match
+    match:
+{{- end}} {{- /* end redirect on no trailing slash */ -}}
+
+    - name: "prefix-{{ . }}"
+      uri:
+        prefix: {{ $slashPrefix }}/
+{{- end }} {{- /* end range prefixes */ -}}
+{{- end }} {{- /* end match types */ -}}
+{{- else }} {{- /* catch all case */ -}}
+  # No match conditions for catch-all route
+  {{- if $catchAllRouteDefined }}
+    {{ fail "only one catch-all route may be defined"}}
+  {{- end }}
+  {{- $catchAllRouteDefined := true }}
+{{- end }} {{- /* end else catch all */ -}}
+
+{{ $rewriteSettings := default $serviceSettings.rewriteUrlPrefix .rewriteUrlPrefix }}
+{{- if $rewriteSettings.enabled }}
+    rewrite:
+      uri: {{ required "rewrite replacement is required" $rewriteSettings.rewriteUrlPrefix.replaceWith }}
+{{- end}}
+
+    route:
+{{- if default $serviceSettings.route .route }}
+  # Explicitly specified route
+{{- $serviceSettings.route .route | toYaml | indent 6 }}
+
+{{- else }} {{- /* not explicit route */}}
+  # routes to service
+    - destination:
+        host: {{ $qualifiedServiceName }}
+        subset: {{ .version }}
+{{- end }} {{- /* end if route */}}
+
+{{- if .corsPolicy }}
+    corsPolicy:
+{{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
+{{- end }} {{- /* end if cors policy */ -}}
+
+{{- include "retries" . }}
+
+{{- end }} {{- /* end range versions */ -}}
+
+{{- end }} {{- /* end range routes */ -}}
+
+{{- range .Values.routes }}
+{{ $service := .service }}  
+{{ $qualifiedServiceName := printf "%s.%s" $service (default .Release.namespace .namespace) -}}}}
+{{ $serviceSettings := . }}
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.name }}-{{ .service | replace "." "-" }}-internal-routes
+spec:
+  hosts:
+  - {{ $qualifiedServiceName }}
+  gateways:
+  - mesh
+  http:
+{{- range .versions }}
+    - route:
+    {{ if .internalMatch }}
+    {{- include "platform-site.internalMatcher" . }}
+    {{ else if $serviceSettings.internalMatch }}
+    {{- include "platform-site.internalMatcher" $serviceSettings }}
+    {{- end }}
+      - destination:
+          host: {{ $qualifiedServiceName }}
+          subset: {{ .version }}
+{{- include "retries" . }}
+{{- end }} {{- /* end range versions */ -}}
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .service | replace "." "-" }}-destination
+spec:
+  host: {{ $qualifiedServiceName }}
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+{{- range .versions }}
+  - name: {{ .version }}
+    labels:
+      version: {{ .version }}
+{{- end }} {{- /* end range versions */ -}}
+{{- end }} {{- /* end range routes */ -}}
