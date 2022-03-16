@@ -63,7 +63,7 @@ Create the name of the service account to use
 
 
 {{- define "platform-site.retries" -}}
-{{- if .retries.enabled }}
+{{- if .retries }} {{- if .retries.enabled }}
     retries:
 {{- if .retries.settings }}
 {{ .retries.settings | toYaml | trim | indent 6 }}
@@ -71,79 +71,178 @@ Create the name of the service account to use
       attempts: 3
       perTryTimeout: 2s
 {{- end -}}
+{{- end -}}{{- end -}}
 {{- end -}}
-{{- end -}}
+
 
 {{- define "platform-site.serviceName" -}}
 {{ .service | replace "." "-" }}
 {{- end -}}
 
+{{- define "platform-site.isComponentEnabledInSource" }}
+{{- /*
+  Given a .source and a .componentName, return whether that component is .enabled
+  Currently used from the valuePrecedence template to check multiple sources
+  return "true", "false", or "" if no value set
+*/ -}}
+{{- $componentName := "{{ .componentName }}"}}
+{{- $enabled := printf "{{- if .source.%s }}{{- .source.%s.enabled }}{{- end}}" .componentName .componentName }}
+{{- tpl $enabled . }}
+{{- end }}
+
+
+{{- define "platform-site.getSourceValue" }}
+{{- /*
+  Given a .source and a .valueName, return the value
+  Return "" if any part of the path is undefined
+  Currently used from the valuePrecedence template to check multiple sources
+*/ -}}
+{{- $valueNameList := .valueName | splitList "." }}
+{{- /* Use mutable value in the dictionary to track component - todo, use separate dict this and acm as well */ -}}
+{{- $_ := set . "missingComponent" false }}
+{{- range $i, $iName := $valueNameList }}
+  {{- /* Variables do not carry state across iterations, so reconstruct the name up to this point */ -}}
+  {{- $acmValueName := slice $valueNameList 0 (add $i 1) | join "." }}
+  {{- if and (not $.missingComponent) (ne $acmValueName ".") }}
+    {{- $lookupTemplate := printf "{{- .source%s -}}" $acmValueName }}
+    {{- $curValue := (tpl $lookupTemplate $) }}
+    {{- if eq $acmValueName $.valueName }}
+      {{- /* We've got the whole value name verified, just return the value */}}
+      {{- $curValue -}}
+    {{- else if not $curValue }}
+      {{- /* We're missing a parent section, skip the rest of the loop */}}
+      {{- $_ := set $ "missingComponent" true }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "platform-site.getValueFromSources" }}
+{{- /*
+  Given a .valueName and version, service, and default sources
+  return the component value given the precedence of version, service, and then default sources
+*/ -}}
+{{- $versionSource := required "versionSource is required" .versionSource }}
+{{- $serviceSource := required "serviceSource is required" .serviceSource }}
+{{- $defaultSource := required "defaultSource is required" .defaultSource }}
+{{- $args := dict "valueName" (required "valueName is required" .valueName) "source" $versionSource "Template" (required "Template parameter is required - use $.Template" $.Template) }}
+{{- $versionValue := include "platform-site.getSourceValue" $args }}
+{{- if ne $versionValue "" }}
+  {{- $versionValue -}}
+{{- else }}
+  {{- $serviceValue := include "platform-site.getSourceValue" (set $args "source" $serviceSource) }}
+  {{- if ne $serviceValue "" }}
+    {{- $serviceValue -}}
+  {{- else }}
+    {{- $defaultValue := include "platform-site.getSourceValue" (set $args "source" $defaultSource) }}
+    {{- $defaultValue -}}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "platform-site.getBoolFromSources" }}
+{{- /*
+  Given a .valueName and version, service, and default sources, return a boolean
+  return the component value given the precedence of version, service, and then default sources
+  Value is expected to be defined at a minimum in default
+  only true/false values are returned
+*/ -}}
+{{-  include "platform-site.getValueFromSources" . 
+  | eq "true" }}
+{{- end }}
+
+
+{{- define "platform-site.isComponentEnabled" }}
+{{- /*
+  Given a .componentName and version, service, and default sources
+  return whether that component is .enabled by going through the version, service, and then default sources
+  returns true or false
+*/ -}}
+{{- $version := include "platform-site.isComponentEnabledInSource" (dict "source" .versionSource "componentName" .componentName "Template" $.Template) }}
+{{- if ne $version "" }}
+  {{- $version | eq "true" -}}
+{{- else }}
+  {{- $service := include "platform-site.isComponentEnabledInSource" (dict "source" .serviceSource "componentName" .componentName "Template" $.Template) }}
+  {{- if ne $service "" }}
+    {{- $service | eq "true" -}}
+  {{- else }}
+    {{- $default := include "platform-site.isComponentEnabledInSource" (dict "source" .defaultSource "componentName" .componentName "Template" $.Template) }}
+    {{- $default | eq "true" -}}
+  {{- end }}
+{{- end }}
+{{- end }}
 
 
 {{- define "platform-site.externalMatcher" }}
-{{- if .externalMatch }}
-  # Explicitly specified match criteria
+
+{{- $sanitizedServiceName := .service | replace "." "-" }}
+{{- $sanitizedVersion := .version | replace "." "-" }}
+
+{{- if .settings.externalMatch }}
+
+  - name: {{ printf "%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}
     match:
-{{- default .externalMatch | toYaml | indent 4 }}
-{{- else if .externalMatchConfig }}
-{{- if not .externalMatchConfig.catchAll }}
+    #custom match
+{{ .settings.externalMatch | toYaml | indent 4 }}
+
+{{- else if .settings.externalMatchConfig }}
+
+{{- if .settings.externalMatchConfig.urlExactMatches }} {{/* match config types: exact prefix */}}
+
+  - name: {{ printf "%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}
     match:
-{{- if .externalMatchConfig.urlExactMatches }} {{- /* match config types */ -}}
-  # Exact matches
-  {{- range .externalMatchConfig.urlExactMatches }}
+  {{- range .settings.externalMatchConfig.urlExactMatches }}
   {{- if hasPrefix "/" . }}
-    {{ fail "url matches must not include leading slash"}}
+    {{ fail "url matches must not include leading slash" }}
   {{- end }}
   {{- $slashMatch := printf "/%s" . }}
     - uri:
         exact: {{ $slashMatch }}
     - uri:
         prefix: {{ $slashMatch }}/
-  {{- end -}} {{- /* end range urls */ -}}
+  {{- end -}} {{/* end range urls */}}
 
-{{- else }} {{- /* match config types */ -}}
-  # prefix routing
+{{- else }} {{/* match config types: prefix */}}
 
-{{- $prefixes := default (list $.Values.service) .externalMatchConfig.urlPrefixes }}
-{{- $redirectOnTrailingSlash := .externalMatchConfig.redirectOnNoTrailingSlash }}
+{{- $prefixes := default (list .service) .settings.externalMatchConfig.urlPrefixes }}
 
+{{- $redirectOnTrailingSlash := coalesce .settings.externalMatchConfig.redirectOnNoTrailingSlash .defaults.redirectOnNoTrailingSlash }}
+{{- if $redirectOnTrailingSlash }}
+{{- range $prefixes }}
+{{- $slashPrefix := printf "/%s" . }}
+
+  - name: {{ printf "redirect-nts-%s-route"  . }}
+    match:
+      - uri:
+          exact: {{ $slashPrefix }}
+    redirect:
+      uri: {{ $slashPrefix }}/
+{{- end }} {{/* end range prefixes */}}
+{{- end }} {{/* end redirect on no trailing slash */}}
+
+  - name: {{ printf "%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}
+    match:
 {{- range $prefixes }}
 {{- if hasPrefix "/" . }}
   {{ fail "url prefixes must not include leading slash"}}
-{{- end}}
+{{- end }}
 {{- $slashPrefix := printf "/%s" . }}
-
-{{- if $redirectOnTrailingSlash }}
-    - name: "redirect-nts-{{ . }}"
-      uri:
-        exact: {{ $slashPrefix }}
-    redirect:
-      uri: {{ $slashPrefix }}/
-  # Set up for next match
-    match:
-{{- end}} {{- /* end redirect on no trailing slash */ -}}
-
     - name: "prefix-{{ . }}"
       uri:
         prefix: {{ $slashPrefix }}/
-{{- end }} {{- /* end range prefixes */ -}}
-{{- end }} {{- /* end match types */ -}}
-{{- else }} {{- /* catch all case */ -}}
-  # No match conditions for catch-all route
-  {{- /* don't do this for now since there are variable scoping complications }}
-  {{- if $catchAllRouteDefined }}
-    {{ fail "only one catch-all route may be defined"}}
-  {{- end }}
-  {{- $catchAllRouteDefined := true }}
-  {{ */ -}}
-{{- end }} {{- /* end else catch all */ -}}
-{{- end }} {{- /* end match vs match config */ -}}
-{{- end }} {{- /* end define */ -}}
+{{- end }} {{- /* end range prefixes */}}
+{{- end }} {{- /* end match types */}}
+{{- else }} {{- /* neither match nor match config */}}
+
+  - name: {{ printf "catch-all-%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}
+
+{{- end }} {{- /* end match vs match config */}}
+{{- end }} {{- /* end define */}}
 
 
 {{- define "platform-site.internalMatcher" }}
-{{- if .internalMatch }}
+{{- if .settings.internalMatch }}
     match:
-{{- default .internalMatch | toYaml | indent 4 }}
+{{- default .settings.internalMatch | toYaml | indent 4 }}
 {{- end }}
 {{- end }}

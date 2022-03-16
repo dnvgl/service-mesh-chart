@@ -1,12 +1,10 @@
 
-
-{{ regexReplaceAll "\\W+" .Release.Name "_" }}
-{{ .Release.Name | regexReplaceAll "\\W+" "_" }}
+{{- $defaults:= .Values.defaults}}
 
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ .Release.name }}-external-routes
+  name: {{ .Release.Name }}-external-routes
   namespace: {{ $.Values.namespace }}
 spec:
   hosts:
@@ -17,123 +15,100 @@ spec:
   gateways:
   - {{ required "A valid .Values.gateway entry required!" .Values.gateway }}
 
-{{- $catchAllRouteDefined := false }}
-
   http:
 {{- range .Values.routes }}
 
-{{ $service := required "service is required" .service }}
-{{ $sanitizedServiceName := $service | replace "." "-" }}
-{{ $qualifiedServiceName := printf "%s.%s" $service (default $.Release.Namespace .namespace) -}}}}
-{{ $serviceSettings := . }}
-
-{{- $catchAllRouteDefined := false }}
+{{- /* Store general route values before version range */}}
+{{- $service := required "service is required" .service }}
+{{- $sanitizedServiceName := $service | replace "." "-" }}
+{{- $qualifiedServiceName := printf "%s.%s" $service (default $.Release.Namespace .namespace) }}
+{{- $serviceSettings := . }}
 
 {{- range .versions }}
 
-{{- /* Remove default level for now due to template complications }}
+{{- /* args for templates which look across sources */}}
+{{- $sourcesArgs := (dict "versionSource" . "serviceSource" $serviceSettings "defaultSource" $defaults "Template" $.Template) }}
+
+{{- /* }}
+{{- $args := (dict "source" .version "componentName" "rewriteUrlPrefix" "Template" $.Template ) }}
+{{ tpl $isEnabled $args }}
+{{*/}}
+
+{{- /*
+   Internal only can be overridden at version level, but false is different than blank. coalesce treats false as null 
+   So this is, if explicitly false or neither is true
+*/}}
+{{- $external := or (eq .internalOnly false) (and (not .internalOnly) (not $serviceSettings.internalOnly)) }}
+{{- $external := include "platform-site.getBoolFromSources" (dict "valueName" ".internalOnly" | mustMergeOverwrite $sourcesArgs) }}
+
+
+{{- if $external }}
 {{- if or .externalMatch .externalMatchConfig }}
-{{- include "platform-site.externalMatcher" . }}
+# Version 
+{{- include "platform-site.externalMatcher" (dict "service" $service "version" .version "settings" . "defaults" $defaults) }}
 {{- else }}
-{{- include "platform-site.externalMatcher" $serviceSettings }}
+# Service
+{{- include "platform-site.externalMatcher" (dict "service" $service "version" .version "settings" $serviceSettings "defaults" $defaults) }}
 {{- end }}
-{{ */ -}}
-{{- include "platform-site.externalMatcher" . }}
 
-  - name: "{{ $sanitizedServiceName }}-routes"
-{{- if not (default $serviceSettings.catchAll .catchAll) }}
-    match:
-{{- if default $serviceSettings.match .match }} {{- /* Match Types */}}
-  # Explicitly specified match criteria
-{{- default $serviceSettings.match .match | toYaml | indent 4 }}
+{{- /* $rewriteSettings := default (default $defaults.rewriteUrlPrefix $serviceSettings.rewriteUrlPrefix) .rewriteUrlPrefix */}}
+{{- /* $rewriteEnabled := include "platform-site.isComponentEnabled" (dict "componentName" "rewriteUrlPrefix" | merge $sourcesArgs) */}}
 
-{{- else if default $serviceSettings.urlExactMatches .urlExactMatches }} {{- /* Match Types */ -}}
-  # Exact matches
-  {{- range default $serviceSettings.urlExactMatches .urlExactMatches }}
-  {{- if hasPrefix "/" . }}
-    {{ fail "url matches must not include leading slash"}}
-  {{- end}}
-  {{- $slashMatch := printf "/%s" . }}
-    - uri:
-        exact: {{ $slashMatch }}
-    - uri:
-        prefix: {{ $slashMatch }}/
-  {{- end }} {{- /* End exact matches */ -}}
+{{- $rewriteEnabled := include "platform-site.getBoolFromSources" (dict "valueName" ".rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) }}
 
-{{- else }} {{- /* Match Types */ -}}
-  # prefix routing
-
-{{- $prefixes := default (list $service) (default $serviceSettings.urlPrefixes .urlPrefixes) }}
-{{- $redirectOnTrailingSlash := default $serviceSettings.redirectOnNoTrailingSlash .redirectOnNoTrailingSlash }}
-
-{{- range $prefixes }}
-{{- if hasPrefix "/" . }}
-  {{ fail "url prefixes must not include leading slash"}}
-{{- end}}
-{{- $slashPrefix := printf "/%s" . }}
-
-{{- if $redirectOnTrailingSlash }}
-    - name: "redirect-nts-{{ . }}"
-      uri:
-        exact: {{ $slashPrefix }}
-    redirect:
-      uri: {{ $slashPrefix }}/
-  # Set up for next match
-    match:
-{{- end}} {{- /* end redirect on no trailing slash */ -}}
-
-    - name: "prefix-{{ . }}"
-      uri:
-        prefix: {{ $slashPrefix }}/
-{{- end }} {{- /* end range prefixes */ -}}
-{{- end }} {{- /* end match types */ -}}
-{{- else }} {{- /* catch all case */ -}}
-  # No match conditions for catch-all route
-  {{- if $catchAllRouteDefined }}
-    {{ fail "only one catch-all route may be defined"}}
-  {{- end }}
-  {{- $catchAllRouteDefined := true }}
-{{- end }} {{- /* end else catch all */ -}}
-
-{{ $rewriteSettings := default $serviceSettings.rewriteUrlPrefix .rewriteUrlPrefix }}
-{{- if $rewriteSettings.enabled }}
+{{- if $rewriteEnabled }}
     rewrite:
-      uri: {{ required "rewrite replacement is required" $rewriteSettings.rewriteUrlPrefix.replaceWith }}
-{{- end}}
+      uri: {{ include "platform-site.getValueFromSources" (dict "valueName" ".rewriteUrlPrefix.replaceWith" | mustMergeOverwrite $sourcesArgs) |
+      required "rewrite replacement is required" }}
 
+      {{/* required "rewrite replacement is required" $rewriteSettings.rewriteUrlPrefix.replaceWith */}}
+{{- end}}
     route:
 {{- if default $serviceSettings.route .route }}
   # Explicitly specified route
 {{- $serviceSettings.route .route | toYaml | indent 6 }}
 
 {{- else }} {{- /* not explicit route */}}
-  # routes to service
     - destination:
         host: {{ $qualifiedServiceName }}
         subset: {{ .version }}
-{{- end }} {{- /* end if route */}}
+
+{{- end }} {{- /* end if explicit route */}}
+
+
+{{- $timeout := coalesce .timeout $serviceSettings.timeout $defaults.timeout }}
+
+{{- if $timeout }}
+    timeout: {{ $timeout }}
+{{- end }}
+
+{{- $retries := coalesce .retries $serviceSettings.retries $defaults.retries }}
+{{- if $retries.enabled }}
+    retries:
+{{ required "retry settings are required at the same level as they are enabled" $retries.settings | toYaml | trim | indent 6 }}
+{{- end }}
 
 {{- if .corsPolicy }}
     corsPolicy:
 {{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
 {{- end }} {{- /* end if cors policy */ -}}
 
-{{- include "retries" . }}
+{{- include "platform-site.retries" . }}
 
+{{- end }} {{- /* internal only */ -}}
 {{- end }} {{- /* end range versions */ -}}
-
 {{- end }} {{- /* end range routes */ -}}
 
 {{- range .Values.routes }}
 {{ $service := .service }}  
-{{ $qualifiedServiceName := printf "%s.%s" $service (default .Release.namespace .namespace) -}}}}
-{{ $serviceSettings := . }}
+{{ $qualifiedServiceName := printf "%s.%s" $service (default $.Release.Namespace .namespace) }}
+{{- $serviceSettings := . }}
 
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ .Release.name }}-{{ .service | replace "." "-" }}-internal-routes
+  name: {{ $.Release.Name }}-{{ .service | replace "." "-" }}-internal-routes
 spec:
   hosts:
   - {{ $qualifiedServiceName }}
@@ -150,8 +125,8 @@ spec:
       - destination:
           host: {{ $qualifiedServiceName }}
           subset: {{ .version }}
-{{- include "retries" . }}
-{{- end }} {{- /* end range versions */ -}}
+{{- include "platform-site.retries" . }}
+{{- end }} {{/* end range versions */}}
 
 ---
 apiVersion: networking.istio.io/v1alpha3

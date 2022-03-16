@@ -1,0 +1,15 @@
+
+{{- $sourcesArgs := (dict "versionSource" .Values "serviceSource" .Values "defaultSource" .Values.defaults "Template" $.Template) }}
+
+sourceBool: {{ include "platform-site.getValueFromSources" (dict "valueName" ".rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) }}
+
+{{- /*
+# sourceBool: {{ include "platform-site.getBoolFromSources" (dict "valueName" ".rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) }}
+
+# enabledP: {{ include "platform-site.isComponentEnabled" (dict "componentName" "testurl" | merge $sourcesArgs) }}
+# sourceValue: {{ include "platform-site.getSourceValue" (dict "source" .Values.defaults "valueName" ".retries.enabled" | merge $sourcesArgs) }}
+# sourceValue: {{ include "platform-site.getSourceValue" (dict "source" .Values.defaults "valueName" ".retries.settings.attempts" | mustMergeOverwrite $sourcesArgs) }}
+
+# $enabled := isEnabled (dict componentName "testurl" version .version service .service default .default)
+
+*/}}
