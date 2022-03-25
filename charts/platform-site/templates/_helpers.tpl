@@ -104,18 +104,19 @@ Create the name of the service account to use
   {{- /* Variables do not carry state across iterations, so reconstruct the name up to this point */ -}}
   {{- $acmValueName := slice $valueNameList 0 (add $i 1) | join "." }}
   {{- if and (not $.missingComponent) (ne $acmValueName ".") }}
-    {{- $lookupTemplate := printf "{{- .source%s -}}" $acmValueName }}
-    {{- $curValue := (tpl $lookupTemplate $) }}
-    {{- if eq $acmValueName $.valueName }}
-      {{- /* We've got the whole value name verified, just return the value */}}
-      {{- $curValue -}}
-    {{- else if not $curValue }}
-      {{- /* We're missing a parent section, skip the rest of the loop */}}
-      {{- $_ := set $ "missingComponent" true }}
+    {{- $hasValue := (tpl (printf "{{- .source%s -}}" $acmValueName) $) }}
+    {{- if not $hasValue }}
+        {{- $_ := set $ "missingComponent" true }}
+    {{- else if eq $acmValueName $.valueName }}
+      {{- /* We've got the whole value name verified, return the value toYaml (for when the value refers to a map)*/}}
+      {{- $lookupTemplate := printf "{{- .source%s | toYaml -}}" $acmValueName }}
+      {{- $curValue := (tpl $lookupTemplate $) }}
+      {{- $curValue }}
     {{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
+
 
 {{- define "platform-site.getValueFromSources" }}
 {{- /*
@@ -128,14 +129,14 @@ Create the name of the service account to use
 {{- $args := dict "valueName" (required "valueName is required" .valueName) "source" $versionSource "Template" (required "Template parameter is required - use $.Template" $.Template) }}
 {{- $versionValue := include "platform-site.getSourceValue" $args }}
 {{- if ne $versionValue "" }}
-  {{- $versionValue -}}
+  {{- $versionValue }} # from version
 {{- else }}
   {{- $serviceValue := include "platform-site.getSourceValue" (set $args "source" $serviceSource) }}
   {{- if ne $serviceValue "" }}
-    {{- $serviceValue -}}
+    {{- $serviceValue }} # from service
   {{- else }}
     {{- $defaultValue := include "platform-site.getSourceValue" (set $args "source" $defaultSource) }}
-    {{- $defaultValue -}}
+    {{- $defaultValue }} # from default
   {{- end }}
 {{- end }}
 {{- end }}
@@ -177,36 +178,23 @@ Create the name of the service account to use
 
 {{- $sanitizedServiceName := .service | replace "." "-" }}
 {{- $sanitizedVersion := .version | replace "." "-" }}
+{{- /* args for templates which look across sources */}}
 
-{{- if .settings.externalMatch }}
-
+{{- if .settings.externalIstioMatch }}
   - name: {{ printf "%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}
     match:
     #custom match
-{{ .settings.externalMatch | toYaml | indent 4 }}
+{{ .settings.externalIstioMatch | toYaml | indent 4 }}
 
 {{- else if .settings.externalMatchConfig }}
 
-{{- if .settings.externalMatchConfig.urlExactMatches }} {{/* match config types: exact prefix */}}
-
-  - name: {{ printf "%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}
-    match:
-  {{- range .settings.externalMatchConfig.urlExactMatches }}
-  {{- if hasPrefix "/" . }}
-    {{ fail "url matches must not include leading slash" }}
-  {{- end }}
-  {{- $slashMatch := printf "/%s" . }}
-    - uri:
-        exact: {{ $slashMatch }}
-    - uri:
-        prefix: {{ $slashMatch }}/
-  {{- end -}} {{/* end range urls */}}
-
-{{- else }} {{/* match config types: prefix */}}
-
 {{- $prefixes := default (list .service) .settings.externalMatchConfig.urlPrefixes }}
 
-{{- $redirectOnTrailingSlash := coalesce .settings.externalMatchConfig.redirectOnNoTrailingSlash .defaults.redirectOnNoTrailingSlash }}
+{{- /* mutually exclusive settings, exactPrefixMatch takes precedence */}}
+{{- $exactPrefixMatch := include "platform-site.getBoolFromSources" (dict "valueName" "externalMatchConfig.exactPrefixMatch" | mustMergeOverwrite .sourcesArgs) }}
+{{- $redirectOnTrailingSlash := and (not $exactPrefixMatch)
+  (include "platform-site.getBoolFromSources" (dict "valueName" "externalMatchConfig.redirectOnNoTrailingSlash" | mustMergeOverwrite .sourcesArgs)) }}
+
 {{- if $redirectOnTrailingSlash }}
 {{- range $prefixes }}
 {{- $slashPrefix := printf "/%s" . }}
@@ -227,11 +215,13 @@ Create the name of the service account to use
   {{ fail "url prefixes must not include leading slash"}}
 {{- end }}
 {{- $slashPrefix := printf "/%s" . }}
-    - name: "prefix-{{ . }}"
-      uri:
+{{- if $exactPrefixMatch }}
+    - uri:
+        exact: {{ $slashPrefix }}
+{{- end }}        
+    - uri:
         prefix: {{ $slashPrefix }}/
 {{- end }} {{- /* end range prefixes */}}
-{{- end }} {{- /* end match types */}}
 {{- else }} {{- /* neither match nor match config */}}
 
   - name: {{ printf "catch-all-%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}

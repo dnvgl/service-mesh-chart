@@ -1,8 +1,4 @@
 # Default values for platform-site.
-
-testurl:
-  enabled: true
-
 gateway: gateway/one-gateway
 hosts:
 - cascade-devtest.dnv.com
@@ -11,103 +7,18 @@ session-management:
   # namespace:  default is release
 
 defaults:
-  testurl:
-    enabled: true
-  timeout: 30s
+  timeout: 3s
   retries:
     enabled: true
     settings:
       attempts: 3
-  redirectOnNoTrailingSlash: true
-  rewriteUrlPrefix:
-    enabled: false
-    replaceWith: "/"
+  externalMatchConfig:
+    redirectOnNoTrailingSlash: true
+    exactPrefixMatch: false
+    rewriteUrlPrefix:
+      enabled: false
+      replaceWith: "/"
   loadBalancerPolicy: RANDOM
   internalOnly: false
 
-
-routes:
-
-  # cascade.efficientenergy.com/assets
-  - service: cas-assets-svc
-    namespace: cascade
-    externalMatchConfig:
-      urlPrefixes:
-        - cas-assets-svc
-
-    versions:
-      - version: fb1
-        externalMatch:
-          - headers:
-              x-sucker:
-                exact: "1"
-            uri:
-              prefix: /cas-assets-svc/
-
-      - version: v1
-        timeout: 60s
-
-      - version: dev
-        externalMatchConfig:
-          urlPrefixes:
-          # cascade.customer.com/devcas-assets-svc/api/etc.
-          - devcas-assets-svc
-        timeout: 5s
-
-
-
-  # cascade-uat.efficientenergy.com/assets
-  - service: asset-registry-svc
-    namespace: cascade-uat
-    versions:
-      - version: v1
-      - version: v2-internal
-        internalOnly: true
-    timeout: 10s
-    externalMatchConfig:
-      urlPrefixes:
-      - assets
-
-
-
-  - service: internal
-    namespace: ns
-    versions:
-      - version: v1
-      - version: v2
-        internalOnly: false
-        externalMatch:
-          - uri:
-              prefix: /v2/
-
-    internalOnly: true
-    timeout: 10s
-
-  # - service: my-app
-  #   versions:
-  #     - version: v1
-  #   externalMatchConfig:
-  #     urlPrefixes:
-  #     - prefix1
-  #     - prefix2
-  #     rewriteUrlPrefix:
-  #       enabled: false
-  #       replaceWith: "blah"
-
-  - service:  my-app-2
-    versions:
-      - version: v1
-    externalMatchConfig:
-      urlExactMatches:
-        - test-exact
-    loadBalancerPolicy: ROUND_ROBIN #RANDOM
-
-  # - service:  my-other-app
-  #   versions:
-  #     - version: v4
-  #   externalMatchConfig:
-  #     catchAll: true
-  #     retries:
-  #       enabled: true
-  #   corsPolicy:
-
+routes: []

@@ -1,0 +1,127 @@
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: internal-only-destination
+spec:
+  host: internal-only.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: internal-except-version-destination
+spec:
+  host: internal-except-version.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: external
+    labels:
+      version: external
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-external-routes
+  namespace: test-ns
+spec:
+  hosts:
+  - "test-host.dnv.com"
+
+  gateways:
+  - gateway/one-gateway
+
+  http:
+
+  - name: catch-all-internal-only-v1-route
+    rewrite:
+      uri: / # from default
+    route:
+    - destination:
+        host: internal-only.test-ns
+        subset: v1
+    timeout: 3s # from default
+    retries:
+      attempts: 3 # from default 
+
+  - name: internal-except-version-v1-route
+    match:
+    - uri:
+        exact: /service-prefix        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # from default
+    route:
+    - destination:
+        host: internal-except-version.test-ns
+        subset: v1
+    timeout: 3s # from default
+    retries:
+      attempts: 3 # from default 
+
+  - name: internal-except-version-external-route
+    match:
+    - uri:
+        exact: /service-prefix        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # from default
+    route:
+    - destination:
+        host: internal-except-version.test-ns
+        subset: external
+    timeout: 3s # from default
+    retries:
+      attempts: 3 # from default
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-internal-only-internal-routes
+spec:
+  hosts:
+  - internal-only.test-ns
+  gateways:
+  - mesh
+  http:
+    - route:
+      - destination:
+          host: internal-only.test-ns
+          subset: v1
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-internal-except-version-internal-routes
+spec:
+  hosts:
+  - internal-except-version.test-ns
+  gateways:
+  - mesh
+  http:
+    - route:
+      - destination:
+          host: internal-except-version.test-ns
+          subset: v1
+    - route:
+      - destination:
+          host: internal-except-version.test-ns
+          subset: external

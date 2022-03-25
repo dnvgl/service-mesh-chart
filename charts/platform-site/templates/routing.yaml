@@ -5,7 +5,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: {{ .Release.Name }}-external-routes
-  namespace: {{ $.Values.namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   hosts:
 {{- range .Values.hosts }}
@@ -43,25 +43,22 @@ spec:
 
 
 {{- if $external }}
-{{- if or .externalMatch .externalMatchConfig }}
-# Version 
-{{- include "platform-site.externalMatcher" (dict "service" $service "version" .version "settings" . "defaults" $defaults) }}
+{{- if or .externalIstioMatch .externalMatchConfig }}
+{{- include "platform-site.externalMatcher" (dict "service" $service "version" .version "settings" . "defaults" $defaults "sourcesArgs" $sourcesArgs ) }}
 {{- else }}
-# Service
-{{- include "platform-site.externalMatcher" (dict "service" $service "version" .version "settings" $serviceSettings "defaults" $defaults) }}
+{{- include "platform-site.externalMatcher" (dict "service" $service "version" .version "settings" $serviceSettings "defaults" $defaults "sourcesArgs" $sourcesArgs ) }}
 {{- end }}
 
 {{- /* $rewriteSettings := default (default $defaults.rewriteUrlPrefix $serviceSettings.rewriteUrlPrefix) .rewriteUrlPrefix */}}
 {{- /* $rewriteEnabled := include "platform-site.isComponentEnabled" (dict "componentName" "rewriteUrlPrefix" | merge $sourcesArgs) */}}
 
-{{- $rewriteEnabled := include "platform-site.getBoolFromSources" (dict "valueName" ".rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) }}
+{{- $rewriteEnabled := include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) }}
 
 {{- if $rewriteEnabled }}
     rewrite:
-      uri: {{ include "platform-site.getValueFromSources" (dict "valueName" ".rewriteUrlPrefix.replaceWith" | mustMergeOverwrite $sourcesArgs) |
-      required "rewrite replacement is required" }}
-
-      {{/* required "rewrite replacement is required" $rewriteSettings.rewriteUrlPrefix.replaceWith */}}
+      uri: {{ include "platform-site.getValueFromSources" (dict "valueName" ".externalMatchConfig.rewriteUrlPrefix.replaceWith" | mustMergeOverwrite $sourcesArgs) 
+              | required "rewrite replacement is required" }}
+      {{- /* required "rewrite replacement is required" $rewriteSettings.rewriteUrlPrefix.replaceWith */}}
 {{- end}}
     route:
 {{- if default $serviceSettings.route .route }}
@@ -75,17 +72,17 @@ spec:
 
 {{- end }} {{- /* end if explicit route */}}
 
-
-{{- $timeout := coalesce .timeout $serviceSettings.timeout $defaults.timeout }}
-
+{{- $timeout := include "platform-site.getValueFromSources" (dict "valueName" ".timeout" | mustMergeOverwrite $sourcesArgs) }}
 {{- if $timeout }}
     timeout: {{ $timeout }}
 {{- end }}
 
-{{- $retries := coalesce .retries $serviceSettings.retries $defaults.retries }}
-{{- if $retries.enabled }}
+{{- $retries := include "platform-site.getValueFromSources" (dict "valueName" ".retries.enabled" | mustMergeOverwrite $sourcesArgs) }}
+{{- if include "platform-site.getBoolFromSources" (dict "valueName" ".retries.enabled" | mustMergeOverwrite $sourcesArgs) }}
     retries:
-{{ required "retry settings are required at the same level as they are enabled" $retries.settings | toYaml | trim | indent 6 }}
+{{ include "platform-site.getValueFromSources" (dict "valueName" ".retries.settings" | mustMergeOverwrite $sourcesArgs) 
+    | required "retry settings are required"
+    | trim | indent 6 }}
 {{- end }}
 
 {{- if .corsPolicy }}
@@ -117,7 +114,7 @@ spec:
   http:
 {{- range .versions }}
     - route:
-    {{ if .internalMatch }}
+    {{- if .internalMatch }}
     {{- include "platform-site.internalMatcher" . }}
     {{ else if $serviceSettings.internalMatch }}
     {{- include "platform-site.internalMatcher" $serviceSettings }}

@@ -1,7 +1,17 @@
 
-{{- $sourcesArgs := (dict "versionSource" .Values "serviceSource" .Values "defaultSource" .Values.defaults "Template" $.Template) }}
+{{- /* $sourcesArgs := (dict "versionSource" .Values "serviceSource" .Values "defaultSource" .Values.defaults "Template" $.Template) }}
+settings: {{ include "platform-site.getValueFromSources" (dict "valueName" ".retries.settings" | mustMergeOverwrite $sourcesArgs) }}
 
 sourceBool: {{ include "platform-site.getValueFromSources" (dict "valueName" ".rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) }}
+
+direct: {{ printf "%t" .Values.defaults.retries.settings }}
+tpl: 
+  {{ (tpl "{{ .Values.defaults.retries.settings | toYaml }}" . ) }}
+
+{{ $test := (tpl "{{ .Values.defaults.retries.settings | toYaml }}" . )}}
+{{ if $test }}test: true
+{{ end */}}
+
 
 {{- /*
 # sourceBool: {{ include "platform-site.getBoolFromSources" (dict "valueName" ".rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) }}
