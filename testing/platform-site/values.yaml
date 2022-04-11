@@ -110,18 +110,22 @@ routes:
             - dev-override-exact
       - version: version-with-redirect
         externalMatchConfig:
+          urlPrefixes:
+            - service-prefix-nr
           redirectOnNoTrailingSlash: true
 
-  # - service: service-with-redirect
-  #   externalMatchConfig:
-  #     urlPrefixes:
-  #       - service-prefix
-  #     redirectOnNoTrailingSlash: true
-  #   versions:
-  #     - version: v1
-  #     - version: version-no-redirect
-  #       externalMatchConfig:
-  #         redirectOnNoTrailingSlash: false
+  - service: service-with-redirect
+    externalMatchConfig:
+      urlPrefixes:
+        - service-prefix
+      redirectOnNoTrailingSlash: true
+    versions:
+      - version: v1
+      - version: version-no-redirect
+        externalMatchConfig:
+          urlPrefixes:
+            - service-prefix-nr
+          redirectOnNoTrailingSlash: false
 
   # - service: service-no-rewrite
   #   externalMatchConfig:

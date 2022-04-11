@@ -179,9 +179,9 @@ Create the name of the service account to use
 {{- $sanitizedServiceName := .service | replace "." "-" }}
 {{- $sanitizedVersion := .version | replace "." "-" }}
 {{- /* args for templates which look across sources */}}
-
+{{- $routeName := printf "%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}
 {{- if .settings.externalIstioMatch }}
-  - name: {{ printf "%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}
+  - name: {{ $routeName }}
     match:
     #custom match
 {{ .settings.externalIstioMatch | toYaml | indent 4 }}
@@ -201,7 +201,7 @@ Create the name of the service account to use
 {{- range $prefixes }}
 {{- $slashPrefix := printf "/%s" . }}
 
-  - name: {{ printf "redirect-nts-%s-route"  . }}
+  - name: {{ $routeName }}-redirect
     match:
       - uri:
           exact: {{ $slashPrefix }}
@@ -210,7 +210,7 @@ Create the name of the service account to use
 {{- end }} {{/* end range prefixes */}}
 {{- end }} {{/* end redirect on no trailing slash */}}
 
-  - name: {{ printf "%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}
+  - name: {{ $routeName }}
     match:
 {{- range $prefixes }}
 {{- if hasPrefix "/" . }}
@@ -226,7 +226,7 @@ Create the name of the service account to use
 {{- end }} {{- /* end range prefixes */}}
 {{- else }} {{- /* neither match nor match config */}}
 
-  - name: {{ printf "catch-all-%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}
+  - name: catch-all-{{ $routeName }}
 
 {{- end }} {{- /* end match vs match config */}}
 {{- end }} {{- /* end define */}}
