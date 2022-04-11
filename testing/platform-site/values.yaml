@@ -112,16 +112,16 @@ routes:
         externalMatchConfig:
           redirectOnNoTrailingSlash: true
 
-  - service: service-with-redirect
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
-      redirectOnNoTrailingSlash: true
-    versions:
-      - version: v1
-      - version: version-no-redirect
-        externalMatchConfig:
-          redirectOnNoTrailingSlash: false
+  # - service: service-with-redirect
+  #   externalMatchConfig:
+  #     urlPrefixes:
+  #       - service-prefix
+  #     redirectOnNoTrailingSlash: true
+  #   versions:
+  #     - version: v1
+  #     - version: version-no-redirect
+  #       externalMatchConfig:
+  #         redirectOnNoTrailingSlash: false
 
   # - service: service-no-rewrite
   #   externalMatchConfig:

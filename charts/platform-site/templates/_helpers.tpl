@@ -191,9 +191,11 @@ Create the name of the service account to use
 {{- $prefixes := default (list .service) .settings.externalMatchConfig.urlPrefixes }}
 
 {{- /* mutually exclusive settings, exactPrefixMatch takes precedence */}}
-{{- $exactPrefixMatch := include "platform-site.getBoolFromSources" (dict "valueName" "externalMatchConfig.exactPrefixMatch" | mustMergeOverwrite .sourcesArgs) }}
+{{- $exactPrefixMatch := include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.exactPrefixMatch" | mustMergeOverwrite .sourcesArgs) 
+      | eq "true" }}
 {{- $redirectOnTrailingSlash := and (not $exactPrefixMatch)
-  (include "platform-site.getBoolFromSources" (dict "valueName" "externalMatchConfig.redirectOnNoTrailingSlash" | mustMergeOverwrite .sourcesArgs)) }}
+  (include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.redirectOnNoTrailingSlash" | mustMergeOverwrite .sourcesArgs)
+    | eq "true" ) }}
 
 {{- if $redirectOnTrailingSlash }}
 {{- range $prefixes }}

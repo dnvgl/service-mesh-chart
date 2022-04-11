@@ -25,24 +25,6 @@ spec:
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: service-with-redirect-destination
-spec:
-  host: service-with-redirect.test-ns
-  trafficPolicy:
-    tls:
-      mode: ISTIO_MUTUAL
-  subsets:
-  - name: v1
-    labels:
-      version: v1
-  - name: version-no-redirect
-    labels:
-      version: version-no-redirect
----
-# Source: platform-site/templates/routing.yaml
-apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: test-release-external-routes
@@ -53,12 +35,12 @@ spec:
   gateways:
   - gateway/one-gateway
 
-  http: 
+  http:
+    # exact match: false # false from default
+    # redirect on no trailing slash: disabled (enabled: false # false from service) 
 
   - name: service-no-redirect-v1-route
-    match:
-    - uri:
-        exact: /service-prefix        
+    match:        
     - uri:
         prefix: /service-prefix/
     rewrite:
@@ -69,12 +51,12 @@ spec:
         subset: v1
     timeout: 3s # 3s from default
     retries:
-      attempts: 3 # attempts: 3 from default 
+      attempts: 3 # attempts: 3 from default
+    # exact match: false # false from default
+    # redirect on no trailing slash: disabled (enabled: false # false from service) 
 
   - name: service-no-redirect-dev-route
-    match:
-    - uri:
-        exact: /dev-override-prefix        
+    match:        
     - uri:
         prefix: /dev-override-prefix/
     rewrite:
@@ -85,12 +67,13 @@ spec:
         subset: dev
     timeout: 3s # 3s from default
     retries:
-      attempts: 3 # attempts: 3 from default 
+      attempts: 3 # attempts: 3 from default
+    # exact match: true # true from version 
 
   - name: service-no-redirect-exact-match-override-route
     match:
     - uri:
-        exact: /dev-override-exact        
+        exact: /dev-override-exact # exact match of prefix        
     - uri:
         prefix: /dev-override-exact/
     rewrite:
@@ -101,12 +84,18 @@ spec:
         subset: exact-match-override
     timeout: 3s # 3s from default
     retries:
-      attempts: 3 # attempts: 3 from default 
+      attempts: 3 # attempts: 3 from default
+    # exact match: false # false from default
+
+  - name: redirect-nts-service-no-redirect-route
+    match:
+      - uri:
+          exact: /service-no-redirect # exact match redirect
+    redirect:
+      uri: /service-no-redirect/  
 
   - name: service-no-redirect-version-with-redirect-route
-    match:
-    - uri:
-        exact: /service-no-redirect        
+    match:        
     - uri:
         prefix: /service-no-redirect/
     rewrite:
@@ -115,38 +104,6 @@ spec:
     - destination:
         host: service-no-redirect.test-ns
         subset: version-with-redirect
-    timeout: 3s # 3s from default
-    retries:
-      attempts: 3 # attempts: 3 from default 
-
-  - name: service-with-redirect-v1-route
-    match:
-    - uri:
-        exact: /service-prefix        
-    - uri:
-        prefix: /service-prefix/
-    rewrite:
-      uri: / # / from default
-    route:
-    - destination:
-        host: service-with-redirect.test-ns
-        subset: v1
-    timeout: 3s # 3s from default
-    retries:
-      attempts: 3 # attempts: 3 from default 
-
-  - name: service-with-redirect-version-no-redirect-route
-    match:
-    - uri:
-        exact: /service-with-redirect        
-    - uri:
-        prefix: /service-with-redirect/
-    rewrite:
-      uri: / # / from default
-    route:
-    - destination:
-        host: service-with-redirect.test-ns
-        subset: version-no-redirect
     timeout: 3s # 3s from default
     retries:
       attempts: 3 # attempts: 3 from default
@@ -184,29 +141,5 @@ spec:
     - destination:
         host: service-no-redirect.test-ns
         subset: version-with-redirect
-    retries:
-      attempts: 3 # attempts: 3 from default
----
-# Source: platform-site/templates/routing.yaml
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: test-release-service-with-redirect-internal-routes
-spec:
-  hosts:
-  - service-with-redirect.test-ns
-  gateways:
-  - mesh
-  http:
-  - route:
-    - destination:
-        host: service-with-redirect.test-ns
-        subset: v1
-    retries:
-      attempts: 3 # attempts: 3 from default
-  - route:
-    - destination:
-        host: service-with-redirect.test-ns
-        subset: version-no-redirect
     retries:
       attempts: 3 # attempts: 3 from default
