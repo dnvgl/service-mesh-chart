@@ -11,7 +11,6 @@ spec:
 {{- range .Values.hosts }}
   - {{ . | quote }}
 {{- end }}
-
   gateways:
   - {{ required "A valid .Values.gateway entry required!" .Values.gateway }}
 
@@ -38,10 +37,8 @@ spec:
    Internal only can be overridden at version level, but false is different than blank. coalesce treats false as null 
    So this is, if explicitly false or neither is true
 */}}
-{{- $external := or (eq .internalOnly false) (and (not .internalOnly) (not $serviceSettings.internalOnly)) }}
-{{- $external := include "platform-site.getBoolFromSources" (dict "valueName" ".internalOnly" | mustMergeOverwrite $sourcesArgs) }}
-
-
+{{- $external := (include "platform-site.getBoolFromSources" (dict "valueName" ".internalOnly" | mustMergeOverwrite $sourcesArgs)
+    | eq "false") }}
 {{- if $external }}
 {{- if or .externalIstioMatch .externalMatchConfig }}
 {{- include "platform-site.externalMatcher" (dict "service" $service "version" .version "settings" . "defaults" $defaults "sourcesArgs" $sourcesArgs ) }}
@@ -77,20 +74,12 @@ spec:
     timeout: {{ $timeout }}
 {{- end }}
 
-{{- $retries := include "platform-site.getValueFromSources" (dict "valueName" ".retries.enabled" | mustMergeOverwrite $sourcesArgs) }}
-{{- if include "platform-site.getBoolFromSources" (dict "valueName" ".retries.enabled" | mustMergeOverwrite $sourcesArgs) }}
-    retries:
-{{ include "platform-site.getValueFromSources" (dict "valueName" ".retries.settings" | mustMergeOverwrite $sourcesArgs) 
-    | required "retry settings are required"
-    | trim | indent 6 }}
-{{- end }}
-
 {{- if .corsPolicy }}
     corsPolicy:
 {{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
 {{- end }} {{- /* end if cors policy */ -}}
 
-{{- include "platform-site.retries" . }}
+{{- include "platform-site.retries" (dict "retries" .retries | mustMergeOverwrite $sourcesArgs) }}
 
 {{- end }} {{- /* internal only */ -}}
 {{- end }} {{- /* end range versions */ -}}
@@ -113,16 +102,18 @@ spec:
   - mesh
   http:
 {{- range .versions }}
-    - route:
-    {{- if .internalMatch }}
-    {{- include "platform-site.internalMatcher" . }}
-    {{ else if $serviceSettings.internalMatch }}
-    {{- include "platform-site.internalMatcher" $serviceSettings }}
-    {{- end }}
-      - destination:
-          host: {{ $qualifiedServiceName }}
-          subset: {{ .version }}
-{{- include "platform-site.retries" . }}
+{{- $sourcesArgs := (dict "versionSource" . "serviceSource" $serviceSettings "defaultSource" $defaults "Template" $.Template) }}
+  - route:
+  {{- if .internalMatch }}
+  {{- include "platform-site.internalMatcher" . }}
+  {{ else if $serviceSettings.internalMatch }}
+  {{- include "platform-site.internalMatcher" $serviceSettings }}
+  {{- end }}
+    - destination:
+        host: {{ $qualifiedServiceName }}
+        subset: {{ .version }}
+{{- include "platform-site.retries" (dict "retries" .retries | mustMergeOverwrite $sourcesArgs) }}
+
 {{- end }} {{/* end range versions */}}
 
 ---

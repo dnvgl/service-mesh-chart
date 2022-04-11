@@ -3,9 +3,9 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: internal-only-destination
+  name: service-no-redirect-destination
 spec:
-  host: internal-only.test-ns
+  host: service-no-redirect.test-ns
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -13,14 +13,23 @@ spec:
   - name: v1
     labels:
       version: v1
+  - name: dev
+    labels:
+      version: dev
+  - name: exact-match-override
+    labels:
+      version: exact-match-override
+  - name: version-with-redirect
+    labels:
+      version: version-with-redirect
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: internal-except-version-destination
+  name: service-with-redirect-destination
 spec:
-  host: internal-except-version.test-ns
+  host: service-with-redirect.test-ns
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -28,9 +37,9 @@ spec:
   - name: v1
     labels:
       version: v1
-  - name: external
+  - name: version-no-redirect
     labels:
-      version: external
+      version: version-no-redirect
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -41,87 +50,163 @@ metadata:
 spec:
   hosts:
   - "test-host.dnv.com"
-
   gateways:
   - gateway/one-gateway
 
-  http:
+  http: 
 
-  - name: catch-all-internal-only-v1-route
-    rewrite:
-      uri: / # from default
-    route:
-    - destination:
-        host: internal-only.test-ns
-        subset: v1
-    timeout: 3s # from default
-    retries:
-      attempts: 3 # from default 
-
-  - name: internal-except-version-v1-route
+  - name: service-no-redirect-v1-route
     match:
     - uri:
         exact: /service-prefix        
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # from default
+      uri: / # / from default
     route:
     - destination:
-        host: internal-except-version.test-ns
+        host: service-no-redirect.test-ns
         subset: v1
-    timeout: 3s # from default
+    timeout: 3s # 3s from default
     retries:
-      attempts: 3 # from default 
+      attempts: 3 # attempts: 3 from default 
 
-  - name: internal-except-version-external-route
+  - name: service-no-redirect-dev-route
+    match:
+    - uri:
+        exact: /dev-override-prefix        
+    - uri:
+        prefix: /dev-override-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: dev
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default 
+
+  - name: service-no-redirect-exact-match-override-route
+    match:
+    - uri:
+        exact: /dev-override-exact        
+    - uri:
+        prefix: /dev-override-exact/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: exact-match-override
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default 
+
+  - name: service-no-redirect-version-with-redirect-route
+    match:
+    - uri:
+        exact: /service-no-redirect        
+    - uri:
+        prefix: /service-no-redirect/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: version-with-redirect
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default 
+
+  - name: service-with-redirect-v1-route
     match:
     - uri:
         exact: /service-prefix        
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # from default
+      uri: / # / from default
     route:
     - destination:
-        host: internal-except-version.test-ns
-        subset: external
-    timeout: 3s # from default
+        host: service-with-redirect.test-ns
+        subset: v1
+    timeout: 3s # 3s from default
     retries:
-      attempts: 3 # from default
+      attempts: 3 # attempts: 3 from default 
+
+  - name: service-with-redirect-version-no-redirect-route
+    match:
+    - uri:
+        exact: /service-with-redirect        
+    - uri:
+        prefix: /service-with-redirect/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-with-redirect.test-ns
+        subset: version-no-redirect
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: test-release-internal-only-internal-routes
+  name: test-release-service-no-redirect-internal-routes
 spec:
   hosts:
-  - internal-only.test-ns
+  - service-no-redirect.test-ns
   gateways:
   - mesh
   http:
-    - route:
-      - destination:
-          host: internal-only.test-ns
-          subset: v1
+  - route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: dev
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: exact-match-override
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: version-with-redirect
+    retries:
+      attempts: 3 # attempts: 3 from default
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: test-release-internal-except-version-internal-routes
+  name: test-release-service-with-redirect-internal-routes
 spec:
   hosts:
-  - internal-except-version.test-ns
+  - service-with-redirect.test-ns
   gateways:
   - mesh
   http:
-    - route:
-      - destination:
-          host: internal-except-version.test-ns
-          subset: v1
-    - route:
-      - destination:
-          host: internal-except-version.test-ns
-          subset: external
+  - route:
+    - destination:
+        host: service-with-redirect.test-ns
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-with-redirect.test-ns
+        subset: version-no-redirect
+    retries:
+      attempts: 3 # attempts: 3 from default

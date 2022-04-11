@@ -63,15 +63,15 @@ Create the name of the service account to use
 
 
 {{- define "platform-site.retries" -}}
-{{- if .retries }} {{- if .retries.enabled }}
+{{- if (include "platform-site.getBoolFromSources" (dict "valueName" ".retries.enabled" | mustMergeOverwrite .) 
+    | eq "true") }}
     retries:
-{{- if .retries.settings }}
-{{ .retries.settings | toYaml | trim | indent 6 }}
+{{ include "platform-site.getValueFromSources" (dict "valueName" ".retries.settings" | mustMergeOverwrite .) 
+    | required "retry settings are required"
+    | trim | indent 6 }}
 {{- else }}
-      attempts: 3
-      perTryTimeout: 2s
-{{- end -}}
-{{- end -}}{{- end -}}
+    # retries: disabled (enabled: {{ include "platform-site.getValueFromSources" (dict "valueName" ".retries.enabled" | mustMergeOverwrite .) }})
+{{- end }}
 {{- end -}}
 
 
@@ -129,14 +129,14 @@ Create the name of the service account to use
 {{- $args := dict "valueName" (required "valueName is required" .valueName) "source" $versionSource "Template" (required "Template parameter is required - use $.Template" $.Template) }}
 {{- $versionValue := include "platform-site.getSourceValue" $args }}
 {{- if ne $versionValue "" }}
-  {{- $versionValue }} # from version
+  {{- $versionValue }} # {{ $versionValue }} from version
 {{- else }}
   {{- $serviceValue := include "platform-site.getSourceValue" (set $args "source" $serviceSource) }}
   {{- if ne $serviceValue "" }}
-    {{- $serviceValue }} # from service
+    {{- $serviceValue }} # {{ $serviceValue }} from service
   {{- else }}
     {{- $defaultValue := include "platform-site.getSourceValue" (set $args "source" $defaultSource) }}
-    {{- $defaultValue }} # from default
+    {{- $defaultValue }} # {{ $defaultValue }} from default
   {{- end }}
 {{- end }}
 {{- end }}
@@ -148,8 +148,8 @@ Create the name of the service account to use
   Value is expected to be defined at a minimum in default
   only true/false values are returned
 */ -}}
-{{-  include "platform-site.getValueFromSources" . 
-  | eq "true" }}
+{{- $strValue := include "platform-site.getValueFromSources" . }}
+{{- $strValue | substr 0 4 | eq "true" -}}{{- /* $strValue }} / {{ $strValue | substr 0 4 }} / {{ $strValue | substr 0 4 | eq "true" */}}
 {{- end }}
 
 
