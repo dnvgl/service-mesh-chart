@@ -92,11 +92,47 @@ routes:
   #           attempts: 5
 
 
-  - service: service-no-redirect
+  # - service: service-no-redirect
+  #   externalMatchConfig:
+  #     urlPrefixes:
+  #       - service-prefix
+  #     redirectOnNoTrailingSlash: false
+  #   versions:
+  #     - version: v1
+  #     - version: dev
+  #       externalMatchConfig:
+  #         urlPrefixes:
+  #           - dev-override-prefix
+  #     - version: exact-match-override
+  #       externalMatchConfig:
+  #         exactPrefixMatch: true
+  #         urlPrefixes:
+  #           - dev-override-exact
+  #     - version: version-with-redirect
+  #       externalMatchConfig:
+  #         urlPrefixes:
+  #           - service-prefix-nr
+  #         redirectOnNoTrailingSlash: true
+
+  # - service: service-with-redirect
+  #   externalMatchConfig:
+  #     urlPrefixes:
+  #       - service-prefix
+  #     redirectOnNoTrailingSlash: true
+  #   versions:
+  #     - version: v1
+  #     - version: version-no-redirect
+  #       externalMatchConfig:
+  #         urlPrefixes:
+  #           - service-prefix-nr
+  #         redirectOnNoTrailingSlash: false
+
+  - service: service-no-rewrite
     externalMatchConfig:
       urlPrefixes:
         - service-prefix
-      redirectOnNoTrailingSlash: false
+      rewriteUrlPrefix:
+        enabled: false
     versions:
       - version: v1
       - version: dev
@@ -108,77 +144,41 @@ routes:
           exactPrefixMatch: true
           urlPrefixes:
             - dev-override-exact
-      - version: version-with-redirect
+      - version: with-rewrite
         externalMatchConfig:
-          urlPrefixes:
-            - service-prefix-nr
-          redirectOnNoTrailingSlash: true
+          rewriteUrlPrefix:
+            enabled: true
+      - version: with-alt-rewrite-url
+        externalMatchConfig:
+          rewriteUrlPrefix:
+            enabled: true
+            replaceWith: "alt-prefix/"
 
-  - service: service-with-redirect
+  - service: service-alt-rewrite
     externalMatchConfig:
       urlPrefixes:
         - service-prefix
-      redirectOnNoTrailingSlash: true
+      rewriteUrlPrefix:
+        replaceWith: "alt-prefix/"
     versions:
       - version: v1
-      - version: version-no-redirect
+      - version: dev
         externalMatchConfig:
           urlPrefixes:
-            - service-prefix-nr
-          redirectOnNoTrailingSlash: false
-
-  # - service: service-no-rewrite
-  #   externalMatchConfig:
-  #     urlPrefixes:
-  #       - service-prefix
-  #     rewriteUrlPrefix:
-  #       enabled: false
-  #   versions:
-  #     - version: v1
-  #     - version: dev
-  #       externalMatchConfig:
-  #         urlPrefixes:
-  #           - dev-override-prefix
-  #     - version: exact-match-override
-  #       externalMatchConfig:
-  #         exactPrefixMatch: true
-  #         urlPrefixes:
-  #           - dev-override-exact
-  #     - version: with-rewrite
-  #       externalMatchConfig:
-  #         rewriteUrlPrefix:
-  #           enabled: true
-  #     - version: with-alt-rewrite-url
-  #       externalMatchConfig:
-  #         rewriteUrlPrefix:
-  #           enabled: true
-  #           replaceWith: "alt-prefix/"
-
-  # - service: service-alt-rewrite
-  #   externalMatchConfig:
-  #     urlPrefixes:
-  #       - service-prefix
-  #     rewriteUrlPrefix:
-  #       replaceWith: "alt-prefix/"
-  #   versions:
-  #     - version: v1
-  #     - version: dev
-  #       externalMatchConfig:
-  #         urlPrefixes:
-  #           - dev-override-prefix
-  #     - version: exact-match-override
-  #       externalMatchConfig:
-  #         exactPrefixMatch: true
-  #         urlPrefixes:
-  #           - dev-override-exact
-  #     - version: no-rewrite
-  #       externalMatchConfig:
-  #         rewriteUrlPrefix:
-  #           enabled: false
-  #     - version: with-alt-rewrite-url
-  #       externalMatchConfig:
-  #         rewriteUrlPrefix:
-  #           replaceWith: "alt-prefix-v/"
+            - dev-override-prefix
+      - version: exact-match-override
+        externalMatchConfig:
+          exactPrefixMatch: true
+          urlPrefixes:
+            - dev-override-exact
+      - version: no-rewrite
+        externalMatchConfig:
+          rewriteUrlPrefix:
+            enabled: false
+      - version: with-alt-rewrite-url
+        externalMatchConfig:
+          rewriteUrlPrefix:
+            replaceWith: "alt-prefix-v/"
 
   # - service: multiple-prefixes
   #   externalMatchConfig:

@@ -179,7 +179,9 @@ Create the name of the service account to use
 {{- $sanitizedServiceName := .service | replace "." "-" }}
 {{- $sanitizedVersion := .version | replace "." "-" }}
 {{- /* args for templates which look across sources */}}
-{{- $routeName := printf "%s-%s-route" $sanitizedServiceName (.version | replace "." "-") }}
+{{- $routeName := printf "%s-%s-route" $sanitizedServiceName $sanitizedVersion }}
+
+  # Routing for {{ printf "%s / version: %s" $sanitizedServiceName $sanitizedVersion }}
 {{- if .settings.externalIstioMatch }}
   - name: {{ $routeName }}
     match:
@@ -200,8 +202,7 @@ Create the name of the service account to use
 {{- if $redirectOnTrailingSlash }}
 {{- range $prefixes }}
 {{- $slashPrefix := printf "/%s" . }}
-
-  - name: {{ $routeName }}-redirect
+  - name: {{ printf "%s-%s-redirect" $sanitizedServiceName $sanitizedVersion }}
     match:
       - uri:
           exact: {{ $slashPrefix }}
@@ -209,7 +210,6 @@ Create the name of the service account to use
       uri: {{ $slashPrefix }}/
 {{- end }} {{/* end range prefixes */}}
 {{- end }} {{/* end redirect on no trailing slash */}}
-
   - name: {{ $routeName }}
     match:
 {{- range $prefixes }}

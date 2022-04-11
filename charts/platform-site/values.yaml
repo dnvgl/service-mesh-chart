@@ -16,7 +16,7 @@ defaults:
     redirectOnNoTrailingSlash: true
     exactPrefixMatch: false
     rewriteUrlPrefix:
-      enabled: false
+      enabled: true
       replaceWith: "/"
   loadBalancerPolicy: RANDOM
   internalOnly: false

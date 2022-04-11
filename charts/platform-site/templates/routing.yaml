@@ -24,7 +24,6 @@ spec:
 {{- $serviceSettings := . }}
 
 {{- range .versions }}
-
 {{- /* args for templates which look across sources */}}
 {{- $sourcesArgs := (dict "versionSource" . "serviceSource" $serviceSettings "defaultSource" $defaults "Template" $.Template) }}
 
@@ -49,7 +48,8 @@ spec:
 {{- /* $rewriteSettings := default (default $defaults.rewriteUrlPrefix $serviceSettings.rewriteUrlPrefix) .rewriteUrlPrefix */}}
 {{- /* $rewriteEnabled := include "platform-site.isComponentEnabled" (dict "componentName" "rewriteUrlPrefix" | merge $sourcesArgs) */}}
 
-{{- $rewriteEnabled := include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) }}
+{{- $rewriteEnabled := include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) 
+    | eq "true" }}
 
 {{- if $rewriteEnabled }}
     rewrite:

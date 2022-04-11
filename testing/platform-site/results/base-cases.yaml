@@ -3,9 +3,9 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: service-no-redirect-destination
+  name: service-no-rewrite-destination
 spec:
-  host: service-no-redirect.test-ns
+  host: service-no-rewrite.test-ns
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -19,17 +19,20 @@ spec:
   - name: exact-match-override
     labels:
       version: exact-match-override
-  - name: version-with-redirect
+  - name: with-rewrite
     labels:
-      version: version-with-redirect
+      version: with-rewrite
+  - name: with-alt-rewrite-url
+    labels:
+      version: with-alt-rewrite-url
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: service-with-redirect-destination
+  name: service-alt-rewrite-destination
 spec:
-  host: service-with-redirect.test-ns
+  host: service-alt-rewrite.test-ns
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -37,9 +40,18 @@ spec:
   - name: v1
     labels:
       version: v1
-  - name: version-no-redirect
+  - name: dev
     labels:
-      version: version-no-redirect
+      version: dev
+  - name: exact-match-override
+    labels:
+      version: exact-match-override
+  - name: no-rewrite
+    labels:
+      version: no-rewrite
+  - name: with-alt-rewrite-url
+    labels:
+      version: with-alt-rewrite-url
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -53,104 +65,198 @@ spec:
   gateways:
   - gateway/one-gateway
 
-  http: 
+  http:
 
-  - name: service-no-redirect-v1-route
+  # Routing for service-no-rewrite / version: v1
+  - name: service-no-rewrite-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-no-rewrite-v1-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    route:
+    - destination:
+        host: service-no-rewrite.test-ns
+        subset: v1
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for service-no-rewrite / version: dev
+  - name: service-no-rewrite-dev-redirect
+    match:
+      - uri:
+          exact: /dev-override-prefix
+    redirect:
+      uri: /dev-override-prefix/  
+  - name: service-no-rewrite-dev-route
+    match:        
+    - uri:
+        prefix: /dev-override-prefix/
+    route:
+    - destination:
+        host: service-no-rewrite.test-ns
+        subset: dev
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for service-no-rewrite / version: exact-match-override 
+  - name: service-no-rewrite-exact-match-override-route
+    match:
+    - uri:
+        exact: /dev-override-exact        
+    - uri:
+        prefix: /dev-override-exact/
+    route:
+    - destination:
+        host: service-no-rewrite.test-ns
+        subset: exact-match-override
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for service-no-rewrite / version: with-rewrite
+  - name: service-no-rewrite-with-rewrite-redirect
+    match:
+      - uri:
+          exact: /service-no-rewrite
+    redirect:
+      uri: /service-no-rewrite/  
+  - name: service-no-rewrite-with-rewrite-route
+    match:        
+    - uri:
+        prefix: /service-no-rewrite/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-no-rewrite.test-ns
+        subset: with-rewrite
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for service-no-rewrite / version: with-alt-rewrite-url
+  - name: service-no-rewrite-with-alt-rewrite-url-redirect
+    match:
+      - uri:
+          exact: /service-no-rewrite
+    redirect:
+      uri: /service-no-rewrite/  
+  - name: service-no-rewrite-with-alt-rewrite-url-route
+    match:        
+    - uri:
+        prefix: /service-no-rewrite/
+    rewrite:
+      uri: alt-prefix/ # alt-prefix/ from version
+    route:
+    - destination:
+        host: service-no-rewrite.test-ns
+        subset: with-alt-rewrite-url
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for service-alt-rewrite / version: v1
+  - name: service-alt-rewrite-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-alt-rewrite-v1-route
     match:        
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: alt-prefix/ # alt-prefix/ from service
     route:
     - destination:
-        host: service-no-redirect.test-ns
+        host: service-alt-rewrite.test-ns
         subset: v1
     timeout: 3s # 3s from default
     retries:
-      attempts: 3 # attempts: 3 from default 
+      attempts: 3 # attempts: 3 from default
 
-  - name: service-no-redirect-dev-route
+  # Routing for service-alt-rewrite / version: dev
+  - name: service-alt-rewrite-dev-redirect
+    match:
+      - uri:
+          exact: /dev-override-prefix
+    redirect:
+      uri: /dev-override-prefix/  
+  - name: service-alt-rewrite-dev-route
     match:        
     - uri:
         prefix: /dev-override-prefix/
     rewrite:
-      uri: / # / from default
+      uri: alt-prefix/ # alt-prefix/ from service
     route:
     - destination:
-        host: service-no-redirect.test-ns
+        host: service-alt-rewrite.test-ns
         subset: dev
     timeout: 3s # 3s from default
     retries:
-      attempts: 3 # attempts: 3 from default 
+      attempts: 3 # attempts: 3 from default
 
-  - name: service-no-redirect-exact-match-override-route
+  # Routing for service-alt-rewrite / version: exact-match-override 
+  - name: service-alt-rewrite-exact-match-override-route
     match:
     - uri:
         exact: /dev-override-exact        
     - uri:
         prefix: /dev-override-exact/
     rewrite:
-      uri: / # / from default
+      uri: alt-prefix/ # alt-prefix/ from service
     route:
     - destination:
-        host: service-no-redirect.test-ns
+        host: service-alt-rewrite.test-ns
         subset: exact-match-override
     timeout: 3s # 3s from default
     retries:
       attempts: 3 # attempts: 3 from default
 
-  - name: service-no-redirect-version-with-redirect-route-redirect
+  # Routing for service-alt-rewrite / version: no-rewrite
+  - name: service-alt-rewrite-no-rewrite-redirect
     match:
       - uri:
-          exact: /service-prefix-nr
+          exact: /service-alt-rewrite
     redirect:
-      uri: /service-prefix-nr/  
-
-  - name: service-no-redirect-version-with-redirect-route
+      uri: /service-alt-rewrite/  
+  - name: service-alt-rewrite-no-rewrite-route
     match:        
     - uri:
-        prefix: /service-prefix-nr/
-    rewrite:
-      uri: / # / from default
+        prefix: /service-alt-rewrite/
     route:
     - destination:
-        host: service-no-redirect.test-ns
-        subset: version-with-redirect
+        host: service-alt-rewrite.test-ns
+        subset: no-rewrite
     timeout: 3s # 3s from default
     retries:
       attempts: 3 # attempts: 3 from default
 
-  - name: service-with-redirect-v1-route-redirect
+  # Routing for service-alt-rewrite / version: with-alt-rewrite-url
+  - name: service-alt-rewrite-with-alt-rewrite-url-redirect
     match:
       - uri:
-          exact: /service-prefix
+          exact: /service-alt-rewrite
     redirect:
-      uri: /service-prefix/  
-
-  - name: service-with-redirect-v1-route
+      uri: /service-alt-rewrite/  
+  - name: service-alt-rewrite-with-alt-rewrite-url-route
     match:        
     - uri:
-        prefix: /service-prefix/
+        prefix: /service-alt-rewrite/
     rewrite:
-      uri: / # / from default
+      uri: alt-prefix-v/ # alt-prefix-v/ from version
     route:
     - destination:
-        host: service-with-redirect.test-ns
-        subset: v1
-    timeout: 3s # 3s from default
-    retries:
-      attempts: 3 # attempts: 3 from default 
-
-  - name: service-with-redirect-version-no-redirect-route
-    match:        
-    - uri:
-        prefix: /service-prefix-nr/
-    rewrite:
-      uri: / # / from default
-    route:
-    - destination:
-        host: service-with-redirect.test-ns
-        subset: version-no-redirect
+        host: service-alt-rewrite.test-ns
+        subset: with-alt-rewrite-url
     timeout: 3s # 3s from default
     retries:
       attempts: 3 # attempts: 3 from default
@@ -159,35 +265,41 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: test-release-service-no-redirect-internal-routes
+  name: test-release-service-no-rewrite-internal-routes
 spec:
   hosts:
-  - service-no-redirect.test-ns
+  - service-no-rewrite.test-ns
   gateways:
   - mesh
   http:
   - route:
     - destination:
-        host: service-no-redirect.test-ns
+        host: service-no-rewrite.test-ns
         subset: v1
     retries:
       attempts: 3 # attempts: 3 from default
   - route:
     - destination:
-        host: service-no-redirect.test-ns
+        host: service-no-rewrite.test-ns
         subset: dev
     retries:
       attempts: 3 # attempts: 3 from default
   - route:
     - destination:
-        host: service-no-redirect.test-ns
+        host: service-no-rewrite.test-ns
         subset: exact-match-override
     retries:
       attempts: 3 # attempts: 3 from default
   - route:
     - destination:
-        host: service-no-redirect.test-ns
-        subset: version-with-redirect
+        host: service-no-rewrite.test-ns
+        subset: with-rewrite
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-no-rewrite.test-ns
+        subset: with-alt-rewrite-url
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -195,22 +307,40 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: test-release-service-with-redirect-internal-routes
+  name: test-release-service-alt-rewrite-internal-routes
 spec:
   hosts:
-  - service-with-redirect.test-ns
+  - service-alt-rewrite.test-ns
   gateways:
   - mesh
   http:
   - route:
     - destination:
-        host: service-with-redirect.test-ns
+        host: service-alt-rewrite.test-ns
         subset: v1
     retries:
       attempts: 3 # attempts: 3 from default
   - route:
     - destination:
-        host: service-with-redirect.test-ns
-        subset: version-no-redirect
+        host: service-alt-rewrite.test-ns
+        subset: dev
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-alt-rewrite.test-ns
+        subset: exact-match-override
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-alt-rewrite.test-ns
+        subset: no-rewrite
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-alt-rewrite.test-ns
+        subset: with-alt-rewrite-url
     retries:
       attempts: 3 # attempts: 3 from default
