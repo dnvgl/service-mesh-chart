@@ -3,6 +3,183 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
+  name: simple-route-destination
+spec:
+  host: simple-route.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: alt-namespace-destination
+spec:
+  host: alt-namespace.alt-namespace
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: alt-loadbalancer-destination
+spec:
+  host: alt-loadbalancer.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: timeouts-destination
+spec:
+  host: timeouts.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: alt-timeout
+    labels:
+      version: alt-timeout
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: internal-only-destination
+spec:
+  host: internal-only.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: internal-except-version-destination
+spec:
+  host: internal-except-version.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: external
+    labels:
+      version: external
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: service-no-retries-destination
+spec:
+  host: service-no-retries.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: with-retries
+    labels:
+      version: with-retries
+  - name: retry-attempts
+    labels:
+      version: retry-attempts
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: service-with-retries-destination
+spec:
+  host: service-with-retries.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: no-retries
+    labels:
+      version: no-retries
+  - name: retry-attempts
+    labels:
+      version: retry-attempts
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: service-no-redirect-destination
+spec:
+  host: service-no-redirect.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: dev
+    labels:
+      version: dev
+  - name: exact-match-override
+    labels:
+      version: exact-match-override
+  - name: version-with-redirect
+    labels:
+      version: version-with-redirect
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: service-with-redirect-destination
+spec:
+  host: service-with-redirect.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: version-no-redirect
+    labels:
+      version: version-no-redirect
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
   name: service-no-rewrite-destination
 spec:
   host: service-no-rewrite.test-ns
@@ -55,6 +232,27 @@ spec:
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: multiple-prefixes-destination
+spec:
+  host: multiple-prefixes.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: alt-prefies
+    labels:
+      version: alt-prefies
+  - name: exact-prefix
+    labels:
+      version: exact-prefix
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: test-release-external-routes
@@ -66,6 +264,339 @@ spec:
   - gateway/one-gateway
 
   http:
+
+  # Routing for simple-route / version: v1
+  - name: simple-route-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: simple-route-v1-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: simple-route.test-ns
+        subset: v1
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for alt-namespace / version: v1
+  - name: alt-namespace-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: alt-namespace-v1-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: alt-namespace.alt-namespace
+        subset: v1
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for alt-loadbalancer / version: v1
+  - name: alt-loadbalancer-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: alt-loadbalancer-v1-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: alt-loadbalancer.test-ns
+        subset: v1
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for timeouts / version: v1
+  - name: timeouts-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: timeouts-v1-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: timeouts.test-ns
+        subset: v1
+    timeout: 4s # 4s from service
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for timeouts / version: alt-timeout
+  - name: timeouts-alt-timeout-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: timeouts-alt-timeout-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: timeouts.test-ns
+        subset: alt-timeout
+    timeout: 5s # 5s from version
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for internal-except-version / version: external
+  - name: internal-except-version-external-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: internal-except-version-external-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: internal-except-version.test-ns
+        subset: external
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for service-no-retries / version: v1
+  - name: service-no-retries-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-no-retries-v1-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-no-retries.test-ns
+        subset: v1
+    timeout: 3s # 3s from default
+    # retries: disabled (enabled: false # false from service)
+
+  # Routing for service-no-retries / version: with-retries
+  - name: service-no-retries-with-retries-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-no-retries-with-retries-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-no-retries.test-ns
+        subset: with-retries
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 4 # attempts: 4 from service
+
+  # Routing for service-no-retries / version: retry-attempts
+  - name: service-no-retries-retry-attempts-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-no-retries-retry-attempts-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-no-retries.test-ns
+        subset: retry-attempts
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 5 # attempts: 5 from version
+
+  # Routing for service-with-retries / version: no-retries
+  - name: service-with-retries-no-retries-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-with-retries-no-retries-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-with-retries.test-ns
+        subset: no-retries
+    timeout: 3s # 3s from default
+    # retries: disabled (enabled: false # false from version)
+
+  # Routing for service-with-retries / version: retry-attempts
+  - name: service-with-retries-retry-attempts-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-with-retries-retry-attempts-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-with-retries.test-ns
+        subset: retry-attempts
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 5 # attempts: 5 from version
+
+  # Routing for service-no-redirect / version: v1 
+  - name: service-no-redirect-v1-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: v1
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for service-no-redirect / version: dev 
+  - name: service-no-redirect-dev-route
+    match:        
+    - uri:
+        prefix: /dev-override-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: dev
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for service-no-redirect / version: exact-match-override 
+  - name: service-no-redirect-exact-match-override-route
+    match:
+    - uri:
+        exact: /dev-override-exact        
+    - uri:
+        prefix: /dev-override-exact/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: exact-match-override
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for service-no-redirect / version: version-with-redirect
+  - name: service-no-redirect-version-with-redirect-redirect
+    match:
+      - uri:
+          exact: /service-prefix-nr
+    redirect:
+      uri: /service-prefix-nr/  
+  - name: service-no-redirect-version-with-redirect-route
+    match:        
+    - uri:
+        prefix: /service-prefix-nr/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: version-with-redirect
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for service-with-redirect / version: v1
+  - name: service-with-redirect-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-with-redirect-v1-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-with-redirect.test-ns
+        subset: v1
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for service-with-redirect / version: version-no-redirect 
+  - name: service-with-redirect-version-no-redirect-route
+    match:        
+    - uri:
+        prefix: /service-prefix-nr/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: service-with-redirect.test-ns
+        subset: version-no-redirect
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
 
   # Routing for service-no-rewrite / version: v1
   - name: service-no-rewrite-v1-redirect
@@ -260,6 +791,305 @@ spec:
     timeout: 3s # 3s from default
     retries:
       attempts: 3 # attempts: 3 from default
+
+  # Routing for multiple-prefixes / version: v1
+  - name: multiple-prefixes-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix-1
+    redirect:
+      uri: /service-prefix-1/
+  - name: multiple-prefixes-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix-2
+    redirect:
+      uri: /service-prefix-2/  
+  - name: multiple-prefixes-v1-route
+    match:        
+    - uri:
+        prefix: /service-prefix-1/        
+    - uri:
+        prefix: /service-prefix-2/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: multiple-prefixes.test-ns
+        subset: v1
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for multiple-prefixes / version: alt-prefies
+  - name: multiple-prefixes-alt-prefies-redirect
+    match:
+      - uri:
+          exact: /version-prefix
+    redirect:
+      uri: /version-prefix/  
+  - name: multiple-prefixes-alt-prefies-route
+    match:        
+    - uri:
+        prefix: /version-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: multiple-prefixes.test-ns
+        subset: alt-prefies
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+
+  # Routing for multiple-prefixes / version: exact-prefix 
+  - name: multiple-prefixes-exact-prefix-route
+    match:
+    - uri:
+        exact: /version-prefix        
+    - uri:
+        prefix: /version-prefix/
+    rewrite:
+      uri: / # / from default
+    route:
+    - destination:
+        host: multiple-prefixes.test-ns
+        subset: exact-prefix
+    timeout: 3s # 3s from default
+    retries:
+      attempts: 3 # attempts: 3 from default
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-simple-route-internal-routes
+spec:
+  hosts:
+  - simple-route.test-ns
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: simple-route.test-ns
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-alt-namespace-internal-routes
+spec:
+  hosts:
+  - alt-namespace.alt-namespace
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: alt-namespace.alt-namespace
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-alt-loadbalancer-internal-routes
+spec:
+  hosts:
+  - alt-loadbalancer.test-ns
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: alt-loadbalancer.test-ns
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-timeouts-internal-routes
+spec:
+  hosts:
+  - timeouts.test-ns
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: timeouts.test-ns
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: timeouts.test-ns
+        subset: alt-timeout
+    retries:
+      attempts: 3 # attempts: 3 from default
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-internal-only-internal-routes
+spec:
+  hosts:
+  - internal-only.test-ns
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: internal-only.test-ns
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-internal-except-version-internal-routes
+spec:
+  hosts:
+  - internal-except-version.test-ns
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: internal-except-version.test-ns
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: internal-except-version.test-ns
+        subset: external
+    retries:
+      attempts: 3 # attempts: 3 from default
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-service-no-retries-internal-routes
+spec:
+  hosts:
+  - service-no-retries.test-ns
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: service-no-retries.test-ns
+        subset: v1
+    # retries: disabled (enabled: false # false from service)
+  - route:
+    - destination:
+        host: service-no-retries.test-ns
+        subset: with-retries
+    retries:
+      attempts: 4 # attempts: 4 from service
+  - route:
+    - destination:
+        host: service-no-retries.test-ns
+        subset: retry-attempts
+    retries:
+      attempts: 5 # attempts: 5 from version
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-service-with-retries-internal-routes
+spec:
+  hosts:
+  - service-with-retries.test-ns
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: service-with-retries.test-ns
+        subset: no-retries
+    # retries: disabled (enabled: false # false from version)
+  - route:
+    - destination:
+        host: service-with-retries.test-ns
+        subset: retry-attempts
+    retries:
+      attempts: 5 # attempts: 5 from version
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-service-no-redirect-internal-routes
+spec:
+  hosts:
+  - service-no-redirect.test-ns
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: dev
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: exact-match-override
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-no-redirect.test-ns
+        subset: version-with-redirect
+    retries:
+      attempts: 3 # attempts: 3 from default
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-service-with-redirect-internal-routes
+spec:
+  hosts:
+  - service-with-redirect.test-ns
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: service-with-redirect.test-ns
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: service-with-redirect.test-ns
+        subset: version-no-redirect
+    retries:
+      attempts: 3 # attempts: 3 from default
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -342,5 +1172,35 @@ spec:
     - destination:
         host: service-alt-rewrite.test-ns
         subset: with-alt-rewrite-url
+    retries:
+      attempts: 3 # attempts: 3 from default
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-multiple-prefixes-internal-routes
+spec:
+  hosts:
+  - multiple-prefixes.test-ns
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: multiple-prefixes.test-ns
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: multiple-prefixes.test-ns
+        subset: alt-prefies
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - route:
+    - destination:
+        host: multiple-prefixes.test-ns
+        subset: exact-prefix
     retries:
       attempts: 3 # attempts: 3 from default
