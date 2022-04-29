@@ -38,20 +38,16 @@ spec:
 */}}
 {{- $external := (include "platform-site.getBoolFromSources" (dict "valueName" ".internalOnly" | mustMergeOverwrite $sourcesArgs) | eq "false") }}
 {{- if $external }}
-{{- if or .externalIstioMatch .externalMatchConfig }}
-{{- include "platform-site.externalMatcher" (dict "service" $service "version" .version "settings" . "defaults" $defaults "sourcesArgs" $sourcesArgs ) }}
-{{- else }}
-{{- include "platform-site.externalMatcher" (dict "service" $service "version" .version "settings" $serviceSettings "defaults" $defaults "sourcesArgs" $sourcesArgs ) }}
-{{- end }}
+{{- include "platform-site.externalMatcher" (dict "versionSource" . "serviceSource" $serviceSettings "defaults" $defaults "sourcesArgs" $sourcesArgs ) }}
 
 {{- /* $rewriteSettings := default (default $defaults.rewriteUrlPrefix $serviceSettings.rewriteUrlPrefix) .rewriteUrlPrefix */}}
 {{- /* $rewriteEnabled := include "platform-site.isComponentEnabled" (dict "componentName" "rewriteUrlPrefix" | merge $sourcesArgs) */}}
 
-{{- $rewriteEnabled := include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) | eq "true" }}
+{{- $rewriteEnabled := include "platform-site.getBoolFromSources" (dict "valueName" ".rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) | eq "true" }}
 
 {{- if $rewriteEnabled }}
     rewrite:
-      uri: {{ include "platform-site.getValueFromSources" (dict "valueName" ".externalMatchConfig.rewriteUrlPrefix.replaceWith" | mustMergeOverwrite $sourcesArgs) | required "rewrite replacement is required" }}
+      uri: {{ include "platform-site.getValueFromSources" (dict "valueName" ".rewriteUrlPrefix.replaceWith" | mustMergeOverwrite $sourcesArgs) | required "rewrite replacement is required" }}
       {{- /* required "rewrite replacement is required" $rewriteSettings.rewriteUrlPrefix.replaceWith */}}
 {{- end }}
     route:

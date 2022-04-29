@@ -5,17 +5,15 @@ hosts:
 
 routes:
   - service: simple-route
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
+    urlPrefixes:
+      - service-prefix
     versions:
       - version: v1
 
   - service: alt-namespace
     namespace: alt-namespace
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
+    urlPrefixes:
+      - service-prefix
     versions:
       - version: v1
 
@@ -23,15 +21,13 @@ routes:
     loadBalancerPolicy: ROUND_ROBIN
     versions:
       - version: v1
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
+    urlPrefixes:
+      - service-prefix
 
   - service: timeouts
     timeout: 4s
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
+    urlPrefixes:
+      - service-prefix
     versions:
       - version: v1
       - version: alt-timeout
@@ -39,26 +35,23 @@ routes:
 
   - service: internal-only
     internalOnly: true
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
+    urlPrefixes:
+      - service-prefix
     versions:
       - version: v1
 
   - service: internal-except-version
     internalOnly: true
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
+    urlPrefixes:
+      - service-prefix
     versions:
       - version: v1
       - version: external
         internalOnly: false
 
   - service: service-no-retries
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
+    urlPrefixes:
+      - service-prefix
     retries:
       enabled: false
       settings:
@@ -75,13 +68,12 @@ routes:
             attempts: 5
        
   - service: service-with-retries
-    externalMatchConfig:
-      retries:
-        enabled: true
-        settings:
-          attempts: 4
-      urlPrefixes:
-        - service-prefix
+    retries:
+      enabled: true
+      settings:
+        attempts: 4
+    urlPrefixes:
+      - service-prefix
     versions:
       - version: no-retries
         retries:
@@ -93,106 +85,87 @@ routes:
 
 
   - service: service-no-redirect
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
-      redirectOnNoTrailingSlash: false
+    urlPrefixes:
+      - service-prefix
+    redirectOnNoTrailingSlash: false
     versions:
       - version: v1
       - version: dev
-        externalMatchConfig:
-          urlPrefixes:
-            - dev-override-prefix
+        urlPrefixes:
+          - dev-override-prefix
       - version: exact-match-override
-        externalMatchConfig:
-          exactPrefixMatch: true
-          urlPrefixes:
-            - dev-override-exact
+        exactPrefixMatch: true
+        urlPrefixes:
+          - dev-override-exact
       - version: version-with-redirect
-        externalMatchConfig:
-          urlPrefixes:
-            - service-prefix-nr
-          redirectOnNoTrailingSlash: true
+        urlPrefixes:
+          - service-prefix-nr
+        redirectOnNoTrailingSlash: true
 
   - service: service-with-redirect
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
-      redirectOnNoTrailingSlash: true
+    urlPrefixes:
+      - service-prefix
+    redirectOnNoTrailingSlash: true
     versions:
       - version: v1
       - version: version-no-redirect
-        externalMatchConfig:
-          urlPrefixes:
-            - service-prefix-nr
-          redirectOnNoTrailingSlash: false
+        urlPrefixes:
+          - service-prefix-nr
+        redirectOnNoTrailingSlash: false
 
   - service: service-no-rewrite
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
-      rewriteUrlPrefix:
-        enabled: false
+    urlPrefixes:
+      - service-prefix
+    rewriteUrlPrefix:
+      enabled: false
     versions:
       - version: v1
       - version: dev
-        externalMatchConfig:
-          urlPrefixes:
-            - dev-override-prefix
+        urlPrefixes:
+          - dev-override-prefix
       - version: exact-match-override
-        externalMatchConfig:
-          exactPrefixMatch: true
-          urlPrefixes:
-            - dev-override-exact
+        exactPrefixMatch: true
+        urlPrefixes:
+          - dev-override-exact
       - version: with-rewrite
-        externalMatchConfig:
-          rewriteUrlPrefix:
-            enabled: true
+        rewriteUrlPrefix:
+          enabled: true
       - version: with-alt-rewrite-url
-        externalMatchConfig:
-          rewriteUrlPrefix:
-            enabled: true
-            replaceWith: "alt-prefix/"
+        rewriteUrlPrefix:
+          enabled: true
+          replaceWith: "alt-prefix/"
 
   - service: service-alt-rewrite
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix
-      rewriteUrlPrefix:
-        replaceWith: "alt-prefix/"
+    urlPrefixes:
+      - service-prefix
+    rewriteUrlPrefix:
+      replaceWith: "alt-prefix/"
     versions:
       - version: v1
       - version: dev
-        externalMatchConfig:
-          urlPrefixes:
-            - dev-override-prefix
+        urlPrefixes:
+          - dev-override-prefix
       - version: exact-match-override
-        externalMatchConfig:
-          exactPrefixMatch: true
-          urlPrefixes:
-            - dev-override-exact
+        exactPrefixMatch: true
+        urlPrefixes:
+          - dev-override-exact
       - version: no-rewrite
-        externalMatchConfig:
-          rewriteUrlPrefix:
-            enabled: false
+        rewriteUrlPrefix:
+          enabled: false
       - version: with-alt-rewrite-url
-        externalMatchConfig:
-          rewriteUrlPrefix:
-            replaceWith: "alt-prefix-v/"
+        rewriteUrlPrefix:
+          replaceWith: "alt-prefix-v/"
 
   - service: multiple-prefixes
-    externalMatchConfig:
-      urlPrefixes:
-        - service-prefix-1
-        - service-prefix-2
+    urlPrefixes:
+      - service-prefix-1
+      - service-prefix-2
     versions:
       - version: v1
       - version: alt-prefies
-        externalMatchConfig:
-          urlPrefixes:
-            - version-prefix
-      - version: exact-prefix
-        externalMatchConfig:
-          exactPrefixMatch: true
-          urlPrefixes:
+        urlPrefixes:
           - version-prefix
+      - version: exact-prefix
+        exactPrefixMatch: true
+        urlPrefixes:
+        - version-prefix

@@ -12,12 +12,11 @@ defaults:
     enabled: true
     settings:
       attempts: 3
-  externalMatchConfig:
-    redirectOnNoTrailingSlash: true
-    exactPrefixMatch: false
-    rewriteUrlPrefix:
-      enabled: true
-      replaceWith: "/"
+  redirectOnNoTrailingSlash: true
+  exactPrefixMatch: false
+  rewriteUrlPrefix:
+    enabled: true
+    replaceWith: "/"
   loadBalancerPolicy: RANDOM
   internalOnly: false
 

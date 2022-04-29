@@ -173,26 +173,20 @@ Create the name of the service account to use
 
 {{- define "platform-site.externalMatcher" }}
 
-{{- $sanitizedServiceName := .service | replace "." "-" }}
-{{- $sanitizedVersion := .version | replace "." "-" }}
+{{- $sanitizedServiceName := .serviceSource.service | replace "." "-" }}
+{{- $sanitizedVersion := .versionSource.version | replace "." "-" }}
 {{- /* args for templates which look across sources */}}
 {{- $routeName := printf "%s-%s-route" $sanitizedServiceName $sanitizedVersion }}
 
   # Routing for {{ printf "%s / version: %s" $sanitizedServiceName $sanitizedVersion }}
-{{- if .settings.externalIstioMatch }}
-  - name: {{ $routeName }}
-    match:
-    #custom match
-{{ .settings.externalIstioMatch | toYaml | indent 4 }}
-
-{{- else if .settings.externalMatchConfig }}
-
-{{- $prefixes := default (list .service) .settings.externalMatchConfig.urlPrefixes }}
+{{- $prefixes := default .serviceSource.urlPrefixes .versionSource.urlPrefixes }}
+{{- /* $prefixes := include "platform-site.getValueFromSources" (dict "valueName" ".urlPrefixes" | mustMergeOverwrite .sourcesArgs) | toYaml */}}
 
 {{- /* mutually exclusive settings, exactPrefixMatch takes precedence */}}
-{{- $exactPrefixMatch := include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.exactPrefixMatch" | mustMergeOverwrite .sourcesArgs) | eq "true" }}
-{{- $redirectOnTrailingSlash := and (not $exactPrefixMatch) (include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.redirectOnNoTrailingSlash" | mustMergeOverwrite .sourcesArgs) | eq "true" ) }}
+{{- $exactPrefixMatch := include "platform-site.getBoolFromSources" (dict "valueName" ".exactPrefixMatch" | mustMergeOverwrite .sourcesArgs) | eq "true" }}
+{{- $redirectOnTrailingSlash := and (not $exactPrefixMatch) (include "platform-site.getBoolFromSources" (dict "valueName" ".redirectOnNoTrailingSlash" | mustMergeOverwrite .sourcesArgs) | eq "true" ) }}
 
+{{- if $prefixes }}
 {{- if $redirectOnTrailingSlash }}
 {{- range $prefixes }}
 {{- $slashPrefix := printf "/%s" . }}
@@ -218,11 +212,21 @@ Create the name of the service account to use
     - uri:
         prefix: {{ $slashPrefix }}/
 {{- end }} {{- /* end range prefixes */}}
-{{- else }} {{- /* neither match nor match config */}}
+{{- end }} {{- /* end if prefixes */}}
+
+{{- $istioMatch := default .serviceSource.externalIstioMatch .versionSource.externalIstioMatch }}
+{{- if $istioMatch }}
+  - name: {{ $routeName }}
+    match:
+    #custom match
+{{ $istioMatch | toYaml | indent 4 }}
+{{- end }}  {{- /* end if externalIstioMatch */}}
+
+{{- if not (or $prefixes $istioMatch) }}
 
   - name: catch-all-{{ $routeName }}
+{{- end }}  {{- /* no prefix or istio match specification */}}
 
-{{- end }} {{- /* end match vs match config */}}
 {{- end }} {{- /* end define */}}
 
 

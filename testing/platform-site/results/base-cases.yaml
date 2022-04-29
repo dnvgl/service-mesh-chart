@@ -655,13 +655,13 @@ spec:
   - name: service-no-rewrite-with-rewrite-redirect
     match:
       - uri:
-          exact: /service-no-rewrite
+          exact: /service-prefix
     redirect:
-      uri: /service-no-rewrite/  
+      uri: /service-prefix/  
   - name: service-no-rewrite-with-rewrite-route
     match:        
     - uri:
-        prefix: /service-no-rewrite/
+        prefix: /service-prefix/
     rewrite:
       uri: / # / from default
     route:
@@ -676,13 +676,13 @@ spec:
   - name: service-no-rewrite-with-alt-rewrite-url-redirect
     match:
       - uri:
-          exact: /service-no-rewrite
+          exact: /service-prefix
     redirect:
-      uri: /service-no-rewrite/  
+      uri: /service-prefix/  
   - name: service-no-rewrite-with-alt-rewrite-url-route
     match:        
     - uri:
-        prefix: /service-no-rewrite/
+        prefix: /service-prefix/
     rewrite:
       uri: alt-prefix/ # alt-prefix/ from version
     route:
@@ -756,13 +756,13 @@ spec:
   - name: service-alt-rewrite-no-rewrite-redirect
     match:
       - uri:
-          exact: /service-alt-rewrite
+          exact: /service-prefix
     redirect:
-      uri: /service-alt-rewrite/  
+      uri: /service-prefix/  
   - name: service-alt-rewrite-no-rewrite-route
     match:        
     - uri:
-        prefix: /service-alt-rewrite/
+        prefix: /service-prefix/
     route:
     - destination:
         host: service-alt-rewrite.test-ns
@@ -775,13 +775,13 @@ spec:
   - name: service-alt-rewrite-with-alt-rewrite-url-redirect
     match:
       - uri:
-          exact: /service-alt-rewrite
+          exact: /service-prefix
     redirect:
-      uri: /service-alt-rewrite/  
+      uri: /service-prefix/  
   - name: service-alt-rewrite-with-alt-rewrite-url-route
     match:        
     - uri:
-        prefix: /service-alt-rewrite/
+        prefix: /service-prefix/
     rewrite:
       uri: alt-prefix-v/ # alt-prefix-v/ from version
     route:
