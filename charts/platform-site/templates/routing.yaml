@@ -79,15 +79,16 @@ spec:
 {{- end }} {{- /* end range routes */ -}}
 
 {{- range .Values.routes }}
-{{ $service := .service }}  
-{{ $qualifiedServiceName := printf "%s.%s" $service (default $.Release.Namespace .namespace) }}
+{{- $service := .service }}  
+{{- $sanitizedServiceName := .service | replace "." "-" }}
+{{- $qualifiedServiceName := printf "%s.%s" $service (default $.Release.Namespace .namespace) }}
 {{- $serviceSettings := . }}
 
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ $.Release.Name }}-{{ .service | replace "." "-" }}-internal-routes
+  name: {{ $.Release.Name }}-{{ $sanitizedServiceName }}-internal-routes
 spec:
   hosts:
   - {{ $qualifiedServiceName }}
@@ -95,13 +96,16 @@ spec:
   - mesh
   http:
 {{- range .versions }}
+{{- /* args for templates which look across sources */}}
 {{- $sourcesArgs := (dict "versionSource" . "serviceSource" $serviceSettings "defaultSource" $defaults "Template" $.Template) }}
-  - route:
-  {{- if .internalMatch }}
-  {{- include "platform-site.internalMatcher" . }}
-  {{ else if $serviceSettings.internalMatch }}
-  {{- include "platform-site.internalMatcher" $serviceSettings }}
+{{- $sanitizedVersion := .version | replace "." "-" }}
+  - name: {{ printf "%s-%s-route" $sanitizedServiceName $sanitizedVersion }}
+  {{- $match := default $serviceSettings.internalMatch .internalMatch }}
+  {{- if $match }}
+    match:
+{{ $match | toYaml | indent 4 }}
   {{- end }}
+    route:
     - destination:
         host: {{ $qualifiedServiceName }}
         subset: {{ .version }}

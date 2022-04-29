@@ -228,11 +228,3 @@ Create the name of the service account to use
 {{- end }}  {{- /* no prefix or istio match specification */}}
 
 {{- end }} {{- /* end define */}}
-
-
-{{- define "platform-site.internalMatcher" }}
-{{- if .settings.internalMatch }}
-    match:
-{{- default .settings.internalMatch | toYaml | indent 4 }}
-{{- end }}
-{{- end }}

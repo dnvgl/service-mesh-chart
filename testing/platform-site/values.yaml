@@ -49,6 +49,17 @@ routes:
       - version: external
         internalOnly: false
 
+  - service: internal-only-with-matches
+    internalOnly: true
+    urlPrefixes:
+      - service-prefix
+    versions:
+      - version: v1
+      - version: dev
+        internalMatch:
+          - uri:
+              prefix: /service-prefix-dev/
+
   - service: service-no-retries
     urlPrefixes:
       - service-prefix

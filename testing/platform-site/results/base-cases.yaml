@@ -99,6 +99,24 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
+  name: internal-only-with-matches-destination
+spec:
+  host: internal-only-with-matches.test-ns
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: dev
+    labels:
+      version: dev
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
   name: service-no-retries-destination
 spec:
   host: service-no-retries.test-ns
@@ -870,7 +888,8 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: simple-route-v1-route
+    route:
     - destination:
         host: simple-route.test-ns
         subset: v1
@@ -888,7 +907,8 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: alt-namespace-v1-route
+    route:
     - destination:
         host: alt-namespace.alt-namespace
         subset: v1
@@ -906,7 +926,8 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: alt-loadbalancer-v1-route
+    route:
     - destination:
         host: alt-loadbalancer.test-ns
         subset: v1
@@ -924,13 +945,15 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: timeouts-v1-route
+    route:
     - destination:
         host: timeouts.test-ns
         subset: v1
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: timeouts-alt-timeout-route
+    route:
     - destination:
         host: timeouts.test-ns
         subset: alt-timeout
@@ -948,7 +971,8 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: internal-only-v1-route
+    route:
     - destination:
         host: internal-only.test-ns
         subset: v1
@@ -966,16 +990,47 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: internal-except-version-v1-route
+    route:
     - destination:
         host: internal-except-version.test-ns
         subset: v1
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: internal-except-version-external-route
+    route:
     - destination:
         host: internal-except-version.test-ns
         subset: external
+    retries:
+      attempts: 3 # attempts: 3 from default
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-internal-only-with-matches-internal-routes
+spec:
+  hosts:
+  - internal-only-with-matches.test-ns
+  gateways:
+  - mesh
+  http:
+  - name: internal-only-with-matches-v1-route
+    route:
+    - destination:
+        host: internal-only-with-matches.test-ns
+        subset: v1
+    retries:
+      attempts: 3 # attempts: 3 from default
+  - name: internal-only-with-matches-dev-route
+    match:
+    - uri:
+        prefix: /service-prefix-dev/
+    route:
+    - destination:
+        host: internal-only-with-matches.test-ns
+        subset: dev
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -990,18 +1045,21 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: service-no-retries-v1-route
+    route:
     - destination:
         host: service-no-retries.test-ns
         subset: v1
     # retries: disabled (enabled: false # false from service)
-  - route:
+  - name: service-no-retries-with-retries-route
+    route:
     - destination:
         host: service-no-retries.test-ns
         subset: with-retries
     retries:
       attempts: 4 # attempts: 4 from service
-  - route:
+  - name: service-no-retries-retry-attempts-route
+    route:
     - destination:
         host: service-no-retries.test-ns
         subset: retry-attempts
@@ -1019,12 +1077,14 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: service-with-retries-no-retries-route
+    route:
     - destination:
         host: service-with-retries.test-ns
         subset: no-retries
     # retries: disabled (enabled: false # false from version)
-  - route:
+  - name: service-with-retries-retry-attempts-route
+    route:
     - destination:
         host: service-with-retries.test-ns
         subset: retry-attempts
@@ -1042,25 +1102,29 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: service-no-redirect-v1-route
+    route:
     - destination:
         host: service-no-redirect.test-ns
         subset: v1
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-no-redirect-dev-route
+    route:
     - destination:
         host: service-no-redirect.test-ns
         subset: dev
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-no-redirect-exact-match-override-route
+    route:
     - destination:
         host: service-no-redirect.test-ns
         subset: exact-match-override
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-no-redirect-version-with-redirect-route
+    route:
     - destination:
         host: service-no-redirect.test-ns
         subset: version-with-redirect
@@ -1078,13 +1142,15 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: service-with-redirect-v1-route
+    route:
     - destination:
         host: service-with-redirect.test-ns
         subset: v1
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-with-redirect-version-no-redirect-route
+    route:
     - destination:
         host: service-with-redirect.test-ns
         subset: version-no-redirect
@@ -1102,31 +1168,36 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: service-no-rewrite-v1-route
+    route:
     - destination:
         host: service-no-rewrite.test-ns
         subset: v1
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-no-rewrite-dev-route
+    route:
     - destination:
         host: service-no-rewrite.test-ns
         subset: dev
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-no-rewrite-exact-match-override-route
+    route:
     - destination:
         host: service-no-rewrite.test-ns
         subset: exact-match-override
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-no-rewrite-with-rewrite-route
+    route:
     - destination:
         host: service-no-rewrite.test-ns
         subset: with-rewrite
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-no-rewrite-with-alt-rewrite-url-route
+    route:
     - destination:
         host: service-no-rewrite.test-ns
         subset: with-alt-rewrite-url
@@ -1144,31 +1215,36 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: service-alt-rewrite-v1-route
+    route:
     - destination:
         host: service-alt-rewrite.test-ns
         subset: v1
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-alt-rewrite-dev-route
+    route:
     - destination:
         host: service-alt-rewrite.test-ns
         subset: dev
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-alt-rewrite-exact-match-override-route
+    route:
     - destination:
         host: service-alt-rewrite.test-ns
         subset: exact-match-override
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-alt-rewrite-no-rewrite-route
+    route:
     - destination:
         host: service-alt-rewrite.test-ns
         subset: no-rewrite
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: service-alt-rewrite-with-alt-rewrite-url-route
+    route:
     - destination:
         host: service-alt-rewrite.test-ns
         subset: with-alt-rewrite-url
@@ -1186,19 +1262,22 @@ spec:
   gateways:
   - mesh
   http:
-  - route:
+  - name: multiple-prefixes-v1-route
+    route:
     - destination:
         host: multiple-prefixes.test-ns
         subset: v1
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: multiple-prefixes-alt-prefies-route
+    route:
     - destination:
         host: multiple-prefixes.test-ns
         subset: alt-prefies
     retries:
       attempts: 3 # attempts: 3 from default
-  - route:
+  - name: multiple-prefixes-exact-prefix-route
+    route:
     - destination:
         host: multiple-prefixes.test-ns
         subset: exact-prefix
