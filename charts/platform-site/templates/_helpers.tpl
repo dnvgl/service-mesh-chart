@@ -63,12 +63,9 @@ Create the name of the service account to use
 
 
 {{- define "platform-site.retries" -}}
-{{- if (include "platform-site.getBoolFromSources" (dict "valueName" ".retries.enabled" | mustMergeOverwrite .) 
-    | eq "true") }}
+{{- if (include "platform-site.getBoolFromSources" (dict "valueName" ".retries.enabled" | mustMergeOverwrite .) | eq "true") }}
     retries:
-{{ include "platform-site.getValueFromSources" (dict "valueName" ".retries.settings" | mustMergeOverwrite .) 
-    | required "retry settings are required"
-    | trim | indent 6 }}
+{{ include "platform-site.getValueFromSources" (dict "valueName" ".retries.settings" | mustMergeOverwrite .) | required "retry settings are required" | trim | indent 6 }}
 {{- else }}
     # retries: disabled (enabled: {{ include "platform-site.getValueFromSources" (dict "valueName" ".retries.enabled" | mustMergeOverwrite .) }})
 {{- end }}
@@ -193,11 +190,8 @@ Create the name of the service account to use
 {{- $prefixes := default (list .service) .settings.externalMatchConfig.urlPrefixes }}
 
 {{- /* mutually exclusive settings, exactPrefixMatch takes precedence */}}
-{{- $exactPrefixMatch := include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.exactPrefixMatch" | mustMergeOverwrite .sourcesArgs) 
-      | eq "true" }}
-{{- $redirectOnTrailingSlash := and (not $exactPrefixMatch)
-  (include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.redirectOnNoTrailingSlash" | mustMergeOverwrite .sourcesArgs)
-    | eq "true" ) }}
+{{- $exactPrefixMatch := include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.exactPrefixMatch" | mustMergeOverwrite .sourcesArgs) | eq "true" }}
+{{- $redirectOnTrailingSlash := and (not $exactPrefixMatch) (include "platform-site.getBoolFromSources" (dict "valueName" ".externalMatchConfig.redirectOnNoTrailingSlash" | mustMergeOverwrite .sourcesArgs) | eq "true" ) }}
 
 {{- if $redirectOnTrailingSlash }}
 {{- range $prefixes }}
