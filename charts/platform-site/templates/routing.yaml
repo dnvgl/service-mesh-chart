@@ -20,7 +20,7 @@ spec:
 {{- /* Store general route values before version range */}}
 {{- $service := required "service is required" .service }}
 {{- $sanitizedServiceName := $service | replace "." "-" }}
-{{- $qualifiedServiceName := printf "%s.%s" $service (default $.Release.Namespace .namespace) }}
+{{- $qualifiedServiceName := printf "%s.%s.svc.cluster.local" $service (default $.Release.Namespace .namespace) }}
 {{- $serviceSettings := . }}
 
 {{- range .versions }}
@@ -81,7 +81,7 @@ spec:
 {{- range .Values.routes }}
 {{- $service := .service }}  
 {{- $sanitizedServiceName := .service | replace "." "-" }}
-{{- $qualifiedServiceName := printf "%s.%s" $service (default $.Release.Namespace .namespace) }}
+{{- $qualifiedServiceName := printf "%s.%s.svc.cluster.local" $service (default $.Release.Namespace .namespace) }}
 {{- $serviceSettings := . }}
 
 ---
