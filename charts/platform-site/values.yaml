@@ -7,7 +7,7 @@ session-management:
   # namespace:  default is release
 
 defaults:
-  timeout: 3s
+  timeout: 15s
   retries:
     enabled: true
     settings:
