@@ -62,7 +62,13 @@ Create the name of the service account to use
 {{- end }}
 
 
-{{- define "platform-site.retries" -}}
+{{- define "platform-site.commonOptions" -}}
+
+{{- $timeout := include "platform-site.getValueFromSources" (dict "valueName" ".timeout" | mustMergeOverwrite .) }}
+{{- if $timeout }}
+    timeout: {{ $timeout }}
+{{- end }}
+
 {{- if (include "platform-site.getBoolFromSources" (dict "valueName" ".retries.enabled" | mustMergeOverwrite .) | eq "true") }}
     retries:
 {{ include "platform-site.getValueFromSources" (dict "valueName" ".retries.settings" | mustMergeOverwrite .) | required "retry settings are required" | trim | indent 6 }}

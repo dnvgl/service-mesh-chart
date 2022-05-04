@@ -893,6 +893,7 @@ spec:
     - destination:
         host: simple-route.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -912,6 +913,7 @@ spec:
     - destination:
         host: alt-namespace.alt-namespace.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -931,6 +933,7 @@ spec:
     - destination:
         host: alt-loadbalancer.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -950,6 +953,7 @@ spec:
     - destination:
         host: timeouts.test-ns.svc.cluster.local
         subset: v1
+    timeout: 4s # 4s from service
     retries:
       attempts: 3 # attempts: 3 from default
   - name: timeouts-alt-timeout-route
@@ -957,6 +961,7 @@ spec:
     - destination:
         host: timeouts.test-ns.svc.cluster.local
         subset: alt-timeout
+    timeout: 5s # 5s from version
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -976,6 +981,7 @@ spec:
     - destination:
         host: internal-only.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -995,6 +1001,7 @@ spec:
     - destination:
         host: internal-except-version.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: internal-except-version-external-route
@@ -1002,6 +1009,7 @@ spec:
     - destination:
         host: internal-except-version.test-ns.svc.cluster.local
         subset: external
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -1021,6 +1029,7 @@ spec:
     - destination:
         host: internal-only-with-matches.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: internal-only-with-matches-dev-route
@@ -1031,6 +1040,7 @@ spec:
     - destination:
         host: internal-only-with-matches.test-ns.svc.cluster.local
         subset: dev
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -1050,12 +1060,14 @@ spec:
     - destination:
         host: service-no-retries.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     # retries: disabled (enabled: false # false from service)
   - name: service-no-retries-with-retries-route
     route:
     - destination:
         host: service-no-retries.test-ns.svc.cluster.local
         subset: with-retries
+    timeout: 15s # 15s from default
     retries:
       attempts: 4 # attempts: 4 from service
   - name: service-no-retries-retry-attempts-route
@@ -1063,6 +1075,7 @@ spec:
     - destination:
         host: service-no-retries.test-ns.svc.cluster.local
         subset: retry-attempts
+    timeout: 15s # 15s from default
     retries:
       attempts: 5 # attempts: 5 from version
 ---
@@ -1082,12 +1095,14 @@ spec:
     - destination:
         host: service-with-retries.test-ns.svc.cluster.local
         subset: no-retries
+    timeout: 15s # 15s from default
     # retries: disabled (enabled: false # false from version)
   - name: service-with-retries-retry-attempts-route
     route:
     - destination:
         host: service-with-retries.test-ns.svc.cluster.local
         subset: retry-attempts
+    timeout: 15s # 15s from default
     retries:
       attempts: 5 # attempts: 5 from version
 ---
@@ -1107,6 +1122,7 @@ spec:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-no-redirect-dev-route
@@ -1114,6 +1130,7 @@ spec:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: dev
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-no-redirect-exact-match-override-route
@@ -1121,6 +1138,7 @@ spec:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: exact-match-override
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-no-redirect-version-with-redirect-route
@@ -1128,6 +1146,7 @@ spec:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: version-with-redirect
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -1147,6 +1166,7 @@ spec:
     - destination:
         host: service-with-redirect.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-with-redirect-version-no-redirect-route
@@ -1154,6 +1174,7 @@ spec:
     - destination:
         host: service-with-redirect.test-ns.svc.cluster.local
         subset: version-no-redirect
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -1173,6 +1194,7 @@ spec:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-no-rewrite-dev-route
@@ -1180,6 +1202,7 @@ spec:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: dev
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-no-rewrite-exact-match-override-route
@@ -1187,6 +1210,7 @@ spec:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: exact-match-override
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-no-rewrite-with-rewrite-route
@@ -1194,6 +1218,7 @@ spec:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: with-rewrite
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-no-rewrite-with-alt-rewrite-url-route
@@ -1201,6 +1226,7 @@ spec:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: with-alt-rewrite-url
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -1220,6 +1246,7 @@ spec:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-alt-rewrite-dev-route
@@ -1227,6 +1254,7 @@ spec:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: dev
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-alt-rewrite-exact-match-override-route
@@ -1234,6 +1262,7 @@ spec:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: exact-match-override
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-alt-rewrite-no-rewrite-route
@@ -1241,6 +1270,7 @@ spec:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: no-rewrite
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: service-alt-rewrite-with-alt-rewrite-url-route
@@ -1248,6 +1278,7 @@ spec:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: with-alt-rewrite-url
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
 ---
@@ -1267,6 +1298,7 @@ spec:
     - destination:
         host: multiple-prefixes.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: multiple-prefixes-alt-prefies-route
@@ -1274,6 +1306,7 @@ spec:
     - destination:
         host: multiple-prefixes.test-ns.svc.cluster.local
         subset: alt-prefies
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default
   - name: multiple-prefixes-exact-prefix-route
@@ -1281,5 +1314,6 @@ spec:
     - destination:
         host: multiple-prefixes.test-ns.svc.cluster.local
         subset: exact-prefix
+    timeout: 15s # 15s from default
     retries:
       attempts: 3 # attempts: 3 from default

@@ -62,17 +62,12 @@ spec:
 
 {{- end }} {{- /* end if explicit route */}}
 
-{{- $timeout := include "platform-site.getValueFromSources" (dict "valueName" ".timeout" | mustMergeOverwrite $sourcesArgs) }}
-{{- if $timeout }}
-    timeout: {{ $timeout }}
-{{- end }}
+{{- include "platform-site.commonOptions" (dict "retries" .retries | mustMergeOverwrite $sourcesArgs) }}
 
 {{- if .corsPolicy }}
     corsPolicy:
 {{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
 {{- end }} {{- /* end if cors policy */ -}}
-
-{{- include "platform-site.retries" (dict "retries" .retries | mustMergeOverwrite $sourcesArgs) }}
 
 {{- end }} {{- /* internal only */ -}}
 {{- end }} {{- /* end range versions */ -}}
@@ -109,7 +104,7 @@ spec:
     - destination:
         host: {{ $qualifiedServiceName }}
         subset: {{ .version }}
-{{- include "platform-site.retries" (dict "retries" .retries | mustMergeOverwrite $sourcesArgs) }}
+{{- include "platform-site.commonOptions" (dict "retries" .retries | mustMergeOverwrite $sourcesArgs) }}
 
 {{- end }} {{/* end range versions */}}
 
