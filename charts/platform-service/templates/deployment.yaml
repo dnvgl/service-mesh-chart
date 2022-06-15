@@ -18,6 +18,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app: {{ required "app is required" .Values.app }}
     version: {{ .Values.version }}
+{{ include "kubeit.tags" . | trim | indent 4 }}
 spec:
   {{- if eq .Values.updateStrategy "NoSurge" }}
   strategy:
@@ -42,6 +43,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app: {{ required "app is required" .Values.app }}
         version: {{ .Values.version }}
+        aadpodidbinding: {{ .Values.podIdentityName | default .Values.kubeit.tenantPodIdentityName }}
         {{- if .Values.opa.enabled }}
         sidecar.opa-istio.io/inject: "true"
         {{- end }}
@@ -52,10 +54,8 @@ spec:
         {{ .Values.sessionManagement.enabledWithoutRedirectLabel }}
         {{- end }}
         {{- end }}
-        {{- if .Values.additionalPodLabels }}
-{{- with .Values.additionalPodLabels }}
-{{ tpl . $ | indent 8 }}
-{{- end }}
+        {{- with .Values.additionalPodLabels }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
         {{- if .Values.service.liveness.enabled }}  
@@ -64,16 +64,24 @@ spec:
         {{- if .Values.mergeAppMetrics }}
         prometheus.io/scrape: "true"
         {{- end }}
-        {{- if .Values.proxyResources.requests }}  
-        {{- if .Values.proxyResources.requests.cpu }}  
+        {{- if .Values.proxyResources.requests }}
+        {{- if .Values.proxyResources.requests.cpu }}
         sidecar.istio.io/proxyCPU: {{ .Values.proxyResources.requests.cpu }}
         {{- end }}
-        {{- if .Values.proxyResources.requests.memory }}  
+        {{- if .Values.proxyResources.requests.memory }}
         sidecar.istio.io/proxyMemory: {{ .Values.proxyResources.requests.memory }}
         {{- end }}
         {{- end }}
+        {{- if .Values.service.liveness.enabled }}
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+        {{- end }}
+        {{- with .Values.additionalPodAnnotations }}       
+        {{ toYaml . | indent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: {{ include "platform-service.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
       initContainers:
       {{- range .Values.initContainers }}
         - name: {{ .name }}
@@ -84,11 +92,12 @@ spec:
 {{ toYaml . | indent 12 }}
 {{- end }}
       {{- end }}
+      {{- toYaml .Values.initContainersExtra | nindent 8 }}
       containers:
 {{ if .Values.opa.enabled }}
         - name: opa-istio
           image: {{ .Values.opa.image }}
-          imagePullPolicy: IfNotPresent          
+          imagePullPolicy: IfNotPresent
           args:
           - run
           - --server
@@ -124,10 +133,9 @@ spec:
 {{ if .Values.opa.resources }}
           resources:
 {{ toYaml .Values.opa.resources | indent 12 }}
-{{ end }}      
+{{ end }}
 
-
-{{ end }}      
+{{ end }}
         - name: {{ include "platform-service.name" . }}
           image: "{{ include "image" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -157,12 +165,13 @@ spec:
 {{- if .Values.workingDir }}
           workingDir: {{ .Values.workingDir }}
 {{- end }}
-
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           ports:
             - name: http
               containerPort: {{ .Values.image.containerPort }}
               protocol: TCP
-          {{- if .Values.service.liveness.enabled }} 
+          {{- if .Values.service.liveness.enabled }}
           livenessProbe:
             httpGet:
               path: {{ .Values.service.liveness.path }}
@@ -187,6 +196,12 @@ spec:
 {{ .Values.health.startupProbe | toYaml | trim | indent 12 }}
 {{- end }}
           volumeMounts:
+{{- if eq .Values.keyVaultSecrets.enabled true }}
+{{- range $keyVaults:= .Values.keyVaultSecrets.keyVaults }}
+            - name: "secrets-store-{{ .keyVaultName | lower }}"
+              mountPath: "/var/secrets/{{ .keyVaultName | lower }}"
+{{- end }}
+{{- end }}
           {{- range .Values.volumes }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
@@ -214,14 +229,24 @@ spec:
       - name: "{{ .Values.image.pullSecret }}"
       {{- end }}
       volumes:
-{{ if .Values.opa.enabled }}      
+{{ if .Values.opa.enabled }}
       - name: opa-istio-config
-        configMap: 
+        configMap:
           name: opa-istio-config
       - name: opa-policy
-        configMap: 
+        configMap:
           name: opa-policy
-{{ end }} 
+{{ end }}
+{{- if .Values.keyVaultSecrets }}
+{{- range $keyVaults:= .Values.keyVaultSecrets.keyVaults }}
+      - name: "secrets-store-{{ .keyVaultName | lower }}"
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "{{ $.Values.app }}-secret-class-{{ .keyVaultName | lower }}"
+{{- end }}
+{{- end }}
 {{- range .Values.volumes }}
       - name: {{ .name }}
 {{ tpl .volumeDefinition $ | indent 8 }}

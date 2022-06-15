@@ -1,3 +1,8 @@
+{{ $tenantPrefix := "" }}
+{{- if $.Values.kubeit.tenantPrefixEnabled }}
+{{ $tenantPrefix = printf "-%s" .Values.kubeit.tenantName }}
+{{- end }}
+
 {{- define "retries" -}}
 {{- if .Values.defaultRouting.retries.enabled }}
     retries:
@@ -9,9 +14,11 @@
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
 {{- if not .Values.deploymentOnly -}}
 {{- if .Values.defaultRouting.enabled}}
 {{- $fullName := include "platform-service.fullname" . -}}
+---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -27,24 +34,34 @@ spec:
         host: {{ include "platform-service.fullQualifiedServiceName" . | quote }}
 {{- include "retries" . }}
 
-{{- if .Values.gateway.exposeService }}
-
 ---
+{{- if .Values.gateway.exposeService }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: {{ include "platform-service.serviceName" . }}-external
+  labels:
+    app: {{ required "app is required" .Values.app }}
+{{ include "kubeit.tags" . | trim | indent 4 }}
 spec:
   hosts:
-{{- if .Values.defaultRouting.allHosts }}
-  - "*"
-{{- else }}
-  {{- range .Values.defaultRouting.hosts }}
-  - {{ . | quote }}
+  {{- if .Values.defaultRouting.kubeitDefaultHosts.enabled }}
+    - "{{ .Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default .Values.app }}{{ $tenantPrefix }}.{{ .Values.kubeit.clusterSubdomain }}.{{ .Values.defaultRouting.kubeitDefaultHosts.dnsDomain }}"                                                                      # Cluster specific subdomain, i.e.: dev001
+    - "{{ .Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default .Values.app }}{{ $tenantPrefix }}.{{ .Values.kubeit.shortRegion }}.{{ .Values.kubeit.environmentName }}.{{ .Values.defaultRouting.kubeitDefaultHosts.dnsDomain }}"                                      # F5/Active Cluster
+    - "{{ .Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default .Values.app }}{{ $tenantPrefix }}.{{ .Values.kubeit.clusterColour }}.{{ .Values.kubeit.shortRegion }}.{{ .Values.kubeit.environmentName }}.{{ .Values.defaultRouting.kubeitDefaultHosts.dnsDomain }}"   # Colour cluster - blue/green deployment
+  {{- if .Values.defaultRouting.kubeitDefaultHosts.tenantMultiRegion }}
+    - "{{ .Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default .Values.app }}{{ $tenantPrefix }}.{{ $.Values.kubeit.environmentName }}.{{ .Values.defaultRouting.kubeitDefaultHosts.dnsDomain }}"                                                                                                              # Traffic Manager
   {{- end }}
+  {{- end }}
+  {{- range .Values.defaultRouting.hosts }}
+    - {{ . | quote }}
 {{- end }}
   gateways:
-  - {{ required "A valid .Values.gateway.name entry required!" .Values.gateway.name }}
+{{- if or (.Values.defaultRouting.kubeitDefaultHosts.enabled) (eq .Values.kubeit.gatewayEnabled true) }}
+    - "istio-system/global-https-{{ .Values.kubeit.ingressType }}-default-gateway"
+{{- else if .Values.gateway.name }}
+    - {{ required "A valid .Values.gateway.name entry required!" .Values.gateway.name }}
+{{- end }}
 {{- $prefixes := default (list .Values.app) .Values.defaultRouting.urlPrefixes }}
   http:
 {{- if .Values.defaultRouting.urlExactMatches }}

@@ -3,6 +3,9 @@ apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
 metadata:
   name: {{ include "platform-service.fullname" . }}
+  labels:
+    app: {{ required "app is required" .Values.app }}
+{{ include "kubeit.tags" . | trim | indent 4 }}
 spec:
   selector:
     matchLabels:

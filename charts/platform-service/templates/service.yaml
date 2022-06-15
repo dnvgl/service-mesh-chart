@@ -11,6 +11,8 @@ metadata:
     helm.sh/chart: {{ include "platform-service.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app: {{ required "app is required" .Values.app }}
+{{ include "kubeit.tags" . | trim | indent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
