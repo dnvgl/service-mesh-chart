@@ -4,8 +4,7 @@ kind: DestinationRule
 metadata:
   name: {{ include "platform-service.fullname" . }}-destinationrule
   labels:
-    app: {{ required "app is required" .Values.app }}
-{{ include "kubeit.tags" . | trim | indent 4 }}
+{{ include "appLabels" . | trim | indent 4 }}
 spec:
   host: {{ include "platform-service.fullQualifiedServiceName" . }}
   trafficPolicy:

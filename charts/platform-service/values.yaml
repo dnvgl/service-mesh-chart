@@ -66,7 +66,7 @@ gateway:
   # map virtual service to a gateway expose this service
   exposeService: true
   # gateway name (fully qualified if in a different namespace), default one provided automatically by KubeIT
-  # name: gateway/one-gateway
+  name: gateway/one-gateway
 
 opa:
   # set to true to enable opa.  requires config in a config map called opa-istio-config and policy in a config map called opa-policy
@@ -284,9 +284,6 @@ debugEnvoyFilters: true
 kubeit:
   tenantPrefixEnabled: true
   gatewayEnabled: true
-
-# TODO: remove if not needed
-sessionManagerDeployment: false
 
 initContainersExtra: []
 

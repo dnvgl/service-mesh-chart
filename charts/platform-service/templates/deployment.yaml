@@ -12,13 +12,7 @@ kind: Deployment
 metadata:
   name: {{ include "platform-service.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "platform-service.name" . }}
-    helm.sh/chart: {{ include "platform-service.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app: {{ required "app is required" .Values.app }}
-    version: {{ .Values.version }}
-{{ include "kubeit.tags" . | trim | indent 4 }}
+{{ include "appLabels" . | trim | indent 4 }}
 spec:
   {{- if eq .Values.updateStrategy "NoSurge" }}
   strategy:
@@ -39,11 +33,10 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "platform-service.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
-        app: {{ required "app is required" .Values.app }}
-        version: {{ .Values.version }}
+{{ include "appLabels" . | trim | indent 8 }}
+        {{- if or ( .Values.podIdentityName )( .Values.kubeit.tenantPodIdentityName ) }}
         aadpodidbinding: {{ .Values.podIdentityName | default .Values.kubeit.tenantPodIdentityName }}
+        {{- end }}
         {{- if .Values.opa.enabled }}
         sidecar.opa-istio.io/inject: "true"
         {{- end }}
@@ -152,6 +145,18 @@ spec:
 {{ $value | toYaml | trim | indent 14 }}
 {{- else }}
               value: {{ $value | quote }}
+{{- end }}
+{{- end }}
+{{- if eq .Values.keyVaultSecrets.enabled true }}
+{{- range $keyVaults:= .Values.keyVaultSecrets.keyVaults }}
+{{- range $secrets:= .secrets }}
+{{- if eq $secrets.k8sSecretEnabled true }}
+            - name: {{ .k8sSecretName }}
+              valueFrom:
+                name: {{ .k8sSecretName }}
+                key: {{ .k8sSecretKey }}
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 
