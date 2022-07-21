@@ -256,17 +256,6 @@ tolerations: []
 
 affinity: {}
 
-keyVaultSecrets:
-  enabled: false                                    # Set to true to enable keyVaultSecrets
-  # tenantId:                                       # ID of the tenant with desired keyvault
-  # keyVaults:
-  #   - keyVaultName:                               # KeyVault name
-  #     secrets:
-  #       - name:                                   # Name of the secret in globalKeyvaultName KeyVault
-  #         k8sSecretEnabled: true                  # Optional - If set to true, creates Kubernetes secret in the application namespace
-  #         k8sSecretName: ancris3-session-manager  # Optional - Name of the Kubernetes secret
-  #         k8sSecretKey: client-secret             # Optional - Secret key of the Kubernetes secret
-
 securityContext: {}
 #   fsGroup: 1000
 #   runAsUser: 1000
@@ -283,8 +272,5 @@ debugEnvoyFilters: true
 
 kubeit:
   tenantPrefixEnabled: true
-  gatewayEnabled: true
 
-initContainersExtra: []
-
-# podIdentityName:
+initContainersDefinitions: []

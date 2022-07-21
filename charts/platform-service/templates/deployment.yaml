@@ -34,9 +34,6 @@ spec:
     metadata:
       labels:
 {{ include "appLabels" . | trim | indent 8 }}
-        {{- if or ( .Values.podIdentityName )( .Values.kubeit.tenantPodIdentityName ) }}
-        aadpodidbinding: {{ .Values.podIdentityName | default .Values.kubeit.tenantPodIdentityName }}
-        {{- end }}
         {{- if .Values.opa.enabled }}
         sidecar.opa-istio.io/inject: "true"
         {{- end }}
@@ -85,7 +82,7 @@ spec:
 {{ toYaml . | indent 12 }}
 {{- end }}
       {{- end }}
-      {{- toYaml .Values.initContainersExtra | nindent 8 }}
+      {{- toYaml .Values.initContainersDefinitions | nindent 8 }}
       containers:
 {{ if .Values.opa.enabled }}
         - name: opa-istio
@@ -147,18 +144,6 @@ spec:
               value: {{ $value | quote }}
 {{- end }}
 {{- end }}
-{{- if eq .Values.keyVaultSecrets.enabled true }}
-{{- range $keyVaults:= .Values.keyVaultSecrets.keyVaults }}
-{{- range $secrets:= .secrets }}
-{{- if eq $secrets.k8sSecretEnabled true }}
-            - name: {{ .k8sSecretName }}
-              valueFrom:
-                name: {{ .k8sSecretName }}
-                key: {{ .k8sSecretKey }}
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
 
 {{- if .Values.command }}
           command:
@@ -201,12 +186,6 @@ spec:
 {{ .Values.health.startupProbe | toYaml | trim | indent 12 }}
 {{- end }}
           volumeMounts:
-{{- if eq .Values.keyVaultSecrets.enabled true }}
-{{- range $keyVaults:= .Values.keyVaultSecrets.keyVaults }}
-            - name: "secrets-store-{{ .keyVaultName | lower }}"
-              mountPath: "/var/secrets/{{ .keyVaultName | lower }}"
-{{- end }}
-{{- end }}
           {{- range .Values.volumes }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
@@ -242,16 +221,6 @@ spec:
         configMap:
           name: opa-policy
 {{ end }}
-{{- if .Values.keyVaultSecrets }}
-{{- range $keyVaults:= .Values.keyVaultSecrets.keyVaults }}
-      - name: "secrets-store-{{ .keyVaultName | lower }}"
-        csi:
-          driver: secrets-store.csi.k8s.io
-          readOnly: true
-          volumeAttributes:
-            secretProviderClass: "{{ $.Values.app }}-secret-class-{{ .keyVaultName | lower }}"
-{{- end }}
-{{- end }}
 {{- range .Values.volumes }}
       - name: {{ .name }}
 {{ tpl .volumeDefinition $ | indent 8 }}

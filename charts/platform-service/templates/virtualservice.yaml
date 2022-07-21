@@ -56,11 +56,7 @@ spec:
     - {{ . | quote }}
 {{- end }}
   gateways:
-{{- if or (.Values.defaultRouting.kubeitDefaultHosts.enabled) (eq .Values.kubeit.gatewayEnabled true) }}
-    - "istio-system/global-https-{{ .Values.kubeit.ingressType }}-default-gateway"
-{{- else if .Values.gateway.name }}
     - {{ required "A valid .Values.gateway.name entry required!" .Values.gateway.name }}
-{{- end }}
 {{- $prefixes := default (list .Values.app) .Values.defaultRouting.urlPrefixes }}
   http:
 {{- if .Values.defaultRouting.urlExactMatches }}
