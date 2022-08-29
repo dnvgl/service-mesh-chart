@@ -24,7 +24,9 @@ spec:
         app.kubernetes.io/instance: test-release
         app: test
         version: v1
+        session-management: backend
       annotations:
+        prometheus.io/scrape: "true"
     spec:
       serviceAccountName: test
       initContainers:

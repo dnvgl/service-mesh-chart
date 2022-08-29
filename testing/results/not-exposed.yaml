@@ -40,7 +40,7 @@ metadata:
   name: test
   labels:
     app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.0.46
+    helm.sh/chart: platform-service-1.0.47
     app.kubernetes.io/instance: test-release
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -61,7 +61,7 @@ metadata:
   name: test-release
   labels:
     app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.0.46
+    helm.sh/chart: platform-service-1.0.47
     app.kubernetes.io/instance: test-release
     app.kubernetes.io/managed-by: Helm
     app: test

@@ -56,6 +56,12 @@ spec:
 {{- end }}
         {{- end }}
       annotations:
+        {{- if .Values.service.liveness.enabled }}  
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+        {{- end }}
+        {{- if .Values.mergeAppMetrics }}
+        prometheus.io/scrape: "true"
+        {{- end }}
         {{- if .Values.proxyResources.requests }}  
         {{- if .Values.proxyResources.requests.cpu }}  
         sidecar.istio.io/proxyCPU: {{ .Values.proxyResources.requests.cpu }}
@@ -63,9 +69,6 @@ spec:
         {{- if .Values.proxyResources.requests.memory }}  
         sidecar.istio.io/proxyMemory: {{ .Values.proxyResources.requests.memory }}
         {{- end }}
-        {{- end }}
-        {{- if .Values.service.liveness.enabled }}  
-        sidecar.istio.io/rewriteAppHTTPProbers: "true"
         {{- end }}
     spec:
       serviceAccountName: {{ include "platform-service.serviceAccountName" . }}
