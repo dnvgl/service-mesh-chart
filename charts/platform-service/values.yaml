@@ -6,6 +6,8 @@ app: appname
 version: v1
 replicaCount: 1
 
+mergeAppMetrics: false
+
 # sample extra label, you can add as many as you want
 #additionalPodLabels: |
 #  saml-idp-forward-auth-filter: enabled

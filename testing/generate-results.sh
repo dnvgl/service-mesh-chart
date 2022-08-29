@@ -18,6 +18,10 @@ helm template test-release ../charts/platform-service -n test-ns -f values.yaml 
     --show-only templates/deployment.yaml \
     > results/sessman-with-redirect.yaml
 
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set mergeAppMetrics=true \
+    --show-only templates/deployment.yaml \
+    > results/mergeAppMetrics.yaml
 
 helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
     --set deploymentOnly=true \
