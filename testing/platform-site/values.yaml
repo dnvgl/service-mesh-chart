@@ -180,3 +180,23 @@ routes:
         exactPrefixMatch: true
         urlPrefixes:
         - version-prefix
+
+
+  - service: service-no-cors
+    urlPrefixes:
+      - service-prefix
+    versions:
+      - version: v1
+      - version: with-cors
+        corsPolicy:
+          allowHeaders:
+          - v1-with-cors
+       
+  - service: service-with-cors
+    corsPolicy:
+      allowHeaders:
+      - with-cors
+    urlPrefixes:
+      - service-prefix
+    versions:
+      - version: v1

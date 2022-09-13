@@ -64,10 +64,13 @@ spec:
 
 {{- include "platform-site.commonOptions" (dict "retries" .retries | mustMergeOverwrite $sourcesArgs) }}
 
-{{- if .corsPolicy }}
+{{- $corsPolicy := default $serviceSettings.corsPolicy .corsPolicy }}
+
+{{- if $corsPolicy }}
     corsPolicy:
-{{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
+{{ $corsPolicy | toYaml | indent 6 }}
 {{- end }} {{- /* end if cors policy */ -}}
+
 
 {{- end }} {{- /* internal only */ -}}
 {{- end }} {{- /* end range versions */ -}}
