@@ -79,6 +79,11 @@ helm template test-release ../charts/platform-service -n test-ns -f values.yaml 
     --show-only templates/deployment.yaml \
     > results/opa-with-resources.yaml
 
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set image.full=alt-registry/alt-repo:alt-tag \
+    --show-only templates/deployment.yaml \
+    > results/full-image-syntax.yaml
+
 
 echo " *** kubeval results ***"
 kubeval --ignore-missing-schemas results/*.yaml
