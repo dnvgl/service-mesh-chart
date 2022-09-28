@@ -1,5 +1,7 @@
 {{- define "image" -}}
-{{- if .Values.image.registry -}}
+{{- if .Values.image.full -}}
+  {{ .Values.image.full }}
+{{- else if .Values.image.registry -}}
   {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
 {{- else -}}
   {{ .Values.image.repository }}:{{ .Values.image.tag }}
