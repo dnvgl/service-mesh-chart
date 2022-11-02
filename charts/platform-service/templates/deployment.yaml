@@ -115,6 +115,12 @@ spec:
               - "eval"
               - "1"
 
+          env:
+{{- range $key, $value := .Values.opaenv }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+{{- end }}
+
 {{ if .Values.opa.resources }}
           resources:
 {{ toYaml .Values.opa.resources | indent 12 }}

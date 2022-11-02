@@ -203,6 +203,11 @@ authorizationPolicy:
 #         name: mysecret
 #         key: username
 
+# OPA environment variables are given as a map - key is the name - either followed by the actual value
+# or a valueFrom component which is literally translated
+# opaenv:
+#   envName: "envValue"
+
 # deprecated
 environmentVariables:
 #  - name: Serilog__MinimumLevel
