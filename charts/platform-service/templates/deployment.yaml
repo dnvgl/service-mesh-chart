@@ -62,9 +62,6 @@ spec:
         sidecar.istio.io/proxyMemory: {{ .Values.proxyResources.requests.memory }}
         {{- end }}
         {{- end }}
-        {{- if .Values.service.liveness.enabled }}
-        sidecar.istio.io/rewriteAppHTTPProbers: "true"
-        {{- end }}
         {{- with .Values.additionalPodAnnotations }}       
         {{ toYaml . | indent 8 }}
         {{- end }}
