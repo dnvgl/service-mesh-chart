@@ -83,7 +83,7 @@ defaultRouting:
   enabled: true
 
   kubeitDefaultHosts:
-    enabled: true
+    enabled: false
     # hostsPrefix:            # Optional - default app name
 
   # hosts to take into account for routing rules (ignored if allHosts = true)
