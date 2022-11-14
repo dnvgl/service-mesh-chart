@@ -3,6 +3,8 @@ apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
 metadata:
   name: {{ include "platform-service.fullname" . }}
+  labels:
+{{ include "appLabels" . | trim | indent 4 }}
 spec:
   selector:
     matchLabels:

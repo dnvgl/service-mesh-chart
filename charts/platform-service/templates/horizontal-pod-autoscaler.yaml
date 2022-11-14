@@ -2,9 +2,9 @@
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  labels:
-    app: {{ required "app is required" .Values.app }}
   name: {{ include "platform-service.fullname" . }}-hpa
+  labels:
+{{ include "appLabels" . | trim | indent 4 }}
 spec:
   maxReplicas: {{.Values.hpa.maxReplicas}}
   minReplicas: {{.Values.hpa.minReplicas}}

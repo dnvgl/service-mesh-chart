@@ -1,7 +1,7 @@
 # Default values for platform-service
-
-# application name - required
-app: appname
+---
+# Application name
+app: app        # Required
 
 version: v1
 replicaCount: 1
@@ -9,8 +9,11 @@ replicaCount: 1
 mergeAppMetrics: false
 
 # sample extra label, you can add as many as you want
-#additionalPodLabels: |
-#  saml-idp-forward-auth-filter: enabled
+additionalPodLabels: {}
+  # saml-idp-forward-auth-filter: enabled
+# sample extra annotations
+additionalPodAnnotations: {}
+  # sidecar.istio.io/inject: "false"
 
 image:
   # registry: platformteam.azurecr.io (ignored if not specified)
@@ -62,7 +65,7 @@ serviceAccount:
 gateway:
   # map virtual service to a gateway expose this service
   exposeService: true
-  # gateway name (fully qualified if in a different namespace)
+  # gateway name (fully qualified if in a different namespace), default one provided automatically by KubeIT
   name: gateway/one-gateway
 
 opa:
@@ -79,10 +82,13 @@ defaultRouting:
   # Generate default virtual services and destination rules
   enabled: true
 
+  kubeitDefaultHosts:
+    enabled: false
+    # hostsPrefix:            # Optional - default app name
+
   # hosts to take into account for routing rules (ignored if allHosts = true)
-  hosts:
-    []
-    #- myhost.dnvgl.com
+  hosts: []
+    # - myhost.dnvgl.com
 
   # list of prefixes for route matching - overrides the default prefix (app)
   urlPrefixes:
@@ -115,20 +121,20 @@ defaultRouting:
   # providing any settings here will override the defaults
   retries:
     enabled: true
-    #settings:
-    #  attempts: 3
-    #  perTryTimeout: 2s
+    # settings:
+    #   attempts: 3
+    #   perTryTimeout: 2s
 
-  #corsPolicy:
-  #  allowOrigins:
-  #    - exact: https://example.com
-  #  allowMethods:
-  #    - POST
-  #    - GET
-  #  allowCredentials: false
-  #  allowHeaders:
-  #    - X-Foo-Bar
-  #  maxAge: "24h"
+  # corsPolicy:
+  #   allowOrigins:
+  #     - exact: https://example.com
+  #   allowMethods:
+  #     - POST
+  #     - GET
+  #   allowCredentials: false
+  #   allowHeaders:
+  #     - X-Foo-Bar
+  #   maxAge: "24h"
 
   # route from all hosts (typically only common services)
   allHosts: false
@@ -177,18 +183,18 @@ authorizationPolicy:
   #   requireJwt - (default true) set to false to allow peer connections from
   #     this service principal without a jwt
   authorizedServices:
-    # Examples:
+  # Examples:
     # 1) allow access from app "myapp" with default service account only with jwt
     # - servicePrincipalName: myapp
-    #
+
     # 2) allow access from app "myapp" with default service account without jwt
     # - servicePrincipalName: myapp
     #   requireJwt: false
-    #
+
     # 3) allow access from service account "myotherappsa" in namespace "other" (only with jwt)
     # - servicePrincipalName: myotherappsa
     #   servicePrincipalNamespace: other
-    #
+
     # 4) alternate form of 3
     # - servicePrincipalFullName: "cluster.local/ns/other/sa/myotherappsa"
     #   servicePrincipalNamespace: other
@@ -249,3 +255,22 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+securityContext: {}
+#   fsGroup: 1000
+#   runAsUser: 1000
+#   runAsNonRoot: true
+
+containerSecurityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+
+debugEnvoyFilters: true
+
+kubeit:
+  tenantPrefixEnabled: true
+
+initContainersDefinitions: []

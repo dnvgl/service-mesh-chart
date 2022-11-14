@@ -3,6 +3,8 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: {{ include "platform-service.fullname" . }}-destinationrule
+  labels:
+{{ include "appLabels" . | trim | indent 4 }}
 spec:
   host: {{ include "platform-service.fullQualifiedServiceName" . }}
   trafficPolicy:
