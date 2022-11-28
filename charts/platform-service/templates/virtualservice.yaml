@@ -1,5 +1,5 @@
 {{ $tenantPrefix := "" }}
-{{- if $.Values.kubeit.tenantPrefixEnabled }}
+{{- if $.Values.kubeitDefaultHosts.tenantPrefixEnabled }}
 {{ $tenantPrefix = printf "-%s" .Values.kubeit.tenantName }}
 {{- end }}
 
