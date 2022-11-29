@@ -43,11 +43,25 @@ app.kubernetes.io/name: {{ include "platform-service.name" . }}
 helm.sh/chart: {{ include "platform-service.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 version: {{ .Values.version }}
-{{ if $.Values.kubeit.tenantName }}
+{{- if $.Values.kubeit }}
+{{- if $.Values.kubeit.tenantName }}
 tenant: {{ $.Values.kubeit.tenantName }}
 {{- end -}}
-{{- if or ( .Values.podIdentityName ) ( .Values.kubeit.tenantPodIdentityName ) }}
-aadpodidbinding: {{ .Values.podIdentityName | default .Values.kubeit.tenantPodIdentityName }}
+{{- end -}}
+
+{{ $podIdentityName := "" }}
+{{- if $.Values.kubeit }}
+{{- if $.Values.kubeit.tenantPodIdentityName }}
+{{ $podIdentityName = .Values.kubeit.tenantPodIdentityName }}
+{{- end }}
+{{- end }}
+
+{{- if $.Values.podIdentityName }}
+{{ $podIdentityName = .Values.podIdentityName }}
+{{- end }}
+
+{{- if $podIdentityName }}
+aadpodidbinding: {{ $podIdentityName }}
 {{- end }}
 {{ if $.Values.volumes -}}
 state: stateful
