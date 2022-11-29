@@ -1,8 +1,3 @@
-{{ $tenantPrefix := "" }}
-{{- if $.Values.kubeitDefaultHosts.tenantPrefixEnabled }}
-{{ $tenantPrefix = printf "-%s" .Values.kubeit.tenantName }}
-{{- end }}
-
 {{- define "retries" -}}
 {{- if .Values.defaultRouting.retries.enabled }}
     retries:
@@ -45,6 +40,10 @@ metadata:
 spec:
   hosts:
   {{- if .Values.defaultRouting.kubeitDefaultHosts.enabled }}
+  {{ $tenantPrefix := "" }}
+  {{- if and $.Values.defaultRouting.kubeitDefaultHosts.enabled $.Values.defaultRouting.kubeitDefaultHosts.tenantPrefixEnabled }}
+  {{ $tenantPrefix = printf "-%s" .Values.kubeit.tenantName }}
+  {{- end }}
     - "{{ .Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default .Values.app }}{{ $tenantPrefix }}.{{ .Values.kubeit.clusterSubdomain }}.{{ .Values.defaultRouting.kubeitDefaultHosts.dnsDomain }}"                                                                      # Cluster specific subdomain, i.e.: dev001
     - "{{ .Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default .Values.app }}{{ $tenantPrefix }}.{{ .Values.kubeit.shortRegion }}.{{ .Values.kubeit.environmentName }}.{{ .Values.defaultRouting.kubeitDefaultHosts.dnsDomain }}"                                      # F5/Active Cluster
     - "{{ .Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default .Values.app }}{{ $tenantPrefix }}.{{ .Values.kubeit.clusterColour }}.{{ .Values.kubeit.shortRegion }}.{{ .Values.kubeit.environmentName }}.{{ .Values.defaultRouting.kubeitDefaultHosts.dnsDomain }}"   # Colour cluster - blue/green deployment
