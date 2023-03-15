@@ -247,9 +247,11 @@ proxyResources:
   # request values are passed to the envoy proxy through annotations
   # these may be set globally at the istio level, so only override by service if necessary
   # requests:
-  # cpu: 10m
-  # memory: 64Mi
-  # limits are not currently supported
+  #   cpu: 10m
+  #   memory: 64Mi
+  #  limits:
+  #    cpu: 10m
+  #    memory: 128Mi
 
 nodeSelector: {}
 

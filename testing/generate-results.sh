@@ -84,6 +84,45 @@ helm template test-release ../charts/platform-service -n test-ns -f values.yaml 
     --show-only templates/deployment.yaml \
     > results/full-image-syntax.yaml
 
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set proxyResources.requests.cpu=10m \
+    --show-only templates/deployment.yaml \
+    > results/proxyresources-request-cpu.yaml
+
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set proxyResources.requests.memory=128Mi \
+    --show-only templates/deployment.yaml \
+    > results/proxyresources-request-memory.yaml
+
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set proxyResources.requests.cpu=10m \
+    --set proxyResources.requests.memory=128Mi \
+    --show-only templates/deployment.yaml \
+    > results/proxyresources-request-cpu-and-memory.yaml
+
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set proxyResources.limits.cpu=10m \
+    --show-only templates/deployment.yaml \
+    > results/proxyresources-limit-cpu.yaml
+
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set proxyResources.limits.memory=128Mi \
+    --show-only templates/deployment.yaml \
+    > results/proxyresources-limit-memory.yaml
+
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set proxyResources.limits.cpu=10m \
+    --set proxyResources.limits.memory=128Mi \
+    --show-only templates/deployment.yaml \
+    > results/proxyresources-limit-cpu-and-memory.yaml
+
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set proxyResources.requests.cpu=10m \
+    --set proxyResources.requests.memory=128Mi \
+    --set proxyResources.limits.cpu=10m \
+    --set proxyResources.limits.memory=128Mi \
+    --show-only templates/deployment.yaml \
+    > results/proxyresources-all.yaml
 
 echo " *** kubeval results ***"
 kubeval --ignore-missing-schemas results/*.yaml
