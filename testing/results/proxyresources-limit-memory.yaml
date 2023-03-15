@@ -28,6 +28,7 @@ spec:
         state: stateful
         session-management: backend
       annotations:
+        sidecar.istio.io/proxyMemoryLimit: 128Mi
     spec:
       serviceAccountName: test
       securityContext:
@@ -37,7 +38,7 @@ spec:
       containers:
 
         - name: test
-          image: "alt-registry/alt-repo:alt-tag"
+          image: "test.io/some/repository:latest"
           imagePullPolicy: IfNotPresent
 
           env:

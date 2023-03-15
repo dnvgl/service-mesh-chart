@@ -5,12 +5,12 @@ kind: Deployment
 metadata:
   name: test-release
   labels:
-    app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.0.48
-    app.kubernetes.io/instance: test-release
-    app.kubernetes.io/managed-by: Helm
     app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.1.2
+    app.kubernetes.io/instance: test-release
     version: v1
+    state: stateful
 spec:
   replicas: 1
   selector:
@@ -20,17 +20,22 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: test
-        app.kubernetes.io/instance: test-release
         app: test
+        app.kubernetes.io/name: test
+        helm.sh/chart: platform-service-1.1.2
+        app.kubernetes.io/instance: test-release
         version: v1
+        state: stateful
         session-management: frontend
       annotations:
     spec:
       serviceAccountName: test
+      securityContext:
+        {}
       initContainers:
+        []
       containers:
-      
+
         - name: test
           image: "test.io/some/repository:latest"
           imagePullPolicy: IfNotPresent
@@ -52,7 +57,8 @@ spec:
                 secretKeyRef:
                   key: username
                   name: base-secret
-
+          securityContext:
+            {}
           ports:
             - name: http
               containerPort: 80

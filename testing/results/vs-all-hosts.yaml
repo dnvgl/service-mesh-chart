@@ -19,11 +19,19 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: test-external
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.1.2
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
 spec:
   hosts:
-  - "*"
+    - "mysubdomain1.mydomain.com"
+    - "mysubdomain2.mydomain.com"
   gateways:
-  - gateway/one-gateway
+    - gateway/one-gateway
   http:
   # redirect on prefixes without trailing slashes
   - match:
