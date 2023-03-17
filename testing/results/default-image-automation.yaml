@@ -1,0 +1,331 @@
+---
+# Source: platform-service/templates/network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test-release-network-policy
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.1.2
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  podSelector:
+    matchLabels:
+      app: test
+      version: v1
+  policyTypes:
+    - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          istio: pilot
+      namespaceSelector:
+        matchLabels:
+          istio-operator-managed: Reconcile
+  - from:
+    - podSelector:
+        matchLabels:
+          istio: ingressgateway
+      namespaceSelector:
+        matchLabels:
+          istio-operator-managed: Reconcile
+  - from:
+    - podSelector:
+        matchLabels:
+          app: consumer
+    ports:
+    - protocol: TCP
+      port: 80
+---
+# Source: platform-service/templates/service-account.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.1.2
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+---
+# Source: platform-service/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.1.2
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  type: 
+  ports:
+    - port: 8000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: test
+    app: test
+---
+# Source: platform-service/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.1.2
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: test
+      app.kubernetes.io/instance: test-release
+  template:
+    metadata:
+      labels:
+        app: test
+        app.kubernetes.io/name: test
+        helm.sh/chart: platform-service-1.1.2
+        app.kubernetes.io/instance: test-release
+        version: v1
+        state: stateful
+        session-management: backend
+      annotations:
+    spec:
+      serviceAccountName: test
+      securityContext:
+        {}
+      initContainers:
+        []
+      containers:
+
+        - name: test
+          image: "test.io/some/repository:latest"
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: baseLevel
+              value: "only set at base"
+            - name: definedInBaseAndDuplicatedInOverride
+              value: "sharedValue"
+            - name: definedInBaseAndOverridden
+              value: "baseValue"
+            - name: definedInBaseAndOverriddenValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+            - name: onlyDefinedInBaseValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+          securityContext:
+            {}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 80
+            successThreshold: 3
+          startupProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /health/startup
+              port: 80
+            periodSeconds: 10
+          volumeMounts:
+            - name: service-secrets
+              mountPath: /secrets
+
+          resources:
+            {}
+      volumes:
+
+      - name: service-secrets
+        secret:
+          secretName: test-secrets
+---
+# Source: platform-service/templates/authorizationPolicy.yaml
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: test-release
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.1.2
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  selector:
+    matchLabels:
+      app: test
+      version: v1
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/myns/sa/consumersp"]
+  - from:
+    - source:
+        principals: ["cluster.local/ns/test-ns/sa/testsp"]
+        requestPrincipals: ["*"]
+  - from:
+    - source:
+        namespaces: ["istio-system"]
+        requestPrincipals: ["*"]
+---
+# Source: platform-service/templates/destinationrules.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: test-release-destinationrule
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.1.2
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  host: test.test-ns.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM
+    tls:
+      mode: ISTIO_MUTUAL
+---
+# Source: platform-service/templates/image-policy.yaml
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImagePolicy
+metadata:
+  name: test
+spec:
+  imageRepositoryRef:
+    name: test
+
+  numerical:
+    order: asc
+---
+# Source: platform-service/templates/image-repository.yaml
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImageRepository
+metadata:
+  name: test
+spec:
+  image: "test.io/some/repository"
+  interval: 1m0s
+---
+# Source: platform-service/templates/requestAuthentication.yaml
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: test-release
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.1.2
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  selector:
+    matchLabels:
+      app: test
+      version: v1
+  jwtRules:
+  - audiences:
+    - test-audience
+    forwardOriginalToken: true
+    issuer: https://login.microsoftonline.com/abcd/v2.0/
+    jwksUri: https://jwksuri/discovery/v2.0/keys
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test
+spec:
+  hosts:
+  - test.test-ns.svc.cluster.local
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: "test.test-ns.svc.cluster.local"
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-external
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-1.1.2
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  hosts:
+    - "mysubdomain1.mydomain.com"
+    - "mysubdomain2.mydomain.com"
+  gateways:
+    - gateway/one-gateway
+  http:
+  # redirect on prefixes without trailing slashes
+  - match:
+    - uri:
+        exact: /prefix1
+    redirect:
+      uri: /prefix1/
+  - match:
+    - uri:
+        exact: /prefix2
+    redirect:
+      uri: /prefix2/
+  # routes to service
+  - route:
+    - destination:
+        host: "test.test-ns.svc.cluster.local"
+    match:
+    - uri:
+        prefix: /prefix1/
+    - uri:
+        prefix: /prefix2/
+    rewrite:
+      uri: /
+    # deprecated
+    headers:
+      request:
+        add:
+          x-appname: prefix1

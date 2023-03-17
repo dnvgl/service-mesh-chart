@@ -1,0 +1,9 @@
+{{- if .Values.image.fluxAutomation.enabled -}}
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImageRepository
+metadata:
+  name: {{ include "platform-service.name" . }}
+spec:
+  image: "{{ include "platform-service.imageRepository" . }}"
+  interval: {{ .Values.image.fluxAutomation.interval }}
+{{- end }}

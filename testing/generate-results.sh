@@ -84,6 +84,17 @@ helm template test-release ../charts/platform-service -n test-ns -f values.yaml 
     --show-only templates/deployment.yaml \
     > results/full-image-syntax.yaml
 
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set image.fluxAutomation.enabled=true \
+    --debug \
+    > results/default-image-automation.yaml
+
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set image.fluxAutomation.enabled=true,image.fluxAutomation.filterTags.pattern='^dev-(?P<build>.*)',image.fluxAutomation.policy.extract='$build',policy.numerical.order=asc \
+    --show-only templates/image-policy.yaml \
+    --show-only templates/image-repository.yaml \
+    --debug \
+    > results/image-automation-options.yaml
 
 echo " *** kubeval results ***"
 kubeval --ignore-missing-schemas results/*.yaml
