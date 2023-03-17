@@ -7,12 +7,12 @@ metadata:
 spec:
   imageRepositoryRef:
     name: test
-
-  pattern: ^dev-(?P<build>.*)
-
-  extract: $build
-  numerical:
-    order: asc
+  filterTags: 
+    extract: $build
+    pattern: ^dev-(?P<build>.*)
+  policy: 
+    numerical:
+      order: asc
 ---
 # Source: platform-service/templates/image-repository.yaml
 apiVersion: image.toolkit.fluxcd.io/v1beta1
