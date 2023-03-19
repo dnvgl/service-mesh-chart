@@ -30,6 +30,16 @@ If release name contains chart name it will be used as a full name.
   {{ include "platform-service.name" . }}.{{ .Release.Namespace }}.svc.cluster.local
 {{- end -}}
 
+{{- define "platform-service.imageRepository" -}}
+{{- if .Values.image.full -}}
+  {{ fail "image automation is incompatible with full image format" }}
+{{- else if .Values.image.registry -}}
+  {{ .Values.image.registry }}/{{ .Values.image.repository }}
+{{- else -}}
+  {{ .Values.image.repository }}
+{{- end -}}
+{{- end -}}
+
 {{/*
 Create chart name and version as used by the chart label.
 */}}

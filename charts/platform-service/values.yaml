@@ -27,6 +27,15 @@ image:
   pullSecret:
   containerPort: 80
 
+  fluxAutomation:
+    enabled: false
+    interval: 1m0s
+    #filterTags:
+    #  pattern: '^dev-(?P<build>.*)'
+    #  extract: '$build'
+    policy:
+      numerical:
+        order: asc
 # deploymentOnly -- This workload is an addon to another for the same app - only create the deployment and destination rule
 deploymentOnly: false
 

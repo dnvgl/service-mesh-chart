@@ -1,0 +1,24 @@
+---
+# Source: platform-service/templates/image-policy.yaml
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImagePolicy
+metadata:
+  name: test
+spec:
+  imageRepositoryRef:
+    name: test
+  filterTags: 
+    extract: $build
+    pattern: ^dev-(?P<build>.*)
+  policy: 
+    numerical:
+      order: asc
+---
+# Source: platform-service/templates/image-repository.yaml
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImageRepository
+metadata:
+  name: test
+spec:
+  image: "test.io/some/repository"
+  interval: 1m0s

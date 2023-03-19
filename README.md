@@ -27,3 +27,15 @@ helm dependency update
 This will download a versioned tgz file into a charts subfolder.
 
 *The requirements.lock and tgz files should be added to source control
+
+## Development
+
+### Testing
+
+The current test approach involves generating output results with various inputs, and then manually validating the results against previous runs. Separate results are created for different test cases. New behavior should include additional test cases. Test cases are listed in the /testing/generate-reults.sh script.
+
+Please run /testing/generate-results.sh and compare results to previous before submitting PR. Include the result output with the commit/PR.
+
+### Version
+
+The chart version is currently manually managed. Update the `version` in /charts/platform-service/Charts.yaml
