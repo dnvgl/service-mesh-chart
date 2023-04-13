@@ -11,8 +11,6 @@ spec:
     extract: $build
     pattern: ^dev-(?P<build>.*)
   policy: 
-    numerical:
-      order: asc
     semver:
       range: '> 0'
 ---
