@@ -11,8 +11,8 @@ spec:
     extract: $build
     pattern: ^dev-(?P<build>.*)
   policy: 
-    numerical:
-      order: asc
+    semver:
+      range: '> 0'
 ---
 # Source: platform-service/templates/image-repository.yaml
 apiVersion: image.toolkit.fluxcd.io/v1beta1

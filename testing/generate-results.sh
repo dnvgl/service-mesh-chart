@@ -90,7 +90,7 @@ helm template test-release ../charts/platform-service -n test-ns -f values.yaml 
     > results/default-image-automation.yaml
 
 helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
-    --set image.fluxAutomation.enabled=true,image.fluxAutomation.filterTags.pattern='^dev-(?P<build>.*)',image.fluxAutomation.filterTags.extract='$build',image.fluxAutomation.policy.numerical.order=asc \
+    --set image.fluxAutomation.enabled=true,image.fluxAutomation.filterTags.pattern='^dev-(?P<build>.*)',image.fluxAutomation.filterTags.extract='$build',image.fluxAutomation.policy.semver.range='> 0' \
     --show-only templates/image-policy.yaml \
     --show-only templates/image-repository.yaml \
     --debug \
