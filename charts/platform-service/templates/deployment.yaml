@@ -25,7 +25,9 @@ spec:
   strategy:
     type: Recreate
   {{- end }}
+  {{- if not .Values.hpa.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "platform-service.name" . }}
