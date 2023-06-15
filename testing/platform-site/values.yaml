@@ -4,27 +4,27 @@ hosts:
 - test-host.dnv.com
 
 routes:
-  - service: simple-route
+  simple-route:
     urlPrefixes:
       - service-prefix
     versions:
       - version: v1
 
-  - service: alt-namespace
+  alt-namespace:
     namespace: alt-namespace
     urlPrefixes:
       - service-prefix
     versions:
       - version: v1
 
-  - service:  alt-loadbalancer
+  alt-loadbalancer:
     loadBalancerPolicy: ROUND_ROBIN
     versions:
       - version: v1
     urlPrefixes:
       - service-prefix
 
-  - service: timeouts
+  timeouts:
     timeout: 4s
     urlPrefixes:
       - service-prefix
@@ -33,14 +33,14 @@ routes:
       - version: alt-timeout
         timeout: 5s
 
-  - service: internal-only
+  internal-only:
     internalOnly: true
     urlPrefixes:
       - service-prefix
     versions:
       - version: v1
 
-  - service: internal-except-version
+  internal-except-version:
     internalOnly: true
     urlPrefixes:
       - service-prefix
@@ -49,7 +49,7 @@ routes:
       - version: external
         internalOnly: false
 
-  - service: internal-only-with-matches
+  internal-only-with-matches:
     internalOnly: true
     urlPrefixes:
       - service-prefix
@@ -60,7 +60,7 @@ routes:
           - uri:
               prefix: /service-prefix-dev/
 
-  - service: service-no-retries
+  service-no-retries:
     urlPrefixes:
       - service-prefix
     retries:
@@ -78,7 +78,7 @@ routes:
           settings:
             attempts: 5
        
-  - service: service-with-retries
+  service-with-retries:
     retries:
       enabled: true
       settings:
@@ -95,7 +95,7 @@ routes:
             attempts: 5
 
 
-  - service: service-no-redirect
+  service-no-redirect:
     urlPrefixes:
       - service-prefix
     redirectOnNoTrailingSlash: false
@@ -113,7 +113,7 @@ routes:
           - service-prefix-nr
         redirectOnNoTrailingSlash: true
 
-  - service: service-with-redirect
+  service-with-redirect:
     urlPrefixes:
       - service-prefix
     redirectOnNoTrailingSlash: true
@@ -124,7 +124,7 @@ routes:
           - service-prefix-nr
         redirectOnNoTrailingSlash: false
 
-  - service: service-no-rewrite
+  service-no-rewrite:
     urlPrefixes:
       - service-prefix
     rewriteUrlPrefix:
@@ -146,7 +146,7 @@ routes:
           enabled: true
           replaceWith: "alt-prefix/"
 
-  - service: service-alt-rewrite
+  service-alt-rewrite:
     urlPrefixes:
       - service-prefix
     rewriteUrlPrefix:
@@ -167,7 +167,7 @@ routes:
         rewriteUrlPrefix:
           replaceWith: "alt-prefix-v/"
 
-  - service: multiple-prefixes
+  multiple-prefixes:
     urlPrefixes:
       - service-prefix-1
       - service-prefix-2
@@ -182,7 +182,7 @@ routes:
         - version-prefix
 
 
-  - service: service-no-cors
+  service-no-cors:
     urlPrefixes:
       - service-prefix
     versions:
@@ -192,7 +192,7 @@ routes:
           allowHeaders:
           - v1-with-cors
        
-  - service: service-with-cors
+  service-with-cors:
     corsPolicy:
       allowHeaders:
       - with-cors

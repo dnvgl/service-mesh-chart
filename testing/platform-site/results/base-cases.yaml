@@ -13,6 +13,8 @@ spec:
   - name: v1
     labels:
       version: v1
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -28,6 +30,8 @@ spec:
   - name: v1
     labels:
       version: v1
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -46,6 +50,8 @@ spec:
   - name: external
     labels:
       version: external
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -61,6 +67,8 @@ spec:
   - name: v1
     labels:
       version: v1
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -79,6 +87,8 @@ spec:
   - name: dev
     labels:
       version: dev
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -100,6 +110,8 @@ spec:
   - name: exact-prefix
     labels:
       version: exact-prefix
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -127,6 +139,8 @@ spec:
   - name: with-alt-rewrite-url
     labels:
       version: with-alt-rewrite-url
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -145,6 +159,8 @@ spec:
   - name: with-cors
     labels:
       version: with-cors
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -169,6 +185,8 @@ spec:
   - name: version-with-redirect
     labels:
       version: version-with-redirect
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -190,6 +208,8 @@ spec:
   - name: retry-attempts
     labels:
       version: retry-attempts
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -217,6 +237,8 @@ spec:
   - name: with-alt-rewrite-url
     labels:
       version: with-alt-rewrite-url
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -232,6 +254,8 @@ spec:
   - name: v1
     labels:
       version: v1
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -250,6 +274,8 @@ spec:
   - name: version-no-redirect
     labels:
       version: version-no-redirect
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -268,6 +294,8 @@ spec:
   - name: retry-attempts
     labels:
       version: retry-attempts
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -283,6 +311,8 @@ spec:
   - name: v1
     labels:
       version: v1
+
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -328,14 +358,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: alt-loadbalancer.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for alt-namespace / version: v1
   - name: alt-namespace-v1-redirect
@@ -349,14 +379,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: alt-namespace.alt-namespace.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for internal-except-version / version: external
   - name: internal-except-version-external-redirect
@@ -370,14 +400,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: internal-except-version.test-ns.svc.cluster.local
         subset: external
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for multiple-prefixes / version: v1
   - name: multiple-prefixes-v1-redirect
@@ -399,14 +429,14 @@ spec:
     - uri:
         prefix: /service-prefix-2/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: multiple-prefixes.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for multiple-prefixes / version: alt-prefies
   - name: multiple-prefixes-alt-prefies-redirect
@@ -420,14 +450,14 @@ spec:
     - uri:
         prefix: /version-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: multiple-prefixes.test-ns.svc.cluster.local
         subset: alt-prefies
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for multiple-prefixes / version: exact-prefix 
   - name: multiple-prefixes-exact-prefix-route
@@ -437,14 +467,14 @@ spec:
     - uri:
         prefix: /version-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: multiple-prefixes.test-ns.svc.cluster.local
         subset: exact-prefix
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-alt-rewrite / version: v1
   - name: service-alt-rewrite-v1-redirect
@@ -458,14 +488,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: alt-prefix/ # alt-prefix/ from service
+      uri: alt-prefix/ # (service level)
     route:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-alt-rewrite / version: dev
   - name: service-alt-rewrite-dev-redirect
@@ -479,14 +509,14 @@ spec:
     - uri:
         prefix: /dev-override-prefix/
     rewrite:
-      uri: alt-prefix/ # alt-prefix/ from service
+      uri: alt-prefix/ # (service level)
     route:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: dev
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-alt-rewrite / version: exact-match-override 
   - name: service-alt-rewrite-exact-match-override-route
@@ -496,14 +526,14 @@ spec:
     - uri:
         prefix: /dev-override-exact/
     rewrite:
-      uri: alt-prefix/ # alt-prefix/ from service
+      uri: alt-prefix/ # (service level)
     route:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: exact-match-override
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-alt-rewrite / version: no-rewrite
   - name: service-alt-rewrite-no-rewrite-redirect
@@ -520,9 +550,9 @@ spec:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: no-rewrite
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-alt-rewrite / version: with-alt-rewrite-url
   - name: service-alt-rewrite-with-alt-rewrite-url-redirect
@@ -536,14 +566,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: alt-prefix-v/ # alt-prefix-v/ from version
+      uri: alt-prefix-v/ # (version-specific)
     route:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: with-alt-rewrite-url
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-no-cors / version: v1
   - name: service-no-cors-v1-redirect
@@ -557,14 +587,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-no-cors.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-no-cors / version: with-cors
   - name: service-no-cors-with-cors-redirect
@@ -578,18 +608,17 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-no-cors.test-ns.svc.cluster.local
         subset: with-cors
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
     corsPolicy:
       allowHeaders:
       - v1-with-cors
-
 
   # Routing for service-no-redirect / version: v1 
   - name: service-no-redirect-v1-route
@@ -597,14 +626,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-no-redirect / version: dev 
   - name: service-no-redirect-dev-route
@@ -612,14 +641,14 @@ spec:
     - uri:
         prefix: /dev-override-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: dev
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-no-redirect / version: exact-match-override 
   - name: service-no-redirect-exact-match-override-route
@@ -629,14 +658,14 @@ spec:
     - uri:
         prefix: /dev-override-exact/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: exact-match-override
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-no-redirect / version: version-with-redirect
   - name: service-no-redirect-version-with-redirect-redirect
@@ -650,14 +679,14 @@ spec:
     - uri:
         prefix: /service-prefix-nr/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: version-with-redirect
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-no-retries / version: v1
   - name: service-no-retries-v1-redirect
@@ -671,13 +700,13 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-no-retries.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
-    # retries: disabled (enabled: false # false from service)
+    timeout: 15s # (default)
+    # retries: disabled (enabled: false # (service level))
 
   # Routing for service-no-retries / version: with-retries
   - name: service-no-retries-with-retries-redirect
@@ -691,14 +720,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-no-retries.test-ns.svc.cluster.local
         subset: with-retries
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 4 # attempts: 4 from service
+      attempts: 4 # (service level)
 
   # Routing for service-no-retries / version: retry-attempts
   - name: service-no-retries-retry-attempts-redirect
@@ -712,14 +741,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-no-retries.test-ns.svc.cluster.local
         subset: retry-attempts
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 5 # attempts: 5 from version
+      attempts: 5 # (version-specific)
 
   # Routing for service-no-rewrite / version: v1
   - name: service-no-rewrite-v1-redirect
@@ -736,9 +765,9 @@ spec:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-no-rewrite / version: dev
   - name: service-no-rewrite-dev-redirect
@@ -755,9 +784,9 @@ spec:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: dev
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-no-rewrite / version: exact-match-override 
   - name: service-no-rewrite-exact-match-override-route
@@ -770,9 +799,9 @@ spec:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: exact-match-override
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-no-rewrite / version: with-rewrite
   - name: service-no-rewrite-with-rewrite-redirect
@@ -786,14 +815,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: with-rewrite
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-no-rewrite / version: with-alt-rewrite-url
   - name: service-no-rewrite-with-alt-rewrite-url-redirect
@@ -807,14 +836,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: alt-prefix/ # alt-prefix/ from version
+      uri: alt-prefix/ # (version-specific)
     route:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: with-alt-rewrite-url
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-with-cors / version: v1
   - name: service-with-cors-v1-redirect
@@ -828,18 +857,17 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-with-cors.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
     corsPolicy:
       allowHeaders:
       - with-cors
-
 
   # Routing for service-with-redirect / version: v1
   - name: service-with-redirect-v1-redirect
@@ -853,14 +881,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-with-redirect.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-with-redirect / version: version-no-redirect 
   - name: service-with-redirect-version-no-redirect-route
@@ -868,14 +896,14 @@ spec:
     - uri:
         prefix: /service-prefix-nr/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-with-redirect.test-ns.svc.cluster.local
         subset: version-no-redirect
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for service-with-retries / version: no-retries
   - name: service-with-retries-no-retries-redirect
@@ -889,13 +917,13 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-with-retries.test-ns.svc.cluster.local
         subset: no-retries
-    timeout: 15s # 15s from default
-    # retries: disabled (enabled: false # false from version)
+    timeout: 15s # (default)
+    # retries: disabled (enabled: false # (version-specific))
 
   # Routing for service-with-retries / version: retry-attempts
   - name: service-with-retries-retry-attempts-redirect
@@ -909,15 +937,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: service-with-retries.test-ns.svc.cluster.local
         subset: retry-attempts
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 5 # attempts: 5 from version
-
+      attempts: 5 # (version-specific)
 
   # Routing for simple-route / version: v1
   - name: simple-route-v1-redirect
@@ -931,14 +958,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: simple-route.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for timeouts / version: v1
   - name: timeouts-v1-redirect
@@ -952,14 +979,14 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: timeouts.test-ns.svc.cluster.local
         subset: v1
-    timeout: 4s # 4s from service
+    timeout: 4s # (service level)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
   # Routing for timeouts / version: alt-timeout
   - name: timeouts-alt-timeout-redirect
@@ -973,17 +1000,16 @@ spec:
     - uri:
         prefix: /service-prefix/
     rewrite:
-      uri: / # / from default
+      uri: / # (default)
     route:
     - destination:
         host: timeouts.test-ns.svc.cluster.local
         subset: alt-timeout
-    timeout: 5s # 5s from version
+    timeout: 5s # (version-specific)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 
-
-
+#
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1001,9 +1027,9 @@ spec:
     - destination:
         host: alt-loadbalancer.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1021,9 +1047,9 @@ spec:
     - destination:
         host: alt-namespace.alt-namespace.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1041,17 +1067,17 @@ spec:
     - destination:
         host: internal-except-version.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: internal-except-version-external-route
     route:
     - destination:
         host: internal-except-version.test-ns.svc.cluster.local
         subset: external
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1069,9 +1095,9 @@ spec:
     - destination:
         host: internal-only.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1089,9 +1115,9 @@ spec:
     - destination:
         host: internal-only-with-matches.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: internal-only-with-matches-dev-route
     match:
     - uri:
@@ -1100,9 +1126,9 @@ spec:
     - destination:
         host: internal-only-with-matches.test-ns.svc.cluster.local
         subset: dev
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1120,25 +1146,25 @@ spec:
     - destination:
         host: multiple-prefixes.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: multiple-prefixes-alt-prefies-route
     route:
     - destination:
         host: multiple-prefixes.test-ns.svc.cluster.local
         subset: alt-prefies
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: multiple-prefixes-exact-prefix-route
     route:
     - destination:
         host: multiple-prefixes.test-ns.svc.cluster.local
         subset: exact-prefix
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1156,41 +1182,41 @@ spec:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-alt-rewrite-dev-route
     route:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: dev
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-alt-rewrite-exact-match-override-route
     route:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: exact-match-override
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-alt-rewrite-no-rewrite-route
     route:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: no-rewrite
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-alt-rewrite-with-alt-rewrite-url-route
     route:
     - destination:
         host: service-alt-rewrite.test-ns.svc.cluster.local
         subset: with-alt-rewrite-url
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1208,17 +1234,17 @@ spec:
     - destination:
         host: service-no-cors.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-no-cors-with-cors-route
     route:
     - destination:
         host: service-no-cors.test-ns.svc.cluster.local
         subset: with-cors
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1236,33 +1262,33 @@ spec:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-no-redirect-dev-route
     route:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: dev
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-no-redirect-exact-match-override-route
     route:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: exact-match-override
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-no-redirect-version-with-redirect-route
     route:
     - destination:
         host: service-no-redirect.test-ns.svc.cluster.local
         subset: version-with-redirect
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1280,24 +1306,24 @@ spec:
     - destination:
         host: service-no-retries.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
-    # retries: disabled (enabled: false # false from service)
+    timeout: 15s # (default)
+    # retries: disabled (enabled: false # (service level))
   - name: service-no-retries-with-retries-route
     route:
     - destination:
         host: service-no-retries.test-ns.svc.cluster.local
         subset: with-retries
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 4 # attempts: 4 from service
+      attempts: 4 # (service level)
   - name: service-no-retries-retry-attempts-route
     route:
     - destination:
         host: service-no-retries.test-ns.svc.cluster.local
         subset: retry-attempts
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 5 # attempts: 5 from version
+      attempts: 5 # (version-specific)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1315,41 +1341,41 @@ spec:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-no-rewrite-dev-route
     route:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: dev
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-no-rewrite-exact-match-override-route
     route:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: exact-match-override
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-no-rewrite-with-rewrite-route
     route:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: with-rewrite
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-no-rewrite-with-alt-rewrite-url-route
     route:
     - destination:
         host: service-no-rewrite.test-ns.svc.cluster.local
         subset: with-alt-rewrite-url
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1367,9 +1393,9 @@ spec:
     - destination:
         host: service-with-cors.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1387,17 +1413,17 @@ spec:
     - destination:
         host: service-with-redirect.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: service-with-redirect-version-no-redirect-route
     route:
     - destination:
         host: service-with-redirect.test-ns.svc.cluster.local
         subset: version-no-redirect
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1415,16 +1441,16 @@ spec:
     - destination:
         host: service-with-retries.test-ns.svc.cluster.local
         subset: no-retries
-    timeout: 15s # 15s from default
-    # retries: disabled (enabled: false # false from version)
+    timeout: 15s # (default)
+    # retries: disabled (enabled: false # (version-specific))
   - name: service-with-retries-retry-attempts-route
     route:
     - destination:
         host: service-with-retries.test-ns.svc.cluster.local
         subset: retry-attempts
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 5 # attempts: 5 from version
+      attempts: 5 # (version-specific)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1442,9 +1468,9 @@ spec:
     - destination:
         host: simple-route.test-ns.svc.cluster.local
         subset: v1
-    timeout: 15s # 15s from default
+    timeout: 15s # (default)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
 ---
 # Source: platform-site/templates/routing.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1462,14 +1488,14 @@ spec:
     - destination:
         host: timeouts.test-ns.svc.cluster.local
         subset: v1
-    timeout: 4s # 4s from service
+    timeout: 4s # (service level)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)
   - name: timeouts-alt-timeout-route
     route:
     - destination:
         host: timeouts.test-ns.svc.cluster.local
         subset: alt-timeout
-    timeout: 5s # 5s from version
+    timeout: 5s # (version-specific)
     retries:
-      attempts: 3 # attempts: 3 from default
+      attempts: 3 # (default)

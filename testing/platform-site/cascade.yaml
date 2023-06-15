@@ -2,9 +2,10 @@
 gateway: gateway/one-gateway
 hosts:
 - cascade-devtest.dnv.com
-
+defaults:
+  timeout: 30s
 routes:
-  - service: cas-assets-svc
+  cas-assets-svc:
     externalMatchConfig:
       urlPrefixes:
         - cas-assets-svc
