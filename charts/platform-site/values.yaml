@@ -20,4 +20,4 @@ defaults:
   loadBalancerPolicy: RANDOM
   internalOnly: false
 
-routes: []
+routes:

@@ -79,7 +79,7 @@ Create the name of the service account to use
 
 
 {{- define "platform-site.serviceName" -}}
-{{ .service | replace "." "-" }}
+{{ .serviceName | replace "." "-" }}
 {{- end -}}
 
 {{- define "platform-site.isComponentEnabledInSource" }}
@@ -132,14 +132,14 @@ Create the name of the service account to use
 {{- $args := dict "valueName" (required "valueName is required" .valueName) "source" $versionSource "Template" (required "Template parameter is required - use $.Template" $.Template) }}
 {{- $versionValue := include "platform-site.getSourceValue" $args }}
 {{- if ne $versionValue "" }}
-  {{- $versionValue }} # {{ $versionValue }} from version
+  {{- $versionValue }} # (version-specific)
 {{- else }}
   {{- $serviceValue := include "platform-site.getSourceValue" (set $args "source" $serviceSource) }}
   {{- if ne $serviceValue "" }}
-    {{- $serviceValue }} # {{ $serviceValue }} from service
+    {{- $serviceValue }} # (service level)
   {{- else }}
     {{- $defaultValue := include "platform-site.getSourceValue" (set $args "source" $defaultSource) }}
-    {{- $defaultValue }} # {{ $defaultValue }} from default
+    {{- $defaultValue }} # (default)
   {{- end }}
 {{- end }}
 {{- end }}
@@ -179,7 +179,7 @@ Create the name of the service account to use
 
 {{- define "platform-site.externalMatcher" }}
 
-{{- $sanitizedServiceName := .serviceSource.service | replace "." "-" }}
+{{- $sanitizedServiceName := .serviceName | replace "." "-" }}
 {{- $sanitizedVersion := .versionSource.version | replace "." "-" }}
 {{- /* args for templates which look across sources */}}
 {{- $routeName := printf "%s-%s-route" $sanitizedServiceName $sanitizedVersion }}
