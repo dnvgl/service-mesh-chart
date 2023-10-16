@@ -195,6 +195,8 @@ spec:
 
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+          terminationGracePeriodSeconds:
+{{ toYaml .Values.terminationGracePeriodSeconds | indent 12 }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

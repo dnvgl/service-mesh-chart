@@ -250,6 +250,8 @@ resources: {}
 #    cpu: 500m
 #    memory: 128Mi
 
+terminationGracePeriodSeconds: 30
+
 # Adjust resources requested for proxy sidecar (see https://istio.io/docs/concepts/performance-and-scalability/#cpu-and-memory)
 proxyResources:
   {}
