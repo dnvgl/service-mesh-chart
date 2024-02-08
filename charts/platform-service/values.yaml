@@ -70,6 +70,9 @@ serviceAccount:
   # will still be prefixed by the release prefix if that option is enabled.
   # If not set and create is true, a name is generated from the app
   name:
+  # Indicates whether pods running as this service
+  # account should have an API token automatically mounted.
+  automountToken: false
 
 gateway:
   # map virtual service to a gateway expose this service
