@@ -106,6 +106,9 @@ defaultRouting:
   # list of prefixes for route matching - overrides the default prefix (app)
   urlPrefixes:
 
+   # list of regexes for route matching
+  urlRegexes:
+
   # catch-all route - anything not routed elsewhere will be routed here
   # When this is used, urlPrefixes are ignored (there should be only catch-all route for this host & gateway)
   catchAll: false
