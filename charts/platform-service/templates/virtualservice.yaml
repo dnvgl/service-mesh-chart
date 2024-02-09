@@ -57,6 +57,7 @@ spec:
   gateways:
     - {{ required "A valid .Values.gateway.name entry required!" .Values.gateway.name }}
 {{- $prefixes := default (list .Values.app) .Values.defaultRouting.urlPrefixes }}
+{{- $regexes := default [] .Values.defaultRouting.urlRegexes }}
   http:
 {{- if .Values.defaultRouting.urlExactMatches }}
   - match:
@@ -109,6 +110,10 @@ spec:
     {{- $slashPrefix := printf "/%s" . }}
     - uri:
         prefix: {{ $slashPrefix }}/
+    {{- end }}
+    {{- range $regexes }}
+    - uri:
+        regex: {{ . }}
     {{- end }}
   {{- end }}
 {{- if .Values.defaultRouting.rewriteUrlPrefix.enabled }}
