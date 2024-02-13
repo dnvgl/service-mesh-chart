@@ -53,6 +53,10 @@ spec:
         prefix: /prefix1/
     - uri:
         prefix: /prefix2/
+    - uri:
+        regex: /api/.*
+    rewrite:
+      uri: /
     # deprecated
     headers:
       request:

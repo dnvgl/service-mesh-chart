@@ -69,6 +69,11 @@ helm template test-release ../charts/platform-service -n test-ns -f values.yaml 
     > results/vs-exact-matches.yaml
 
 helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
+    --set defaultRouting.urlRegexes[0]="/api/.*" \
+    --show-only templates/virtualservice.yaml \
+    > results/vs-regexPrefixes.yaml
+
+helm template test-release ../charts/platform-service -n test-ns -f values.yaml \
     --set opa.enabled=true \
     --show-only templates/deployment.yaml \
     > results/opa-enabled.yaml

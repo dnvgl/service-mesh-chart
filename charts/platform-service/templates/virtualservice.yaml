@@ -57,7 +57,7 @@ spec:
   gateways:
     - {{ required "A valid .Values.gateway.name entry required!" .Values.gateway.name }}
 {{- $prefixes := default (list .Values.app) .Values.defaultRouting.urlPrefixes }}
-{{- $regexes := default [] .Values.defaultRouting.urlRegexes }}
+{{- $regexes := .Values.defaultRouting.urlRegexes }}
   http:
 {{- if .Values.defaultRouting.urlExactMatches }}
   - match:
