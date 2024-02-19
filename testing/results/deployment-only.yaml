@@ -7,7 +7,7 @@ metadata:
   labels:
     app: test
     app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.1.2
+    helm.sh/chart: platform-service-1.2.4
     app.kubernetes.io/instance: test-release
     version: v1
     state: stateful
@@ -49,7 +49,7 @@ metadata:
   labels:
     app: test
     app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.1.2
+    helm.sh/chart: platform-service-1.2.4
     app.kubernetes.io/instance: test-release
     version: v1
     state: stateful
@@ -64,7 +64,7 @@ spec:
       labels:
         app: test
         app.kubernetes.io/name: test
-        helm.sh/chart: platform-service-1.1.2
+        helm.sh/chart: platform-service-1.2.4
         app.kubernetes.io/instance: test-release
         version: v1
         state: stateful
@@ -130,11 +130,16 @@ spec:
 
           resources:
             {}
+          terminationGracePeriodSeconds:
+            30
       volumes:
 
       - name: service-secrets
         secret:
           secretName: test-secrets
+---
+# Source: platform-service/templates/service-account.yaml
+automountServiceAccountToken: false
 ---
 # Source: platform-service/templates/authorizationPolicy.yaml
 apiVersion: security.istio.io/v1beta1
@@ -144,7 +149,7 @@ metadata:
   labels:
     app: test
     app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.1.2
+    helm.sh/chart: platform-service-1.2.4
     app.kubernetes.io/instance: test-release
     version: v1
     state: stateful
@@ -175,7 +180,7 @@ metadata:
   labels:
     app: test
     app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.1.2
+    helm.sh/chart: platform-service-1.2.4
     app.kubernetes.io/instance: test-release
     version: v1
     state: stateful
@@ -195,7 +200,7 @@ metadata:
   labels:
     app: test
     app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.1.2
+    helm.sh/chart: platform-service-1.2.4
     app.kubernetes.io/instance: test-release
     version: v1
     state: stateful
