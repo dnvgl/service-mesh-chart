@@ -131,8 +131,12 @@ spec:
   subsets:
 {{- range .versions }}
   - name: {{ .version }}
+{{- if .subsetDefinition }}
+{{ .subsetDefinition | toYaml | indent 4 }}
+{{- else }} {{- /* no subset definition override */}}
     labels:
       version: {{ .version }}
+{{- end }} {{- /* end subsetDefinition */ -}}
 {{- end }} {{- /* end range versions */ -}}
 {{- end }} {{- /* end with route value */ -}}
 {{- end }} {{- /* end range routes */ -}}
