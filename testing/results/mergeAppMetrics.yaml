@@ -7,7 +7,7 @@ metadata:
   labels:
     app: test
     app.kubernetes.io/name: test
-    helm.sh/chart: platform-service-1.2.4
+    helm.sh/chart: platform-service-test
     app.kubernetes.io/instance: test-release
     version: v1
     state: stateful
@@ -22,13 +22,17 @@ spec:
       labels:
         app: test
         app.kubernetes.io/name: test
-        helm.sh/chart: platform-service-1.2.4
+        helm.sh/chart: platform-service-test
         app.kubernetes.io/instance: test-release
         version: v1
         state: stateful
         session-management: backend
+        label1: "1"
+        label2: "2"
       annotations:
         prometheus.io/scrape: "true"
+        anno1: "1"
+        anno2: "2"
     spec:
       serviceAccountName: test
       securityContext:
