@@ -1,6 +1,14 @@
 app: test
 version: v1
 
+additionalPodLabels:
+  label1: "1"
+  label2: "2"
+
+additionalPodAnnotations:
+  anno1: "1"
+  anno2: "2"
+
 image:
   registry: test.io
   repository: some/repository
