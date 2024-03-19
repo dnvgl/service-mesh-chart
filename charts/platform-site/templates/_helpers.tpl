@@ -34,3 +34,13 @@ Base redirect name given standard values dictionary
 {{ .retries.settings | toYaml | indent 6 }}
 {{- end }}
 {{- end -}}
+
+
+{{- define "platform-site.routeDestination" -}}
+- destination:
+    host: {{ include "platform-site.qualifiedServiceName" . }}
+    {{- if (.destination).port }}
+    port: {{ .destination.port }}
+    {{- end }}
+    subset: {{ default .version (.destination).subset }}
+{{- end -}}

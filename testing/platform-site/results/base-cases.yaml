@@ -237,6 +237,48 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
+  name: service-with-destination-destination
+spec:
+  host: service-with-destination.test-ns.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: port-override
+    labels:
+      version: port-override
+  - name: subset-override
+    labels:
+      version: subset-override
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: service-with-only-version-destination-override-destination
+spec:
+  host: service-with-only-version-destination-override.test-ns.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: port-override
+    labels:
+      version: port-override
+  - name: subset-override
+    labels:
+      version: subset-override
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
   name: service-with-redirect-destination
 spec:
   host: service-with-redirect.test-ns.svc.cluster.local
@@ -838,6 +880,136 @@ spec:
       allowHeaders:
       - with-cors
 
+  # Routing for service-with-destination / version: v1
+  - name: service-with-destination-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-with-destination-v1-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: service-with-destination.test-ns.svc.cluster.local
+        port: 8080
+        subset: abc
+    timeout: 15s
+    retries:
+      attempts: 3
+
+  # Routing for service-with-destination / version: port-override
+  - name: service-with-destination-port-override-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-with-destination-port-override-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: service-with-destination.test-ns.svc.cluster.local
+        port: 9090
+        subset: abc
+    timeout: 15s
+    retries:
+      attempts: 3
+
+  # Routing for service-with-destination / version: subset-override
+  - name: service-with-destination-subset-override-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-with-destination-subset-override-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: service-with-destination.test-ns.svc.cluster.local
+        port: 8080
+        subset: override
+    timeout: 15s
+    retries:
+      attempts: 3
+
+  # Routing for service-with-only-version-destination-override / version: v1
+  - name: service-with-only-version-destination-override-v1-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-with-only-version-destination-override-v1-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: service-with-only-version-destination-override.test-ns.svc.cluster.local
+        subset: v1
+    timeout: 15s
+    retries:
+      attempts: 3
+
+  # Routing for service-with-only-version-destination-override / version: port-override
+  - name: service-with-only-version-destination-override-port-override-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-with-only-version-destination-override-port-override-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: service-with-only-version-destination-override.test-ns.svc.cluster.local
+        port: 9090
+        subset: port-override
+    timeout: 15s
+    retries:
+      attempts: 3
+
+  # Routing for service-with-only-version-destination-override / version: subset-override
+  - name: service-with-only-version-destination-override-subset-override-redirect
+    match:
+      - uri:
+          exact: /service-prefix
+    redirect:
+      uri: /service-prefix/  
+  - name: service-with-only-version-destination-override-subset-override-route
+    match:        
+    - uri:
+        prefix: /service-prefix/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: service-with-only-version-destination-override.test-ns.svc.cluster.local
+        subset: override
+    timeout: 15s
+    retries:
+      attempts: 3
+
   # Routing for service-with-redirect / version: v1
   - name: service-with-redirect-v1-redirect
     match:
@@ -1358,6 +1530,82 @@ spec:
     - destination:
         host: service-with-cors.test-ns.svc.cluster.local
         subset: v1
+    timeout: 15s
+    retries:
+      attempts: 3
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-service-with-destination-internal-routes
+spec:
+  hosts:
+  - service-with-destination.test-ns.svc.cluster.local
+  gateways:
+  - mesh
+  http:
+  - name: service-with-destination-v1-route
+    route:
+    - destination:
+        host: service-with-destination.test-ns.svc.cluster.local
+        port: 8080
+        subset: abc
+    timeout: 15s
+    retries:
+      attempts: 3
+  - name: service-with-destination-port-override-route
+    route:
+    - destination:
+        host: service-with-destination.test-ns.svc.cluster.local
+        port: 9090
+        subset: abc
+    timeout: 15s
+    retries:
+      attempts: 3
+  - name: service-with-destination-subset-override-route
+    route:
+    - destination:
+        host: service-with-destination.test-ns.svc.cluster.local
+        port: 8080
+        subset: override
+    timeout: 15s
+    retries:
+      attempts: 3
+---
+# Source: platform-site/templates/routing.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-release-service-with-only-version-destination-override-internal-routes
+spec:
+  hosts:
+  - service-with-only-version-destination-override.test-ns.svc.cluster.local
+  gateways:
+  - mesh
+  http:
+  - name: service-with-only-version-destination-override-v1-route
+    route:
+    - destination:
+        host: service-with-only-version-destination-override.test-ns.svc.cluster.local
+        subset: v1
+    timeout: 15s
+    retries:
+      attempts: 3
+  - name: service-with-only-version-destination-override-port-override-route
+    route:
+    - destination:
+        host: service-with-only-version-destination-override.test-ns.svc.cluster.local
+        port: 9090
+        subset: port-override
+    timeout: 15s
+    retries:
+      attempts: 3
+  - name: service-with-only-version-destination-override-subset-override-route
+    route:
+    - destination:
+        host: service-with-only-version-destination-override.test-ns.svc.cluster.local
+        subset: override
     timeout: 15s
     retries:
       attempts: 3

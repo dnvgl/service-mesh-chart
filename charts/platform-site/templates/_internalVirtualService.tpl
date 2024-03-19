@@ -23,9 +23,7 @@ spec:
 {{ $match | toYaml | indent 4 }}
   {{- end }}
     route:
-    - destination:
-        host: {{ $qualifiedServiceName }}
-        subset: {{ .version }}
+{{ include "platform-site.routeDestination" $versionValues | indent 4 }} 
 {{- include "platform-site.commonOptions" $versionValues }}
 {{- end }} {{/* end range versions */}}
 {{- end -}}

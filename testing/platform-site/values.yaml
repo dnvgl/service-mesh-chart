@@ -200,3 +200,30 @@ routes:
       - service-prefix
     versions:
       - version: v1
+
+  service-with-destination:
+    urlPrefixes:
+      - service-prefix
+    destination:
+      port: "8080"
+      subset: "abc"
+    versions:
+    - version: v1
+    - version: port-override
+      destination:
+        port: "9090"
+    - version: subset-override
+      destination:
+        subset: "override"
+
+  service-with-only-version-destination-override:
+    urlPrefixes:
+      - service-prefix
+    versions:
+    - version: v1
+    - version: port-override
+      destination:
+        port: "9090"
+    - version: subset-override
+      destination:
+        subset: "override"

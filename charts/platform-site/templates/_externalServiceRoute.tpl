@@ -62,10 +62,7 @@
 {{- .route | toYaml | indent 6 }}
 
 {{- else }} {{- /* not explicit route */}}
-    - destination:
-        host: {{ include "platform-site.qualifiedServiceName" . }}
-        subset: {{ .version }}
-
+{{ include "platform-site.routeDestination" . | indent 4 }} 
 {{- end }} {{- /* end if explicit route */}}
 
 {{- include "platform-site.commonOptions" . }}
