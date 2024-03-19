@@ -1,6 +1,7 @@
 
 {{- $defaults:= .Values.defaults}}
 
+{{- /**** Create a single VirtualService for all external service routes ****/}}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -15,128 +16,45 @@ spec:
   - {{ required "A valid .Values.gateway entry required!" .Values.gateway }}
 
   http:
-{{- /* range .Values.routes */}}
 {{- range $key, $value := .Values.routes }}
 {{- with $value }}
-{{- /* Store general route values before version range */}}
-{{- /* $service := required "service is required" .service */}}
-{{- $service := required "service required" $key }}
-{{- $sanitizedServiceName := $service | replace "." "-" }}
-{{- $qualifiedServiceName := printf "%s.%s.svc.cluster.local" $service (default $.Release.Namespace .namespace) }}
-{{- $serviceSettings := . }}
+
+{{- /* Store all values at the service level
+       plus a few specific values, and merge in defaults */}}
+{{- $serviceValues := (dict 
+    "serviceName" (required "service required" $key)
+    "namespace" (default $.Release.Namespace .namespace)
+    "releaseName" $.Release.Name
+ ) | mustMergeOverwrite ((. | deepCopy) | mustMergeOverwrite ($defaults | deepCopy)) }} 
 
 {{- range .versions }}
-{{- /* args for templates which look across sources */}}
-{{- $sourcesArgs := (dict "serviceName" $service "versionSource" . "serviceSource" $serviceSettings "defaultSource" $defaults "Template" $.Template) }}
 
-{{- /* }}
-{{- $args := (dict "source" .version "componentName" "rewriteUrlPrefix" "Template" $.Template ) }}
-{{ tpl $isEnabled $args }}
-{{*/}}
+{{- /* Use dictionary merge to override version-specific settings and pull in service values */}}
+{{- $versionValues := (. | deepCopy) | mustMergeOverwrite ($serviceValues | deepCopy) }} 
 
-{{- /*
-   Internal only can be overridden at version level, but false is different than blank. coalesce treats false as null 
-   So this is, if explicitly false or neither is true
-*/}}
-{{- $external := (include "platform-site.getBoolFromSources" (dict "valueName" ".internalOnly" | mustMergeOverwrite $sourcesArgs) | eq "false") }}
-{{- if $external }}
-{{- include "platform-site.externalMatcher" (dict "serviceName" $service "versionSource" . "serviceSource" $serviceSettings "defaults" $defaults "sourcesArgs" $sourcesArgs ) }}
-
-{{- /* $rewriteSettings := default (default $defaults.rewriteUrlPrefix $serviceSettings.rewriteUrlPrefix) .rewriteUrlPrefix */}}
-{{- /* $rewriteEnabled := include "platform-site.isComponentEnabled" (dict "componentName" "rewriteUrlPrefix" | merge $sourcesArgs) */}}
-
-{{- $rewriteEnabled := include "platform-site.getBoolFromSources" (dict "valueName" ".rewriteUrlPrefix.enabled" | mustMergeOverwrite $sourcesArgs) | eq "true" }}
-
-{{- if $rewriteEnabled }}
-    rewrite:
-      uri: {{ include "platform-site.getValueFromSources" (dict "valueName" ".rewriteUrlPrefix.replaceWith" | mustMergeOverwrite $sourcesArgs) | required "rewrite replacement is required" }}
-      {{- /* required "rewrite replacement is required" $rewriteSettings.rewriteUrlPrefix.replaceWith */}}
-{{- end }}
-    route:
-{{- if default $serviceSettings.route .route }}
-  # Explicitly specified route
-{{- $serviceSettings.route .route | toYaml | indent 6 }}
-
-{{- else }} {{- /* not explicit route */}}
-    - destination:
-        host: {{ $qualifiedServiceName }}
-        subset: {{ .version }}
-
-{{- end }} {{- /* end if explicit route */}}
-
-{{- include "platform-site.commonOptions" (dict "retries" .retries | mustMergeOverwrite $sourcesArgs) }}
-
-{{- $corsPolicy := default $serviceSettings.corsPolicy .corsPolicy }}
-
-{{- if $corsPolicy }}
-    corsPolicy:
-{{ $corsPolicy | toYaml | indent 6 }}
-{{- end }} {{- /* end if cors policy */ -}}
-
-
+{{- if not $versionValues.internalOnly }}
+{{- include "platform-site.externalRoute" $versionValues }}
 {{- end }} {{- /* internal only */ -}}
 {{- end }} {{- /* end range versions */ -}}
 {{- end }} {{- /* end with route value */ -}}
 {{- end }} {{- /* end range routes */ -}}
 
-{{- /* range .Values.routes */ -}}
+{{- /**** For Each route create separate internal virtual service and destination rule ****/}}
+
 {{- range $key, $value := .Values.routes }}
 {{- with $value }}
 
-#{{- $service := .service }}  
-{{- $service := $key }}  
-{{- $sanitizedServiceName := $service | replace "." "-" }}
-{{- $qualifiedServiceName := printf "%s.%s.svc.cluster.local" $service (default $.Release.Namespace .namespace) }}
-{{- $serviceSettings := . }}
+{{- /* Store all values at the service level
+       plus a few specific values, and merge in defaults */}}
+{{- $serviceValues := (dict 
+    "serviceName" $key
+    "namespace" (default $.Release.Namespace .namespace)
+    "releaseName" $.Release.Name
+ ) | mustMergeOverwrite ((. | deepCopy) | mustMergeOverwrite ($defaults | deepCopy)) }} 
 
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: {{ $.Release.Name }}-{{ $sanitizedServiceName }}-internal-routes
-spec:
-  hosts:
-  - {{ $qualifiedServiceName }}
-  gateways:
-  - mesh
-  http:
-{{- range .versions }}
-{{- /* args for templates which look across sources */}}
-{{- $sourcesArgs := (dict "serviceName" $service "versionSource" . "serviceSource" $serviceSettings "defaultSource" $defaults "Template" $.Template) }}
-{{- $sanitizedVersion := .version | replace "." "-" }}
-  - name: {{ printf "%s-%s-route" $sanitizedServiceName $sanitizedVersion }}
-  {{- $match := default $serviceSettings.internalMatch .internalMatch }}
-  {{- if $match }}
-    match:
-{{ $match | toYaml | indent 4 }}
-  {{- end }}
-    route:
-    - destination:
-        host: {{ $qualifiedServiceName }}
-        subset: {{ .version }}
-{{- include "platform-site.commonOptions" (dict "retries" .retries | mustMergeOverwrite $sourcesArgs) }}
+{{- include "platform-site.internalVirtualService" $serviceValues -}}
 
-{{- end }} {{/* end range versions */}}
+{{- include "platform-site.destinationRule" $serviceValues -}}
 
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: {{ $service | replace "." "-" }}-destination
-spec:
-  host: {{ $qualifiedServiceName }}
-  trafficPolicy:
-    tls:
-      mode: ISTIO_MUTUAL
-  subsets:
-{{- range .versions }}
-  - name: {{ .version }}
-{{- if .subsetDefinition }}
-{{ .subsetDefinition | toYaml | indent 4 }}
-{{- else }} {{- /* no subset definition override */}}
-    labels:
-      version: {{ .version }}
-{{- end }} {{- /* end subsetDefinition */ -}}
-{{- end }} {{- /* end range versions */ -}}
 {{- end }} {{- /* end with route value */ -}}
 {{- end }} {{- /* end range routes */ -}}
