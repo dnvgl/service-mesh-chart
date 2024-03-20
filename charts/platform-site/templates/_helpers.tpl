@@ -40,7 +40,8 @@ Base redirect name given standard values dictionary
 - destination:
     host: {{ include "platform-site.qualifiedServiceName" . }}
     {{- if (.destination).port }}
-    port: {{ .destination.port }}
+    port: 
+    {{ .destination.port | toYaml | indent 2 }}
     {{- end }}
     subset: {{ default .version (.destination).subset }}
 {{- end -}}

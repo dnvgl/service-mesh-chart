@@ -896,7 +896,8 @@ spec:
     route:
     - destination:
         host: service-with-destination.test-ns.svc.cluster.local
-        port: 8080
+        port: 
+          number: 8080
         subset: abc
     timeout: 15s
     retries:
@@ -918,7 +919,8 @@ spec:
     route:
     - destination:
         host: service-with-destination.test-ns.svc.cluster.local
-        port: 9090
+        port: 
+          number: 9090
         subset: abc
     timeout: 15s
     retries:
@@ -940,7 +942,8 @@ spec:
     route:
     - destination:
         host: service-with-destination.test-ns.svc.cluster.local
-        port: 8080
+        port: 
+          number: 8080
         subset: override
     timeout: 15s
     retries:
@@ -983,7 +986,8 @@ spec:
     route:
     - destination:
         host: service-with-only-version-destination-override.test-ns.svc.cluster.local
-        port: 9090
+        port: 
+          number: 9090
         subset: port-override
     timeout: 15s
     retries:
@@ -1549,7 +1553,8 @@ spec:
     route:
     - destination:
         host: service-with-destination.test-ns.svc.cluster.local
-        port: 8080
+        port: 
+          number: 8080
         subset: abc
     timeout: 15s
     retries:
@@ -1558,7 +1563,8 @@ spec:
     route:
     - destination:
         host: service-with-destination.test-ns.svc.cluster.local
-        port: 9090
+        port: 
+          number: 9090
         subset: abc
     timeout: 15s
     retries:
@@ -1567,7 +1573,8 @@ spec:
     route:
     - destination:
         host: service-with-destination.test-ns.svc.cluster.local
-        port: 8080
+        port: 
+          number: 8080
         subset: override
     timeout: 15s
     retries:
@@ -1596,7 +1603,8 @@ spec:
     route:
     - destination:
         host: service-with-only-version-destination-override.test-ns.svc.cluster.local
-        port: 9090
+        port: 
+          number: 9090
         subset: port-override
     timeout: 15s
     retries:
