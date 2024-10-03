@@ -266,7 +266,8 @@ proxyResources:
   # requests:
   # cpu: 10m
   # memory: 64Mi
-  # limits are not currently supported
+  # limits:  
+
 
 nodeSelector: {}
 

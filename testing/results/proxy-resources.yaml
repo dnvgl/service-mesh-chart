@@ -1,0 +1,105 @@
+---
+# Source: platform-service/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: test
+      app.kubernetes.io/instance: test-release
+  template:
+    metadata:
+      labels:
+        app: test
+        app.kubernetes.io/name: test
+        helm.sh/chart: platform-service-test
+        app.kubernetes.io/instance: test-release
+        version: v1
+        state: stateful
+        session-management: backend
+        label1: "1"
+        label2: "2"
+      annotations:
+        sidecar.istio.io/proxyCPU: 1m
+        sidecar.istio.io/proxyMemory: 10Mi
+        sidecar.istio.io/proxyCPULimit: 2m
+        sidecar.istio.io/proxyMemoryLimit: 20Mi
+        anno1: "1"
+        anno2: "2"
+    spec:
+      serviceAccountName: test
+      securityContext:
+        {}
+      initContainers:
+        []
+      containers:
+
+        - name: test
+          image: "test.io/some/repository:latest"
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: baseLevel
+              value: "only set at base"
+            - name: definedInBaseAndDuplicatedInOverride
+              value: "sharedValue"
+            - name: definedInBaseAndOverridden
+              value: "baseValue"
+            - name: definedInBaseAndOverriddenValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+            - name: onlyDefinedInBaseValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+          securityContext:
+            {}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 80
+            successThreshold: 3
+          startupProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /health/startup
+              port: 80
+            periodSeconds: 10
+          volumeMounts:
+            - name: service-secrets
+              mountPath: /secrets
+
+          resources:
+            {}
+          terminationGracePeriodSeconds:
+            30
+      volumes:
+
+      - name: service-secrets
+        secret:
+          secretName: test-secrets

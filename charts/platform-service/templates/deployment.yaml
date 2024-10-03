@@ -64,7 +64,15 @@ spec:
         sidecar.istio.io/proxyMemory: {{ .Values.proxyResources.requests.memory }}
         {{- end }}
         {{- end }}
-        {{- with .Values.additionalPodAnnotations }}       
+        {{- if .Values.proxyResources.limits }}
+        {{- if .Values.proxyResources.limits.cpu }}
+        sidecar.istio.io/proxyCPULimit: {{ .Values.proxyResources.limits.cpu }}
+        {{- end }}
+        {{- if .Values.proxyResources.limits.memory }}
+        sidecar.istio.io/proxyMemoryLimit: {{ .Values.proxyResources.limits.memory }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.additionalPodAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
