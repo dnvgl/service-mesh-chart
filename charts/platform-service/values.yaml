@@ -72,7 +72,7 @@ serviceAccount:
   name:
   # Indicates whether pods running as this service
   # account should have an API token automatically mounted.
-  automountToken: false
+  automountToken: true
 
 gateway:
   # map virtual service to a gateway expose this service
