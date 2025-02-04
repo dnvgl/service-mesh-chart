@@ -1,0 +1,9 @@
+workloadIdentityClientId:
+keyVaults:
+  #- akv: # keyvault name
+  #  k8sSecrets:
+      # - name:
+      #   akvSecrets: [] # import directly as dataKeys under the same names
+      #   secrets:
+      #     - akvSecret:
+      #       k8sDataKey:
