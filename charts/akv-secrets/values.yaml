@@ -1,0 +1,57 @@
+workloadIdentityClientId: # id of your workload identity id that is authorized to access the keyvault
+
+# # Schema:
+# keyVaults:
+#   - akv: # name of an Azure Keyvault to import secrets from 
+#     k8sSecrets:
+#       - name: # name of the k8s secret to create
+#         # # There are two ways of importing secrets from AKV.
+#         # # 1) Import secrets with the same name of data keys as secrets in AKV.
+#         #  akvSecrets: [] # list of names of secrets in AKV to import, data keys with the same names will be created in kubernetes secret. 
+#         # # 2) Use the form below if you need to import secrets under dataKeys with different names. Useful if you need to adjust naming convention on the fly. 
+#         # # e.g. you need UNDERSCORES_IN_NAMES but keyvault doesn't allow underscores in secret names.
+#         # secrets:
+#         #   - akvSecret:
+#         #     k8sDataKey:
+
+# # Example 1
+# keyVaults:
+#   - akv: devpeuwkey01example1
+#     k8sSecrets:
+#       - name: databaseCredentials
+#         akvSecrets: [ databaseUser, databasePassword ]
+#
+# # for secret in Keyvault:
+# # - name: databaseUser
+# #   value: user
+# # - name: databasePassword
+# #   value: password
+# #
+# # this will create a k8s secret with the following data:
+# # kind: Secret
+# # data:
+# #   databaseUser: user
+# #   databasePassword: password
+
+# # Example 2
+# keyVaults:
+#   - akv: devpeuwkey01example2
+#     k8sSecrets:
+#       - name: databaseCredentials
+#         secrets:
+#           - akvSecret: databaseUser
+#             k8sDataKey: DATABASE_USER
+#           - akvSecret: databasePassword
+#             k8sDataKey: DATABASE_PASSWORD
+#
+# # for secrest in Keyvault:
+# # - name: databaseUser
+# #   value: user
+# # - name: databasePassword
+# #   value: password
+# #
+# # this will create a k8s secret with the following data:
+# # kind: Secret
+# # data:
+# #   DATABASE_USER: user
+# #   DATABASE_PASSWORD: password
