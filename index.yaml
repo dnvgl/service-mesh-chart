@@ -1,5 +1,15 @@
 apiVersion: v1
 entries:
+  akv-secrets:
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: "2025-02-07T10:31:51.859315173Z"
+    description: akv secrets
+    digest: c71e1383c5bee5391afd22279e1ea1e5e487d5ec1145e88f305e4c0c3b69aa2e
+    name: akv-secrets
+    urls:
+    - https://github.com/dnvgl/service-mesh-chart/releases/download/akv-secrets-1.0.7/akv-secrets-1.0.7.tgz
+    version: 1.0.7
   platform-service:
   - apiVersion: v1
     appVersion: "1.1"
