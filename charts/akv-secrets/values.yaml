@@ -1,9 +1,15 @@
-workloadIdentityClientId:
+workloadIdentityClientId: # id of your workload identity id that is authorized to access the keyvault
+
 keyVaults:
-  #- akv: # keyvault name
-  #  k8sSecrets:
-      # - name:
-      #   akvSecrets: [] # import directly as dataKeys under the same names
-      #   secrets:
-      #     - akvSecret:
-      #       k8sDataKey:
+  # - akv: # name of an Azure Keyvault to import secrets from 
+  #   k8sSecrets:
+  #     - name: # name of the k8s secret to create
+  #       # # There are two ways of importing secrets from AKV.
+  #       # # 1) Import secrets with the same name of data keys as secrets in AKV.
+  #       #  akvSecrets: [] # list of names of secrets in AKV to import, data keys with the same names will be created in kubernetes secret. 
+  #       # # 2) Use the form below if you need to import secrets under dataKeys with different names. Useful if you need to adjust naming convention on the fly. 
+  #       # # e.g. you need UNDERSCORES_IN_NAMES but keyvault doesn't allow underscores in secret names.
+  #       # secrets:
+  #       #   - akvSecret:
+  #       #     k8sDataKey:
+
