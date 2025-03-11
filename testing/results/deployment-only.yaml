@@ -142,9 +142,6 @@ spec:
         secret:
           secretName: test-secrets
 ---
-# Source: platform-service/templates/service-account.yaml
-automountServiceAccountToken: false
----
 # Source: platform-service/templates/authorizationPolicy.yaml
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
