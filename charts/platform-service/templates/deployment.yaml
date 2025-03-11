@@ -49,6 +49,9 @@ spec:
         {{- with .Values.additionalPodLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- if .Values.workloadIdentityClientId }}
+        azure.workload.identity/use: "true"
+        {{- end }}
       annotations:
         {{- if .Values.service.liveness.enabled }}  
         sidecar.istio.io/rewriteAppHTTPProbers: "true"

@@ -292,3 +292,5 @@ debugEnvoyFilters: true
 #kubeit: #placeholder used for kubeit parameters passed from tenant bootstrap app of apps
 
 initContainersDefinitions: []
+
+workloadIdentityClientId: # id of your workload identity id that is authorized to access the keyvault

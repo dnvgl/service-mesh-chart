@@ -104,6 +104,10 @@ echo `date` > results/run-date.txt
     --show-only templates/deployment.yaml \
     > results/proxy-resources.yaml
 
+./generate-test-chart.sh \
+    --set workloadIdentityClientId="123abc" \
+    > results/workload-identity.yaml
+
 echo " *** kubeval results ***"
 kubeval --ignore-missing-schemas results/*.yaml
 echo " *** istioctl validation results ***"
