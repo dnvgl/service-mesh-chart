@@ -27,15 +27,17 @@ dependencies:
 In your main chart's template file, reference the Bootstrap Chart's template:
 
 # Generate all manifests for specified environment
+
+all-manifests.yaml
+```
 {{- include "bootstrap.allManifests" . }}
-
-
+```
 
 ## Configuration
 
 The chart is configured using a values.yaml file. Below is an example configuration:
 
-``
+```
 ## KubeIT top level values
 env: nonprod
 region: eastus2
@@ -66,7 +68,7 @@ prod:
     shortRegion: eus2
     clusterColour: blue
 
-``
+```
 
 ## Template Structure
 
