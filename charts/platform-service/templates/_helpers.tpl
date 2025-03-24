@@ -59,13 +59,6 @@ tenant: {{ $.Values.kubeit.tenantName }}
 {{- end -}}
 {{- end -}}
 
-{{ $podIdentityName := "" }}
-{{- if $.Values.kubeit }}
-{{- if $.Values.kubeit.tenantPodIdentityName }}
-{{ $podIdentityName = .Values.kubeit.tenantPodIdentityName }}
-{{- end }}
-{{- end }}
-
 {{- if $.Values.podIdentityName }}
 {{ $podIdentityName = .Values.podIdentityName }}
 {{- end }}
