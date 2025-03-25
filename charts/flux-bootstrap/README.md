@@ -20,7 +20,7 @@ In your main chart's Chart.yaml, add the Bootstrap Chart as a dependency:
 dependencies:
   - name: flux-bootstrap
     version: "0.0.1"
-    repository: "https://github.com/dnvgl/service-mesh-chart/charts/flux-bootstrap"
+    repository: "https://dnvgl.github.io/service-mesh-chart"
 ```
 
 ### Step 2: Include Template
