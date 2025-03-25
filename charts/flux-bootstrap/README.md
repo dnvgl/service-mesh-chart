@@ -19,7 +19,7 @@ In your main chart's Chart.yaml, add the Bootstrap Chart as a dependency:
 ```
 dependencies:
   - name: flux-bootstrap
-    version: "0.0.1"
+    version: "0.1.2"
     repository: "https://dnvgl.github.io/service-mesh-chart"
 
 ```
@@ -55,6 +55,13 @@ tenantMultiRegion: false
 managementNamespace: "management-<tenant>"
 workloadIdentityClientId: xxxx-xxx-xxx-xxxx-xxxx
 
+## Flux-bootstrap values
+
+gitRepoNameTemplate: "tenant"
+kustomizationNameTemplate: "tenant"
+fluxSshSecretNameTemplate: gitops-repo-key
+fluxSshSecretName: gitops-repo-key
+kustomizationOverride: tenant
 
 ## Tenant environment values
 nonprod:
