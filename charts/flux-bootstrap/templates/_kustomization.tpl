@@ -1,6 +1,4 @@
-
 {{- define "bootstrap.kustomization" }}
-
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -20,5 +18,4 @@ spec:
   sourceRef:
     kind: GitRepository
     name: {{ include "bootstrap.gitRepoName" . }}
-
 {{- end }}
