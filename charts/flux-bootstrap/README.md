@@ -21,6 +21,7 @@ dependencies:
   - name: flux-bootstrap
     version: "0.0.1"
     repository: "https://dnvgl.github.io/service-mesh-chart"
+
 ```
 
 ### Step 2: Include Template
