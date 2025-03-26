@@ -56,7 +56,7 @@ managementNamespace: "management-<tenant>"
 workloadIdentityClientId: xxxx-xxx-xxx-xxxx-xxxx
 
 ## Flux-bootstrap values
-
+pathTemplate: "{{ print `./gitops/` .prodOrNonprod `/` .namespace }}"
 gitRepoNameTemplate: "tenant"
 kustomizationNameTemplate: "tenant"
 fluxSshSecretNameTemplate: gitops-repo-key
