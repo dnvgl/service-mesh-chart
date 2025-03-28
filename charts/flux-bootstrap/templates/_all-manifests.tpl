@@ -52,9 +52,9 @@
   "namespace" .namespace
   "path" .path
   "pathTemplate" $values.pathTemplate
-  "fluxSshSecretNameTemplate" $values.fluxSshSecretNameTemplate
-  "gitRepoNameTemplate" $values.gitRepoNameTemplate
-  "kustomizationNameTemplate" $values.kustomizationNameTemplate
+  "fluxSshSecretNameTemplate" ($values.fluxSshSecretNameTemplate | default "gitops-repo-key")
+  "gitRepoNameTemplate" ( $values.gitRepoNameTemplate | default "tenant" )
+  "kustomizationNameTemplate" ( $values.kustomizationNameTemplate | default "tenant")
   "Template" $.Template) }}
 
 {{- include "bootstrap.gitRepository" $context }}
