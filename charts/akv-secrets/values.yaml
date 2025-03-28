@@ -1,4 +1,6 @@
-workloadIdentityClientId: # id of your workload identity id that is authorized to access the keyvault
+serviceAccountName: bootstrap-service-account
+createServiceAccount: false
+#workloadIdentityClientId: # id of your workload identity id that is authorized to access the keyvault, need to be passed if createServiceAccount is true
 
 # # Schema:
 # keyVaults:
