@@ -3,6 +3,15 @@ entries:
   akv-secrets:
   - apiVersion: v1
     appVersion: "1.0"
+    created: "2025-03-31T19:06:45.530066548Z"
+    description: akv secrets
+    digest: 3bfb945fa26b515462d0f8c487f48bc595efdcd0eda585c207a3b60ea1007448
+    name: akv-secrets
+    urls:
+    - https://github.com/dnvgl/service-mesh-chart/releases/download/akv-secrets-1.0.9/akv-secrets-1.0.9.tgz
+    version: 1.0.9
+  - apiVersion: v1
+    appVersion: "1.0"
     created: "2025-02-07T10:31:51.859315173Z"
     description: akv secrets
     digest: c71e1383c5bee5391afd22279e1ea1e5e487d5ec1145e88f305e4c0c3b69aa2e
