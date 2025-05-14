@@ -97,7 +97,7 @@ defaultRouting:
   enabled: true
   
   # decide if generate one domain per CR VirtualService 
-  oneDomainPerVirtualService: true
+  oneDomainPerVirtualService: false
   
   # external hosts to take into account for routing rules
   hosts: []
