@@ -1,6 +1,6 @@
 ---
 # Source: platform-service/templates/virtualservice.yaml
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: test
@@ -15,10 +15,10 @@ spec:
         host: "test.test-ns.svc.cluster.local"
 ---
 # Source: platform-service/templates/virtualservice.yaml
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: test-external
+  name: mysubdomain1-mydomain-com-ext
   labels:
     app: test
     app.kubernetes.io/name: test
@@ -28,44 +28,96 @@ metadata:
     state: stateful
 spec:
   hosts:
-    - "mysubdomain1.mydomain.com"
-    - "mysubdomain2.mydomain.com"
+    - mysubdomain1.mydomain.com
   gateways:
-    - gateway/one-gateway
+    - istio-system/global-https-internal-default-gateway  
   http:
-  - match:
-    - uri:
-        exact: /url2
-    - uri:
-        prefix: /url2/
-  # routes to service
-    route:
-    - destination:
-        host: "test.test-ns.svc.cluster.local"
-  # redirect on prefixes without trailing slashes
-  - match:
-    - uri:
-        exact: /prefix1
-    redirect:
-      uri: /prefix1/
-  - match:
-    - uri:
-        exact: /prefix2
-    redirect:
-      uri: /prefix2/
-  # routes to service
-  - route:
-    - destination:
-        host: "test.test-ns.svc.cluster.local"
-    match:
-    - uri:
-        prefix: /prefix1/
-    - uri:
-        prefix: /prefix2/
-    rewrite:
-      uri: /
-    # deprecated
-    headers:
-      request:
-        add:
-          x-appname: prefix1
+    - match:
+      - uri:
+          exact: /url2
+      - uri:
+          prefix: /url2/
+    # routes to service
+      route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+    # redirect on prefixes without trailing slashes
+    - match:
+      - uri:
+          exact: /prefix1
+      redirect:
+        uri: /prefix1/
+    - match:
+      - uri:
+          exact: /prefix2
+      redirect:
+        uri: /prefix2/
+    # routes to service
+    - route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+      match:
+      - uri:
+          prefix: /prefix1/
+      - uri:
+          prefix: /prefix2/
+      rewrite:
+        uri: /
+      # deprecated
+      headers:
+        request:
+          add:
+            x-appname: prefix1    
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: mysubdomain2-mydomain-com-ext
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  hosts:
+    - mysubdomain2.mydomain.com
+  gateways:
+    - istio-system/global-https-internal-default-gateway  
+  http:
+    - match:
+      - uri:
+          exact: /url2
+      - uri:
+          prefix: /url2/
+    # routes to service
+      route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+    # redirect on prefixes without trailing slashes
+    - match:
+      - uri:
+          exact: /prefix1
+      redirect:
+        uri: /prefix1/
+    - match:
+      - uri:
+          exact: /prefix2
+      redirect:
+        uri: /prefix2/
+    # routes to service
+    - route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+      match:
+      - uri:
+          prefix: /prefix1/
+      - uri:
+          prefix: /prefix2/
+      rewrite:
+        uri: /
+      # deprecated
+      headers:
+        request:
+          add:
+            x-appname: prefix1

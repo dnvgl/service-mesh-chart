@@ -25,14 +25,22 @@ service:
 
 gateway:
   exposeService: true
+  name: istio-system/global-https-internal-default-gateway
+  internalName: istio-system/global-internaluse-gateway
 
 defaultRouting:
   enabled: true
   allHosts: false
 
+  oneDomainPerVirtualService: true
+
   hosts:
     - mysubdomain1.mydomain.com
     - mysubdomain2.mydomain.com
+
+  internalHosts:
+    - myhost.green.we.nonprod.kubeit-int.dnv.com
+    - myhost.blue.we.nonprod.kubeit-int.dnv.com
 
   urlPrefixes:
     - prefix1
@@ -51,7 +59,7 @@ health:
     initialDelaySeconds: 0
     periodSeconds: 10
     timeoutSeconds: 1
-    failureThreshold: 3      
+    failureThreshold: 3
   readinessProbe:
     httpGet:
       path: /ready
@@ -68,12 +76,12 @@ env:
   baseLevel: only set at base
   definedInBaseAndDuplicatedInOverride: sharedValue
   definedInBaseAndOverridden: "baseValue"
-  definedInBaseAndOverriddenValue: 
+  definedInBaseAndOverriddenValue:
     valueFrom:
       secretKeyRef:
         name: base-secret
         key: username
-  onlyDefinedInBaseValue: 
+  onlyDefinedInBaseValue:
     valueFrom:
       secretKeyRef:
         name: base-secret
