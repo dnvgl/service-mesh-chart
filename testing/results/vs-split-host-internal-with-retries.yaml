@@ -40,10 +40,3 @@ spec:
           prefix: /prefix2/
       rewrite:
         uri: /
-      # deprecated
-      headers:
-        request:
-          add:
-            x-appname: prefix1    
-      retries:
-        attempts: 3

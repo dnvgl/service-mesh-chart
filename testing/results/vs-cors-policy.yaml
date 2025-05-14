@@ -1,0 +1,109 @@
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: test
+spec:
+  hosts:
+  - test.test-ns.svc.cluster.local
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: "test.test-ns.svc.cluster.local"    
+    retries:
+      attempts: 3
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: mysubdomain1-mydomain-com-ext
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  hosts:
+    - mysubdomain1.mydomain.com
+  gateways:
+    - istio-system/global-https-internal-default-gateway  
+  http:
+    # redirect on prefixes without trailing slashes
+    - match:
+      - uri:
+          exact: /prefix1
+      redirect:
+        uri: /prefix1/
+    - match:
+      - uri:
+          exact: /prefix2
+      redirect:
+        uri: /prefix2/
+    # routes to service
+    - route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+      corsPolicy:
+      allowMethods:
+      - GET
+      allowOrigins:
+      - exact: app://.
+      match:
+      - uri:
+          prefix: /prefix1/
+      - uri:
+          prefix: /prefix2/
+      rewrite:
+        uri: /
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: mysubdomain2-mydomain-com-ext
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  hosts:
+    - mysubdomain2.mydomain.com
+  gateways:
+    - istio-system/global-https-internal-default-gateway  
+  http:
+    # redirect on prefixes without trailing slashes
+    - match:
+      - uri:
+          exact: /prefix1
+      redirect:
+        uri: /prefix1/
+    - match:
+      - uri:
+          exact: /prefix2
+      redirect:
+        uri: /prefix2/
+    # routes to service
+    - route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+      corsPolicy:
+      allowMethods:
+      - GET
+      allowOrigins:
+      - exact: app://.
+      match:
+      - uri:
+          prefix: /prefix1/
+      - uri:
+          prefix: /prefix2/
+      rewrite:
+        uri: /

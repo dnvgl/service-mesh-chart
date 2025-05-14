@@ -47,7 +47,7 @@ defaultRouting:
     - prefix2
 
   retries:
-    enabled: false
+    enabled: true
     settings:
       attempts: 3
 

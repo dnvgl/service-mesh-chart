@@ -132,7 +132,7 @@ http:
     - destination:
         host: {{ include "platform-service.fullQualifiedServiceName" $ | quote }}
 {{- if $.Values.defaultRouting.corsPolicy }}
-  corsPolicy:
+    corsPolicy:
 {{ $.Values.defaultRouting.corsPolicy | toYaml | trim | indent 4 }}
 {{- end -}}
 
@@ -155,10 +155,5 @@ http:
     rewrite:
       uri: {{ required "rewriteUri is required" $.Values.defaultRouting.rewriteUrlPrefix.replaceWith }}
 {{- end}}
-    # deprecated
-    headers:
-      request:
-        add:
-          x-appname: {{ first $prefixes }}
-{{- include "retries" $ | indent 4 }}
+
 {{- end -}}

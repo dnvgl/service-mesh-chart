@@ -33,6 +33,7 @@ spec:
   gateways:
     - {{ required "A valid .Values.gateway.name entry required!" $.Values.gateway.name }}
 {{- include "platform-service.virtualserviceContent" $ | indent 2 }}
+---
 {{- end }}
 {{- else }}
 apiVersion: networking.istio.io/v1

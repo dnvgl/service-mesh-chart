@@ -12,7 +12,9 @@ spec:
   http:
   - route:
     - destination:
-        host: "test.test-ns.svc.cluster.local"
+        host: "test.test-ns.svc.cluster.local"    
+    retries:
+      attempts: 3
 ---
 # Source: platform-service/templates/virtualservice.yaml
 apiVersion: networking.istio.io/v1
@@ -54,11 +56,8 @@ spec:
           prefix: /prefix2/
       rewrite:
         uri: /
-      # deprecated
-      headers:
-        request:
-          add:
-            x-appname: prefix1    
+---
+# Source: platform-service/templates/virtualservice.yaml
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
@@ -98,8 +97,3 @@ spec:
           prefix: /prefix2/
       rewrite:
         uri: /
-      # deprecated
-      headers:
-        request:
-          add:
-            x-appname: prefix1
