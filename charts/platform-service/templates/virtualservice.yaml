@@ -1,20 +1,8 @@
-{{- define "retries" -}}
-{{- if .Values.defaultRouting.retries.enabled }}
-    retries:
-{{- if .Values.defaultRouting.retries.settings }}
-{{ .Values.defaultRouting.retries.settings | toYaml | trim | indent 6 }}
-{{- else }}
-      attempts: 3
-      perTryTimeout: 2s
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
 {{- if not .Values.deploymentOnly -}}
-{{- if .Values.defaultRouting.enabled}}
+{{- if .Values.defaultRouting.enabled -}}
 {{- $fullName := include "platform-service.fullname" . -}}
 ---
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: {{ include "platform-service.serviceName" . }}
@@ -27,117 +15,27 @@ spec:
   - route:
     - destination:
         host: {{ include "platform-service.fullQualifiedServiceName" . | quote }}
-{{- include "retries" . }}
-
+{{- include "retries" $ | indent 4 }}
 ---
 {{- if .Values.gateway.exposeService -}}
-{{- $ingressList := list -}}
-{{- if .Values.defaultRouting.kubeitDefaultHosts.enabled -}}
-{{ $tenantPrefix := "" -}}
-{{- if and $.Values.defaultRouting.kubeitDefaultHosts.enabled $.Values.defaultRouting.kubeitDefaultHosts.tenantPrefixEnabled -}}
-{{ $tenantPrefix = printf "-%s" .Values.kubeit.tenantName -}}
-{{- end -}}
-{{- $ingressList = append $ingressList (printf "%s%s.%s.%s" ($.Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default $.Values.app) $tenantPrefix $.Values.kubeit.clusterSubdomain .Values.defaultRouting.kubeitDefaultHosts.dnsDomain) -}}
-{{- $ingressList = append $ingressList (printf "%s%s.%s.%s.%s" ($.Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default $.Values.app) $tenantPrefix $.Values.kubeit.shortRegion $.Values.kubeit.environmentName $.Values.defaultRouting.kubeitDefaultHosts.dnsDomain) -}}
-{{- $ingressList = append $ingressList (printf "%s%s.%s.%s.%s.%s" ($.Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default $.Values.app) $tenantPrefix $.Values.kubeit.clusterColour $.Values.kubeit.shortRegion $.Values.kubeit.environmentName $.Values.defaultRouting.kubeitDefaultHosts.dnsDomain) -}}
-{{- if $.Values.defaultRouting.kubeitDefaultHosts.tenantMultiRegion -}}
-{{- $ingressList = append $ingressList (printf "%s%s.%s.%s" ($.Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default $.Values.app) $tenantPrefix $.Values.kubeit.environmentName $.Values.defaultRouting.kubeitDefaultHosts.dnsDomain) -}}
-{{- end -}}
-{{- range $host := $.Values.defaultRouting.hosts -}}
-{{- $ingressList = append $ingressList $host -}}
-{{- end -}}
-{{- $kubeitDnvComUsed := false -}}
-{{- range $vs := $ingressList -}}
-  {{- if regexMatch (printf ".*%s.*" "kubeit.dnv.com") $vs -}}
-    {{- $kubeitDnvComUsed = true -}}
-  {{- end -}}
-{{- end -}}
-{{- if $kubeitDnvComUsed -}}
-{{- range $vs := $ingressList }}
-apiVersion: networking.istio.io/v1alpha3
+{{- if gt (len .Values.defaultRouting.hosts) 0 -}}
+{{- if .Values.defaultRouting.oneDomainPerVirtualService -}}
+{{- range $host := $.Values.defaultRouting.hosts }}
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: {{ $vs | replace "." "-" | trimSuffix "." | trunc 59 }}-ext
+  name: {{ $host | replace "." "-" | trimSuffix "-" | trunc 59 }}-ext
   labels:
 {{ include "appLabels" $ | trim | indent 4 }}
 spec:
   hosts:
-    - {{ $vs }}
+    - {{ $host }}
   gateways:
     - {{ required "A valid .Values.gateway.name entry required!" $.Values.gateway.name }}
-{{- $prefixes := default (list $.Values.app) $.Values.defaultRouting.urlPrefixes }}
-{{- $regexes := $.Values.defaultRouting.urlRegexes }}
-  http:
-{{- if $.Values.defaultRouting.urlExactMatches }}
-  - match:
-  {{- range $.Values.defaultRouting.urlExactMatches }}
-  {{- if hasPrefix "/" . }}
-    {{ fail "url matches must not include leading slash"}}
-  {{- end}}
-  {{- $slashMatch := printf "/%s" . }}
-    - uri:
-        exact: {{ $slashMatch }}
-    - uri:
-        prefix: {{ $slashMatch }}/
-  {{- end }}
-  # routes to service
-    route:
-    - destination:
-        host: {{ include "platform-service.fullQualifiedServiceName" $ | quote }}
-{{- if $.Values.defaultRouting.corsPolicy }}
-    corsPolicy:
-{{ $.Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
-{{- end }}
-{{- end }}
-
-{{- if $.Values.defaultRouting.redirectOnNoTrailingSlash }}
-  # redirect on prefixes without trailing slashes
-  {{- range $prefixes }}
-  {{- $slashPrefix := printf "/%s" . }}
-  - match:
-    - uri:
-        exact: {{ $slashPrefix }}
-    redirect:
-      uri: {{ $slashPrefix }}/
-  {{- end}}
-{{- end}}
-  # routes to service
-  - route:
-    - destination:
-        host: {{ include "platform-service.fullQualifiedServiceName" $ | quote }}
-{{- if $.Values.defaultRouting.corsPolicy }}
-    corsPolicy:
-{{ $.Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
-{{- end -}}
-
-  {{- if not $.Values.defaultRouting.catchAll }}
-    match:
-    {{- range $prefixes }}
-    {{- if hasPrefix "/" . }}
-      {{ fail "url prefixes must not include leading slash"}}
-    {{- end}}
-    {{- $slashPrefix := printf "/%s" . }}
-    - uri:
-        prefix: {{ $slashPrefix }}/
-    {{- end }}
-    {{- range $regexes }}
-    - uri:
-        regex: {{ . }}
-    {{- end }}
-  {{- end }}
-{{- if $.Values.defaultRouting.rewriteUrlPrefix.enabled }}
-    rewrite:
-      uri: {{ required "rewriteUri is required" $.Values.defaultRouting.rewriteUrlPrefix.replaceWith }}
-{{- end}}
-    # deprecated
-    headers:
-      request:
-        add:
-          x-appname: {{ first $prefixes }}
-{{- include "retries" $ }}
+{{- include "platform-service.virtualserviceContent" $ | indent 2 }}
 {{- end }}
 {{- else }}
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: {{ include "platform-service.serviceName" . }}-external
@@ -145,89 +43,15 @@ metadata:
 {{ include "appLabels" . | trim | indent 4 }}
 spec:
   hosts:
-    - "{{ .Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default .Values.app }}{{ $tenantPrefix }}.{{ .Values.kubeit.clusterSubdomain }}.{{ .Values.defaultRouting.kubeitDefaultHosts.dnsDomain }}"                                                                      # Cluster specific subdomain, i.e.: dev001
-    - "{{ .Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default .Values.app }}{{ $tenantPrefix }}.{{ .Values.kubeit.shortRegion }}.{{ .Values.kubeit.environmentName }}.{{ .Values.defaultRouting.kubeitDefaultHosts.dnsDomain }}"                                      # F5/Active Cluster
-    - "{{ .Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default .Values.app }}{{ $tenantPrefix }}.{{ .Values.kubeit.clusterColour }}.{{ .Values.kubeit.shortRegion }}.{{ .Values.kubeit.environmentName }}.{{ .Values.defaultRouting.kubeitDefaultHosts.dnsDomain }}"   # Colour cluster - blue/green deployment
-  {{- if .Values.defaultRouting.kubeitDefaultHosts.tenantMultiRegion }}
-    - "{{ .Values.defaultRouting.kubeitDefaultHosts.hostsPrefix | default .Values.app }}{{ $tenantPrefix }}.{{ $.Values.kubeit.environmentName }}.{{ .Values.defaultRouting.kubeitDefaultHosts.dnsDomain }}"                                                                                                              # Traffic Manager
-  {{- end }}
-  {{- end }}
-  {{- range .Values.defaultRouting.hosts }}
+{{- range .Values.defaultRouting.hosts }}
     - {{ . | quote }}
 {{- end }}
   gateways:
-    - {{ required "A valid .Values.gateway.name entry required!" .Values.gateway.name }}
-{{- $prefixes := default (list .Values.app) .Values.defaultRouting.urlPrefixes }}
-{{- $regexes := .Values.defaultRouting.urlRegexes }}
-  http:
-{{- if .Values.defaultRouting.urlExactMatches }}
-  - match:
-  {{- range .Values.defaultRouting.urlExactMatches }}
-  {{- if hasPrefix "/" . }}
-    {{ fail "url matches must not include leading slash"}}
-  {{- end}}
-  {{- $slashMatch := printf "/%s" . }}
-    - uri:
-        exact: {{ $slashMatch }}
-    - uri:
-        prefix: {{ $slashMatch }}/
-  {{- end }}
-  # routes to service
-    route:
-    - destination:
-        host: {{ include "platform-service.fullQualifiedServiceName" . | quote }}
-{{- if .Values.defaultRouting.corsPolicy }}
-    corsPolicy:
-{{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
+    - {{ required "A valid .Values.gateway.name entry required!" $.Values.gateway.name }}
+{{- include "platform-service.virtualserviceContent" $ | indent 2 }}
+---
 {{- end }}
 {{- end }}
-
-{{- if .Values.defaultRouting.redirectOnNoTrailingSlash }}
-  # redirect on prefixes without trailing slashes
-  {{- range $prefixes }}
-  {{- $slashPrefix := printf "/%s" . }}
-  - match:
-    - uri:
-        exact: {{ $slashPrefix }}
-    redirect:
-      uri: {{ $slashPrefix }}/
-  {{- end}}
-{{- end}}
-  # routes to service
-  - route:
-    - destination:
-        host: {{ include "platform-service.fullQualifiedServiceName" . | quote }}
-{{- if .Values.defaultRouting.corsPolicy }}
-    corsPolicy:
-{{ .Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
-{{- end -}}
-
-  {{- if not .Values.defaultRouting.catchAll }}
-    match:
-    {{- range $prefixes }}
-    {{- if hasPrefix "/" . }}
-      {{ fail "url prefixes must not include leading slash"}}
-    {{- end}}
-    {{- $slashPrefix := printf "/%s" . }}
-    - uri:
-        prefix: {{ $slashPrefix }}/
-    {{- end }}
-    {{- range $regexes }}
-    - uri:
-        regex: {{ . }}
-    {{- end }}
-  {{- end }}
-{{- if .Values.defaultRouting.rewriteUrlPrefix.enabled }}
-    rewrite:
-      uri: {{ required "rewriteUri is required" .Values.defaultRouting.rewriteUrlPrefix.replaceWith }}
-{{- end}}
-    # deprecated
-    headers:
-      request:
-        add:
-          x-appname: {{ first $prefixes }}
-{{- include "retries" . }}
-{{- end}}
-{{- end}}
-{{- end}}
+{{- end }}
+{{- end }}
 {{- end }}

@@ -1,0 +1,24 @@
+{{- if not .Values.deploymentOnly -}}
+{{- if .Values.defaultRouting.enabled -}}
+{{- if .Values.gateway.exposeService -}}
+{{- if gt (len .Values.defaultRouting.internalHosts) 0 -}}
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ include "platform-service.serviceName" . }}-int
+  labels:
+{{ include "appLabels" . | trim | indent 4 }}
+spec:
+  hosts:
+{{- range .Values.defaultRouting.internalHosts }}
+    - {{ . | quote }}
+{{- end }}
+  gateways:
+    - {{ required "A valid .Values.gateway.internalName entry required!" $.Values.gateway.internalName }}
+{{- include "platform-service.virtualserviceContent" $ | indent 2 }}
+---
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

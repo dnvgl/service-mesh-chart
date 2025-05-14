@@ -77,8 +77,10 @@ serviceAccount:
 gateway:
   # map virtual service to a gateway expose this service
   exposeService: true
-  # gateway name (fully qualified if in a different namespace), default one provided automatically by KubeIT
-  name: gateway/one-gateway
+  # external gateway name (fully qualified if in a different namespace), default gateway provided by KubeIT
+  name: istio-system/global-https-internal-default-gateway
+  # internal gateway name (fully qualified if in a different namespace), internaluse gateway provided by KubeIT
+  internalName: istio-system/global-internaluse-gateway
 
 opa:
   # set to true to enable opa.  requires config in a config map called opa-istio-config and policy in a config map called opa-policy
@@ -93,15 +95,19 @@ hpa:
 defaultRouting:
   # Generate default virtual services and destination rules
   enabled: true
-
-  kubeitDefaultHosts:
-    enabled: false
-    tenantPrefixEnabled: true
-    # hostsPrefix:            # Optional - default app name
-
-  # hosts to take into account for routing rules (ignored if allHosts = true)
+  
+  # decide if generate one domain per CR VirtualService 
+  oneDomainPerVirtualService: true
+  
+  # external hosts to take into account for routing rules
   hosts: []
-    # - myhost.dnvgl.com
+  # - myhost.dnv.com
+  
+  # internal hosts to take into account for routing rules
+  # <service>.dnv.com - DNS record should be requested to GSS IT / TLS supported (one "dot" level only!)
+  # <service>[.<color>].<region>.<environment>.kubeit-int.dnv.com - works immediately / TLS supported
+  internalHosts: []
+  # - myhost.green.we.nonprod.kubeit-int.dnv.com
 
   # list of prefixes for route matching - overrides the default prefix (app)
   urlPrefixes:
@@ -151,9 +157,6 @@ defaultRouting:
   #   allowHeaders:
   #     - X-Foo-Bar
   #   maxAge: "24h"
-
-  # route from all hosts (typically only common services)
-  allHosts: false
 
 # Specify network policies
 networkPolicy:
@@ -289,7 +292,22 @@ containerSecurityContext: {}
 
 debugEnvoyFilters: true
 
-#kubeit: #placeholder used for kubeit parameters passed from tenant bootstrap app of apps
+# placeholder used for kubeit parameters passed from tenant bootstrap app of apps
+# kubeit:
+#   env: nonprod
+#   region: we
+#   dnsDomain: kubeit.dnv.com
+#   internalDnsDomain: kubeit-int.dnv.com
+#   clusterSubdomain: nonprod005
+#   clusterColour: green
+#   ingressType: default
+#   shortRegion: we
+#   tenantName: tenant
+#   targetRevision: main
+#   repoURL: https://github.com/example.git
+#   networkPlugin: azure
+#   tenantMultiRegion: false
+#   managementNamespace: management-tenant
 
 initContainersDefinitions: []
 
