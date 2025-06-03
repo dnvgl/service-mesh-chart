@@ -108,6 +108,18 @@ echo `date` > results/run-date.txt
     --set workloadIdentityClientId="123abc" \
     > results/workload-identity.yaml
 
+./generate-test-chart.sh \
+    --set defaultRouting.retries.enabled=true \
+    --set oneDomainPerVirtualService=true  \
+    --show-only templates/virtualservice-internal.yaml \
+    > results/vs-split-host-internal-with-retries.yaml
+
+./generate-test-chart.sh \
+    --set defaultRouting.retries.enabled=true \
+    --set oneDomainPerVirtualService=true  \
+    --show-only templates/virtualservice.yaml \
+    > results/vs-split-host-with-retries.yaml
+
 echo " *** kubeval results ***"
 kubeval --ignore-missing-schemas results/*.yaml
 echo " *** istioctl validation results ***"

@@ -258,8 +258,50 @@ spec:
     issuer: https://login.microsoftonline.com/abcd/v2.0/
     jwksUri: https://jwksuri/discovery/v2.0/keys
 ---
+# Source: platform-service/templates/virtualservice-internal.yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: test-int
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  hosts:
+    - "myhost.green.we.nonprod.kubeit-int.dnv.com"
+    - "myhost.blue.we.nonprod.kubeit-int.dnv.com"
+  gateways:
+    - istio-system/global-internaluse-gateway  
+  http:
+    # redirect on prefixes without trailing slashes
+    - match:
+      - uri:
+          exact: /prefix1
+      redirect:
+        uri: /prefix1/
+    - match:
+      - uri:
+          exact: /prefix2
+      redirect:
+        uri: /prefix2/
+    # routes to service
+    - route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+      match:
+      - uri:
+          prefix: /prefix1/
+      - uri:
+          prefix: /prefix2/
+      rewrite:
+        uri: /
+---
 # Source: platform-service/templates/virtualservice.yaml
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: test
@@ -271,13 +313,15 @@ spec:
   http:
   - route:
     - destination:
-        host: "test.test-ns.svc.cluster.local"
+        host: "test.test-ns.svc.cluster.local"    
+    retries:
+      attempts: 3
 ---
 # Source: platform-service/templates/virtualservice.yaml
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: test-external
+  name: mysubdomain1-mydomain-com-ext
   labels:
     app: test
     app.kubernetes.io/name: test
@@ -287,35 +331,70 @@ metadata:
     state: stateful
 spec:
   hosts:
-    - "mysubdomain1.mydomain.com"
-    - "mysubdomain2.mydomain.com"
+    - mysubdomain1.mydomain.com
   gateways:
-    - gateway/one-gateway
+    - istio-system/global-https-internal-default-gateway  
   http:
-  # redirect on prefixes without trailing slashes
-  - match:
-    - uri:
-        exact: /prefix1
-    redirect:
-      uri: /prefix1/
-  - match:
-    - uri:
-        exact: /prefix2
-    redirect:
-      uri: /prefix2/
-  # routes to service
-  - route:
-    - destination:
-        host: "test.test-ns.svc.cluster.local"
-    match:
-    - uri:
-        prefix: /prefix1/
-    - uri:
-        prefix: /prefix2/
-    rewrite:
-      uri: /
-    # deprecated
-    headers:
-      request:
-        add:
-          x-appname: prefix1
+    # redirect on prefixes without trailing slashes
+    - match:
+      - uri:
+          exact: /prefix1
+      redirect:
+        uri: /prefix1/
+    - match:
+      - uri:
+          exact: /prefix2
+      redirect:
+        uri: /prefix2/
+    # routes to service
+    - route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+      match:
+      - uri:
+          prefix: /prefix1/
+      - uri:
+          prefix: /prefix2/
+      rewrite:
+        uri: /
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: mysubdomain2-mydomain-com-ext
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  hosts:
+    - mysubdomain2.mydomain.com
+  gateways:
+    - istio-system/global-https-internal-default-gateway  
+  http:
+    # redirect on prefixes without trailing slashes
+    - match:
+      - uri:
+          exact: /prefix1
+      redirect:
+        uri: /prefix1/
+    - match:
+      - uri:
+          exact: /prefix2
+      redirect:
+        uri: /prefix2/
+    # routes to service
+    - route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+      match:
+      - uri:
+          prefix: /prefix1/
+      - uri:
+          prefix: /prefix2/
+      rewrite:
+        uri: /

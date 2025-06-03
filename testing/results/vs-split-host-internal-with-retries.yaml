@@ -1,0 +1,42 @@
+---
+# Source: platform-service/templates/virtualservice-internal.yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: test-int
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  hosts:
+    - "myhost.green.we.nonprod.kubeit-int.dnv.com"
+    - "myhost.blue.we.nonprod.kubeit-int.dnv.com"
+  gateways:
+    - istio-system/global-internaluse-gateway  
+  http:
+    # redirect on prefixes without trailing slashes
+    - match:
+      - uri:
+          exact: /prefix1
+      redirect:
+        uri: /prefix1/
+    - match:
+      - uri:
+          exact: /prefix2
+      redirect:
+        uri: /prefix2/
+    # routes to service
+    - route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+      match:
+      - uri:
+          prefix: /prefix1/
+      - uri:
+          prefix: /prefix2/
+      rewrite:
+        uri: /

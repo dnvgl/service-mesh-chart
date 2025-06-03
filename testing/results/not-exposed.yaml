@@ -248,7 +248,7 @@ spec:
     jwksUri: https://jwksuri/discovery/v2.0/keys
 ---
 # Source: platform-service/templates/virtualservice.yaml
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: test
@@ -260,4 +260,6 @@ spec:
   http:
   - route:
     - destination:
-        host: "test.test-ns.svc.cluster.local"
+        host: "test.test-ns.svc.cluster.local"    
+    retries:
+      attempts: 3
