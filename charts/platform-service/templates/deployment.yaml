@@ -97,6 +97,7 @@ spec:
       {{- end }}
       {{- toYaml .Values.initContainersDefinitions | nindent 8 }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       containers:
 {{- if .Values.opa.enabled }}
         - name: opa-istio
@@ -213,7 +214,6 @@ spec:
 
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-          terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
