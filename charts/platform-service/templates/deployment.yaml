@@ -80,8 +80,11 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ include "platform-service.serviceAccountName" . }}
+      {{- if not (empty .Values.securityContext) }}
       securityContext:
         {{- toYaml .Values.securityContext | nindent 8 }}
+      {{- end }}
+      {{- if .Values.initContainers }}
       initContainers:
       {{- range .Values.initContainers }}
         - name: {{ .name }}
@@ -93,8 +96,9 @@ spec:
 {{- end }}
       {{- end }}
       {{- toYaml .Values.initContainersDefinitions | nindent 8 }}
+      {{- end }}
       containers:
-{{ if .Values.opa.enabled }}
+{{- if .Values.opa.enabled }}
         - name: opa-istio
           image: {{ .Values.opa.image }}
           imagePullPolicy: IfNotPresent
@@ -130,7 +134,7 @@ spec:
               value: {{ $value | quote }}
 {{- end }}
 
-{{ if .Values.opa.resources }}
+{{- if .Values.opa.resources }}
           resources:
 {{ toYaml .Values.opa.resources | indent 12 }}
 {{ end }}
@@ -145,6 +149,7 @@ spec:
 {{ toYaml . | indent 12 }}
 {{- end }}
 {{ end }}
+{{- if .Values.env }}
           env:
 {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
@@ -154,7 +159,7 @@ spec:
               value: {{ $value | quote }}
 {{- end }}
 {{- end }}
-
+{{- end }}
 {{- if .Values.command }}
           command:
             {{- range .Values.command }}
@@ -165,8 +170,10 @@ spec:
 {{- if .Values.workingDir }}
           workingDir: {{ .Values.workingDir }}
 {{- end }}
+{{- if .Values.securityContext }}
           securityContext:
             {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+{{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.image.containerPort }}
@@ -206,8 +213,7 @@ spec:
 
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-          terminationGracePeriodSeconds:
-{{ toYaml .Values.terminationGracePeriodSeconds | indent 12 }}
+          terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
