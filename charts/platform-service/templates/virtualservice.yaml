@@ -21,10 +21,11 @@ spec:
 {{- if gt (len .Values.defaultRouting.hosts) 0 -}}
 {{- if .Values.defaultRouting.oneDomainPerVirtualService -}}
 {{- range $host := $.Values.defaultRouting.hosts }}
+{{- $vsName := printf "%s-%s" ($host | trunc 50) $.Release.Name | replace "." "-" | trimSuffix "-" | trunc 59 }}
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: {{ $host | replace "." "-" | trimSuffix "-" | trunc 59 }}-ext
+  name: {{ $vsName }}-ext
   labels:
 {{ include "appLabels" $ | trim | indent 4 }}
 spec:
