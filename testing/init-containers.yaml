@@ -1,0 +1,10 @@
+initContainers:
+ - name: data-migrationjob
+   image:
+     full: test/test:build-1
+     pullPolicy: IfNotPresent
+   envVariables:
+     - name: ENV1
+       value: "123"
+     - name: ENV2
+       value: "234"
