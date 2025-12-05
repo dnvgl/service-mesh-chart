@@ -88,14 +88,18 @@ spec:
       initContainers:
       {{- range .Values.initContainers }}
         - name: {{ .name }}
-          image: "{{ include "image" . }}"
+          image: {{ .image.full }}
           imagePullPolicy: {{ .image.pullPolicy }}
+{{- if .envVariables }}
           env:
 {{- with .envVariables }}
 {{ toYaml . | indent 12 }}
 {{- end }}
+{{- end }}
       {{- end }}
+{{- if .Values.initContainersDefinitions }}
       {{- toYaml .Values.initContainersDefinitions | nindent 8 }}
+{{- end }}
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       containers:
