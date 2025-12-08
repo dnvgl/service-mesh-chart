@@ -84,8 +84,9 @@ spec:
       securityContext:
         {{- toYaml .Values.securityContext | nindent 8 }}
       {{- end }}
-      {{- if .Values.initContainers }}
+      {{- if or .Values.initContainers .Values.initContainersDefinitions }}
       initContainers:
+{{- if .Values.initContainers }}
       {{- range .Values.initContainers }}
         - name: {{ .name }}
           image: {{ .image.full }}
@@ -96,9 +97,14 @@ spec:
 {{ toYaml . | indent 12 }}
 {{- end }}
 {{- end }}
+{{- if .resources }}
+          resources:
+{{ toYaml .resources | indent 12 }}
+{{- end }}
       {{- end }}
+{{- end }}
 {{- if .Values.initContainersDefinitions }}
-      {{- toYaml .initContainersDefinitions | nindent 8 }}
+      {{- toYaml .Values.initContainersDefinitions | nindent 8 }}
 {{- end }}
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}

@@ -1,10 +1,17 @@
 initContainers:
- - name: data-migrationjob
-   image:
-     full: test/test:build-1
-     pullPolicy: IfNotPresent
-   envVariables:
-     - name: ENV1
-       value: "123"
-     - name: ENV2
-       value: "234"
+  - name: data-migrationjob
+    image:
+      full: test/test:build-1
+      pullPolicy: IfNotPresent
+    envVariables:
+      - name: ENV1
+        value: "123"
+      - name: ENV2
+        value: "234"
+    resources:
+      limits:
+        cpu: "1"
+        memory: "512Mi"
+      requests:
+        cpu: "500m"
+        memory: "256Mi"
