@@ -95,14 +95,14 @@ hpa:
 defaultRouting:
   # Generate default virtual services and destination rules
   enabled: true
-  
-  # decide if generate one domain per CR VirtualService 
+
+  # decide if generate one domain per CR VirtualService
   oneDomainPerVirtualService: false
-  
+
   # external hosts to take into account for routing rules
   hosts: []
   # - myhost.dnv.com
-  
+
   # internal hosts to take into account for routing rules
   # <service>.dnv.com - DNS record should be requested to GSS IT / TLS supported (one "dot" level only!)
   # <service>[.<color>].<region>.<environment>.kubeit-int.dnv.com - works immediately / TLS supported
@@ -269,7 +269,7 @@ proxyResources:
   # requests:
   # cpu: 10m
   # memory: 64Mi
-  # limits:  
+  # limits:
 
 
 nodeSelector: {}
@@ -309,6 +309,26 @@ debugEnvoyFilters: true
 #   tenantMultiRegion: false
 #   managementNamespace: management-tenant
 
+# Init container definitions with structured config and resources support
+initContainers: []
+  # - name: data-migrationjob
+  #   image:
+  #     full: test/test:build-1
+  #     pullPolicy: IfNotPresent
+  #   envVariables:
+  #     - name: ENV1
+  #       value: "123"
+  #     - name: ENV2
+  #       value: "234"
+  #   resources:
+  #     limits:
+  #       cpu: "1"
+  #       memory: "512Mi"
+  #     requests:
+  #       cpu: "500m"
+  #       memory: "256Mi"
+
+# Advanced: Raw YAML for additional init containers requiring full control
 initContainersDefinitions: []
 
 workloadIdentityClientId: # id of your workload identity id that is authorized to access the keyvault

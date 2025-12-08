@@ -35,6 +35,22 @@ spec:
         anno2: "2"
     spec:
       serviceAccountName: test
+      initContainers:
+        - name: data-migrationjob
+          image: test/test:build-1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ENV1
+              value: "123"
+            - name: ENV2
+              value: "234"
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+            requests:
+              cpu: 500m
+              memory: 256Mi
       terminationGracePeriodSeconds: 30
       containers:
         - name: opa-istio
