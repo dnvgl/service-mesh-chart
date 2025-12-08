@@ -1,6 +1,10 @@
 # Run helm template to allow comparing differences from run to run
 
-rm results/*.yaml
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+rm -f results/*.yaml
 echo `date` > results/run-date.txt
 
 ./generate-test-chart.sh \

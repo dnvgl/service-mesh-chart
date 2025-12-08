@@ -76,12 +76,8 @@ spec:
         anno2: "2"
     spec:
       serviceAccountName: test
-      securityContext:
-        {}
-      initContainers:
-        []
+      terminationGracePeriodSeconds: 30
       containers:
-
         - name: test
           image: "test.io/some/repository:latest"
           imagePullPolicy: IfNotPresent
@@ -103,8 +99,6 @@ spec:
                 secretKeyRef:
                   key: username
                   name: base-secret
-          securityContext:
-            {}
           ports:
             - name: http
               containerPort: 80
@@ -134,8 +128,6 @@ spec:
 
           resources:
             {}
-          terminationGracePeriodSeconds:
-            30
       volumes:
 
       - name: service-secrets

@@ -113,12 +113,8 @@ spec:
         anno2: "2"
     spec:
       serviceAccountName: test
-      securityContext:
-        {}
-      initContainers:
-        []
+      terminationGracePeriodSeconds: 30
       containers:
-
         - name: test
           image: "test.io/some/repository:latest"
           imagePullPolicy: IfNotPresent
@@ -140,8 +136,6 @@ spec:
                 secretKeyRef:
                   key: username
                   name: base-secret
-          securityContext:
-            {}
           ports:
             - name: http
               containerPort: 80
@@ -171,8 +165,6 @@ spec:
 
           resources:
             {}
-          terminationGracePeriodSeconds:
-            30
       volumes:
 
       - name: service-secrets
@@ -338,7 +330,7 @@ spec:
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: mysubdomain1-mydomain-com-ext
+  name: mysubdomain1-mydomain-com-test-release-ext
   labels:
     app: test
     app.kubernetes.io/name: test
@@ -379,7 +371,7 @@ spec:
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: mysubdomain2-mydomain-com-ext
+  name: mysubdomain2-mydomain-com-test-release-ext
   labels:
     app: test
     app.kubernetes.io/name: test

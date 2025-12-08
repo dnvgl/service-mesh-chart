@@ -35,12 +35,8 @@ spec:
         anno2: "2"
     spec:
       serviceAccountName: test
-      securityContext:
-        {}
-      initContainers:
-        []
+      terminationGracePeriodSeconds: 30
       containers:
-
         - name: opa-istio
           image: openpolicyagent/opa:0.28.0-istio
           imagePullPolicy: IfNotPresent
@@ -71,8 +67,6 @@ spec:
               - "1"
 
           env:
-
-
           resources:
             limits:
               cpu: 300m
@@ -104,8 +98,6 @@ spec:
                 secretKeyRef:
                   key: username
                   name: base-secret
-          securityContext:
-            {}
           ports:
             - name: http
               containerPort: 80
@@ -135,8 +127,6 @@ spec:
 
           resources:
             {}
-          terminationGracePeriodSeconds:
-            30
       volumes:
 
       - name: opa-istio-config
