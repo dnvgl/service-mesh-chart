@@ -53,7 +53,7 @@ spec:
         azure.workload.identity/use: "true"
         {{- end }}
       annotations:
-        {{- if .Values.service.liveness.enabled }}  
+        {{- if .Values.service.liveness.enabled }}
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
         {{- end }}
         {{- if .Values.mergeAppMetrics }}
@@ -98,7 +98,7 @@ spec:
 {{- end }}
       {{- end }}
 {{- if .Values.initContainersDefinitions }}
-      {{- toYaml .Values.initContainersDefinitions | nindent 8 }}
+      {{- toYaml .initContainersDefinitions | nindent 8 }}
 {{- end }}
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
