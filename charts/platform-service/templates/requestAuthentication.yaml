@@ -1,5 +1,5 @@
 {{- if .Values.requestAuthentication.enabled -}}
-apiVersion: security.istio.io/v1beta1
+apiVersion: security.istio.io/v1
 kind: RequestAuthentication
 metadata:
   name: {{ include "platform-service.fullname" . }}
