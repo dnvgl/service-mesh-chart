@@ -1,7 +1,7 @@
 {{- define "bootstrap.gitRepository" }}
 
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
   name: {{ include "bootstrap.gitRepoName" . }}

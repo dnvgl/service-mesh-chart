@@ -1,6 +1,10 @@
 {{- define "bootstrap.kustomization" }}
 ---
+{{- if $.Capabilities.APIVersions.Has "kustomize.toolkit.fluxcd.io/v1" }}
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+{{- else }}
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+{{- end }}
 kind: Kustomization
 metadata:
   name: {{ include "bootstrap.kustomizationName" . }}

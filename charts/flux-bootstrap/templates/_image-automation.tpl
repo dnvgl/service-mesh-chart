@@ -1,7 +1,11 @@
 {{- define "bootstrap.imageAutomation" }}
 
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta1
+{{- if $.Capabilities.APIVersions.Has "image.toolkit.fluxcd.io/v1" }}
+apiVersion: image.toolkit.fluxcd.io/v1
+{{- else }}
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+{{- end }}
 kind: ImageUpdateAutomation
 metadata:
   name: image-update-automation
