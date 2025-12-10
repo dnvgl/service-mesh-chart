@@ -6,6 +6,7 @@ The Bootstrap Chart is designed to generate all necessary manifests for a specif
 
 - Kubernetes 1.16+
 - Helm 3.0+
+- KubeIT 3.0+ if chart version =>0.3.1
 
 ## Installation
 

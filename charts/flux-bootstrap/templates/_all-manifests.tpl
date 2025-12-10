@@ -55,6 +55,7 @@
   "fluxSshSecretNameTemplate" ($values.fluxSshSecretNameTemplate | default "gitops-repo-key")
   "gitRepoNameTemplate" ( $values.gitRepoNameTemplate | default "tenant" )
   "kustomizationNameTemplate" ( $values.kustomizationNameTemplate | default "tenant")
+  "capabilities" $.Capabilities
   "Template" $.Template) }}
 
 {{- include "bootstrap.gitRepository" $context }}

@@ -1,7 +1,7 @@
 {{- define "bootstrap.imageAutomation" }}
 
 ---
-{{- if $.Capabilities.APIVersions.Has "image.toolkit.fluxcd.io/v1" }}
+{{- if .capabilities.APIVersions.Has "image.toolkit.fluxcd.io/v1" }}
 apiVersion: image.toolkit.fluxcd.io/v1
 {{- else }}
 apiVersion: image.toolkit.fluxcd.io/v1beta2
