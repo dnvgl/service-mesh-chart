@@ -1,7 +1,7 @@
 {{- define "bootstrap.sshKeySecrets" }}
 ---
 # Source: akv-secrets/templates/secret-sync.yaml
-{{- if .Capabilities.APIVersions.Has "external-secrets.io/v1" }}
+{{- if .capabilities.APIVersions.Has "external-secrets.io/v1" }}
 apiVersion: external-secrets.io/v1
 {{- else }}
 apiVersion: external-secrets.io/v1beta1
@@ -41,7 +41,7 @@ metadata:
   namespace: {{ .namespace }}
 ---
 # Source: akv-secrets/templates/secret-sync.yaml
-{{- if .Capabilities.APIVersions.Has "external-secrets.io/v1" }}
+{{- if .capabilities.APIVersions.Has "external-secrets.io/v1" }}
 apiVersion: external-secrets.io/v1
 {{- else }}
 apiVersion: external-secrets.io/v1beta1
