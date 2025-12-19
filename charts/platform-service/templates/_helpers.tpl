@@ -152,8 +152,17 @@ http:
     {{- end }}
   {{- end }}
 {{- if $.Values.defaultRouting.rewriteUrlPrefix.enabled }}
+  {{- if $.Values.defaultRouting.rewriteUrlPrefix.regexRewrite }}
+    rewrite:
+      uriRegexRewrite:
+        match: {{ required "match is required" $.Values.defaultRouting.rewriteUrlPrefix.regexRewrite.match }}
+        rewrite: {{ required "rewrite is required" $.Values.defaultRouting.rewriteUrlPrefix.regexRewrite.rewrite }}
+  {{- else if $.Values.defaultRouting.rewriteUrlPrefix.replaceWith }}
     rewrite:
       uri: {{ required "rewriteUri is required" $.Values.defaultRouting.rewriteUrlPrefix.replaceWith }}
-{{- end}}
+  {{- else }}
+    {{- fail "Either replaceWith or regexRewrite are required" }}
+  {{- end }}
+{{- end }}
 
 {{- end -}}

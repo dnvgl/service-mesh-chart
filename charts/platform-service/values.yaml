@@ -132,6 +132,11 @@ defaultRouting:
     # alternate prefixes should begin and end with a "/"
     # examples: "/", "/api/"
     replaceWith: "/"
+    # Alternatively, use a regex to rewrite the URL path. See https://istio.io/latest/docs/reference/config/networking/virtual-service/#RegexRewrite
+    # e.g. to rewrite the URL path '/service/update/v1/api' to '/customprefix/v1/api/update', use:
+    # regexRewrite:
+    #   match: '^\/service\/([^\/]+)(\/.*)$'
+    #   rewrite: '\/customprefix\/\2\/\1'
 
   # Load balancer policy
   # Also supported are:
