@@ -181,7 +181,7 @@ spec:
 {{- if .Values.workingDir }}
           workingDir: {{ .Values.workingDir }}
 {{- end }}
-{{- if .Values.securityContext }}
+{{- if .Values.containerSecurityContext }}
           securityContext:
             {{- toYaml .Values.containerSecurityContext | nindent 12 }}
 {{- end }}
