@@ -138,6 +138,15 @@ defaultRouting:
     #   match: '^\/service\/([^\/]+)(\/.*)$'
     #   rewrite: '\/customprefix\/\2\/\1'
 
+  mirror:
+    # enable request mirroring to a secondary service. See https://istio.io/latest/docs/tasks/traffic-management/mirroring/
+    enabled: false
+    # name of the mirrored service (must be in the same namespace)
+    host: my-mirror-service
+    # percentage of traffic to mirror (0-100). Defaults to 100 if not specified
+    # mirrorPercentage: 100
+    
+
   # Load balancer policy
   # Also supported are:
   #   STICKY_SESSIONS: ensures each session will always hit the same pod.

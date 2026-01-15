@@ -164,5 +164,12 @@ http:
     {{- fail "Either replaceWith or regexRewrite are required" }}
   {{- end }}
 {{- end }}
-
+{{- if $.Values.defaultRouting.mirror.enabled }}
+    mirror:
+      host: {{required "host is required" $.Values.defaultRouting.mirror.host }}
+  {{- if $.Values.defaultRouting.mirror.mirrorPercentage }}
+    mirrorPercentage: 
+      value: {{ $.Values.defaultRouting.mirror.mirrorPercentage }}
+  {{- end }}
+{{- end }}
 {{- end -}}
