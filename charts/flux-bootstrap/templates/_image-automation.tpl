@@ -23,7 +23,7 @@ spec:
       author:
         email: fluxcdbot@users.noreply.github.com
         name: fluxcdbot
-      messageTemplate:  '{{"{{"}}range .Changed.Images{{"}}"}}{{"{{"}}println .{{"}}"}}{{"{{"}}end{{"}}"}}'
+      messageTemplate: '{{"{{"}}range .Changed.Changes{{"}}"}}{{"{{"}}println .NewValue{{"}}"}}{{"{{"}}end{{"}}"}}'
     push:
       branch: {{ .branch }}
   update:
