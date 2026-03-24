@@ -8,7 +8,7 @@ kind: ImageRepository
 metadata:
   name: {{ include "platform-service.name" . }}
 spec:
-  provider: azure
+  provider: {{ default "azure" .Values.image.fluxAutomation.provider }}
   image: "{{ include "platform-service.imageRepository" . }}"
   interval: {{ .Values.image.fluxAutomation.interval }}
 {{- end }}
