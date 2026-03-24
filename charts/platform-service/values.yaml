@@ -30,6 +30,7 @@ image:
   fluxAutomation:
     enabled: false
     interval: 1m0s
+    provider: azure
     #filterTags:
     #  pattern: '^dev-(?P<build>.*)'
     #  extract: '$build'
