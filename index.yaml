@@ -31,6 +31,16 @@ entries:
   flux-bootstrap:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2026-03-24T12:14:51.867726024Z"
+    description: A Helm chart for Kubernetes
+    digest: ba74d4dea087ac48d4767258f00c50f4aab2a1ce209063b6d3c22545a01c89bc
+    name: flux-bootstrap
+    type: library
+    urls:
+    - https://github.com/dnvgl/service-mesh-chart/releases/download/flux-bootstrap-0.3.3/flux-bootstrap-0.3.3.tgz
+    version: 0.3.3
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2026-03-24T11:44:03.568899136Z"
     description: A Helm chart for Kubernetes
     digest: 971a31f67f8e2fd6c6921bb084a7941f2f2ed19eb5caebb2dd8bdfc0d1a9bb7d
