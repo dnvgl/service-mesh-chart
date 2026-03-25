@@ -188,7 +188,7 @@ spec:
           secretName: test-secrets
 ---
 # Source: platform-service/templates/authorizationPolicy.yaml
-apiVersion: security.istio.io/v1beta1
+apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: test-release
@@ -219,7 +219,7 @@ spec:
         requestPrincipals: ["*"]
 ---
 # Source: platform-service/templates/requestAuthentication.yaml
-apiVersion: security.istio.io/v1beta1
+apiVersion: security.istio.io/v1
 kind: RequestAuthentication
 metadata:
   name: test-release

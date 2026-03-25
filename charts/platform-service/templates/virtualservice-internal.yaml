@@ -9,6 +9,10 @@ metadata:
   name: {{ include "platform-service.serviceName" . }}-int
   labels:
 {{ include "appLabels" . | trim | indent 4 }}
+{{- with $.Values.defaultRouting.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
 spec:
   hosts:
 {{- range .Values.defaultRouting.internalHosts }}
