@@ -172,6 +172,9 @@ defaultRouting:
   #   allowHeaders:
   #     - X-Foo-Bar
   #   maxAge: "24h"
+  
+  # Annotations for virtualservice
+  annotations: {}
 
 # Specify network policies
 networkPolicy:

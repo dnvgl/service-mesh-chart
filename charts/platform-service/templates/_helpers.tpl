@@ -112,7 +112,7 @@ http:
         host: {{ include "platform-service.fullQualifiedServiceName" $ | quote }}
 {{- if $.Values.defaultRouting.corsPolicy }}
   corsPolicy:
-{{ $.Values.defaultRouting.corsPolicy | toYaml | trim | indent 4 }}
+{{ $.Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
 {{- end }}
 {{- end }}
 
@@ -133,7 +133,7 @@ http:
         host: {{ include "platform-service.fullQualifiedServiceName" $ | quote }}
 {{- if $.Values.defaultRouting.corsPolicy }}
     corsPolicy:
-{{ $.Values.defaultRouting.corsPolicy | toYaml | trim | indent 4 }}
+{{ $.Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
 {{- end -}}
 
   {{- if not $.Values.defaultRouting.catchAll }}

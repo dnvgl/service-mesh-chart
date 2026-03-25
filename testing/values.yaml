@@ -51,6 +51,8 @@ defaultRouting:
     settings:
       attempts: 3
 
+  annotations:
+    f5xc/priority: "2"
 
 initContainers:
   - name: data-migrationjob

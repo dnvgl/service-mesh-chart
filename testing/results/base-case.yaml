@@ -188,7 +188,7 @@ spec:
           secretName: test-secrets
 ---
 # Source: platform-service/templates/authorizationPolicy.yaml
-apiVersion: security.istio.io/v1beta1
+apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: test-release
@@ -219,7 +219,7 @@ spec:
         requestPrincipals: ["*"]
 ---
 # Source: platform-service/templates/destinationrules.yaml
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1
 kind: DestinationRule
 metadata:
   name: test-release-destinationrule
@@ -239,7 +239,7 @@ spec:
       mode: ISTIO_MUTUAL
 ---
 # Source: platform-service/templates/requestAuthentication.yaml
-apiVersion: security.istio.io/v1beta1
+apiVersion: security.istio.io/v1
 kind: RequestAuthentication
 metadata:
   name: test-release
@@ -274,6 +274,8 @@ metadata:
     app.kubernetes.io/instance: test-release
     version: v1
     state: stateful
+  annotations:
+    f5xc/priority: "2"
 spec:
   hosts:
     - "myhost.green.we.nonprod.kubeit-int.dnv.com"
@@ -333,6 +335,8 @@ metadata:
     app.kubernetes.io/instance: test-release
     version: v1
     state: stateful
+  annotations:
+    f5xc/priority: "2"
 spec:
   hosts:
     - mysubdomain1.mydomain.com
@@ -374,6 +378,8 @@ metadata:
     app.kubernetes.io/instance: test-release
     version: v1
     state: stateful
+  annotations:
+    f5xc/priority: "2"
 spec:
   hosts:
     - mysubdomain2.mydomain.com

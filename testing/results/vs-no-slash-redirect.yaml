@@ -28,6 +28,8 @@ metadata:
     app.kubernetes.io/instance: test-release
     version: v1
     state: stateful
+  annotations:
+    f5xc/priority: "2"
 spec:
   hosts:
     - mysubdomain1.mydomain.com
@@ -58,6 +60,8 @@ metadata:
     app.kubernetes.io/instance: test-release
     version: v1
     state: stateful
+  annotations:
+    f5xc/priority: "2"
 spec:
   hosts:
     - mysubdomain2.mydomain.com

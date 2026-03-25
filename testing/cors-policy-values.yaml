@@ -1,6 +1,6 @@
 defaultRouting:
   corsPolicy:
     allowOrigins:
-    - exact: app://.
+      - exact: http://.
     allowMethods:
-    - GET
+      - GET
