@@ -277,6 +277,12 @@ resources: {}
 #    cpu: 500m
 #    memory: 128Mi
 
+resizePolicy: []
+  # - resourceName: cpu
+  #   restartPolicy: NotRequired
+  # - resourceName: memory
+  #   restartPolicy: NotRequired
+
 terminationGracePeriodSeconds: 30
 
 # Adjust resources requested for proxy sidecar (see https://istio.io/docs/concepts/performance-and-scalability/#cpu-and-memory)

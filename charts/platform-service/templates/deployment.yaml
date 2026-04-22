@@ -224,6 +224,10 @@ spec:
 
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+{{- if .Values.resizePolicy }}
+          resizePolicy:
+{{- toYaml .Values.resizePolicy | nindent 12 }}
+{{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

@@ -1,0 +1,5 @@
+resizePolicy:
+  - resourceName: cpu
+    restartPolicy: NotRequired
+  - resourceName: memory
+    restartPolicy: NotRequired
