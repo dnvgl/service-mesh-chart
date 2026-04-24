@@ -109,6 +109,11 @@ echo `date` > results/run-date.txt
     > results/proxy-resources.yaml
 
 ./generate-test-chart.sh \
+    -f resize-policy-values.yaml \
+    --show-only templates/deployment.yaml \
+    > results/resize-policy.yaml
+
+./generate-test-chart.sh \
     --set workloadIdentityClientId="123abc" \
     > results/workload-identity.yaml
 
