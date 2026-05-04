@@ -55,6 +55,8 @@ service:
     periodSeconds: 5
     timeoutSeconds: 1
     failureThreshold: 3
+  # annotations for service
+  annotations: {}
 
 # Health check configuration - exposes full k8s api for each probe type. See https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 health:
@@ -99,6 +101,9 @@ defaultRouting:
 
   # decide if generate one domain per CR VirtualService
   oneDomainPerVirtualService: false
+
+  # set it for TCP (non-HTTP) service
+  tcpEnabled: false
 
   # external hosts to take into account for routing rules
   hosts: []

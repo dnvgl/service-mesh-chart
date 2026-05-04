@@ -1,0 +1,10 @@
+---
+defaultRouting:
+  tcpEnabled: true
+  hosts:
+    - onehost-only.mydomain
+service:
+  port: 10010
+  annotations:
+    example: test
+    example2: test2

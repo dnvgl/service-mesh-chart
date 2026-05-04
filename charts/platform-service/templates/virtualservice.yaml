@@ -1,5 +1,6 @@
 {{- if not .Values.deploymentOnly -}}
 {{- if .Values.defaultRouting.enabled -}}
+{{- if not .Values.defaultRouting.tcpEnabled }}
 {{- $fullName := include "platform-service.fullname" . -}}
 ---
 apiVersion: networking.istio.io/v1
@@ -62,6 +63,29 @@ spec:
 ---
 {{- end }}
 {{- end }}
+{{- end }}
+{{- else }}
+# TCP service
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ include "platform-service.serviceName" . }}
+spec:
+  hosts:
+{{- range .Values.defaultRouting.hosts }}
+    - {{ . | quote }}
+{{- end }}
+  gateways:
+  - {{ required "A valid .Values.gateway.name entry required!" $.Values.gateway.name }}
+  tcp:
+  - match:
+    - port: {{ .Values.service.port }}
+    route:
+    - destination:
+       host: {{ include "platform-service.fullQualifiedServiceName" . | quote }}
+       port:
+         number: {{ .Values.service.port }}
 {{- end }}
 {{- end }}
 {{- end }}
