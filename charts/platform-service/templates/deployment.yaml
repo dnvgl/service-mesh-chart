@@ -186,7 +186,11 @@ spec:
             {{- toYaml .Values.containerSecurityContext | nindent 12 }}
 {{- end }}
           ports:
+          {{- if .Values.defaultRouting.tcpEnabled }}
+            - name: tcp
+          {{- else }}
             - name: http
+          {{- end }}
               containerPort: {{ .Values.image.containerPort }}
               protocol: TCP
           {{- if .Values.service.liveness.enabled }}

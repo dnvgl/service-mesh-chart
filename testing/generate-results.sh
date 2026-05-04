@@ -133,6 +133,7 @@ echo `date` > results/run-date.txt
     -f vs-tcp-values.yaml \
      --show-only templates/virtualservice.yaml \
      --show-only templates/service.yaml \
+     --show-only templates/deployment.yaml \
      > results/vs-tcp.yaml
 
 echo " *** kubeval results ***"
