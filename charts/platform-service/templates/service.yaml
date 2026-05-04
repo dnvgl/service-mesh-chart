@@ -2,12 +2,18 @@
 Create the name of the service to use
 */}}
 {{- if not .Values.deploymentOnly -}}
+{{- if not .Values.defaultRouting.tcpEnabled }}
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "platform-service.serviceName" . }}
   labels:
 {{ include "appLabels" . | trim | indent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -18,4 +24,28 @@ spec:
   selector:
     app.kubernetes.io/name: {{ include "platform-service.name" . }}
     app: {{ .Values.app }}
-{{- end}}
+{{- end }}
+---
+{{- if .Values.defaultRouting.tcpEnabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "platform-service.serviceName" . }}
+  labels:
+{{ include "appLabels" . | trim | indent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ required "service.port must be specified" .Values.service.port }}
+      targetPort: {{ required "service.port must be specified" .Values.service.port }}
+      protocol: TCP
+      name: tcp
+  selector:
+    app.kubernetes.io/name: {{ include "platform-service.name" . }}
+    app: {{ .Values.app }}
+{{- end }}
+{{- end }}

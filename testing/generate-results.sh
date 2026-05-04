@@ -129,6 +129,13 @@ echo `date` > results/run-date.txt
     --show-only templates/virtualservice.yaml \
     > results/vs-split-host-with-retries.yaml
 
+./generate-test-chart.sh \
+    -f vs-tcp-values.yaml \
+     --show-only templates/virtualservice.yaml \
+     --show-only templates/service.yaml \
+     --show-only templates/deployment.yaml \
+     > results/vs-tcp.yaml
+
 echo " *** kubeval results ***"
 kubeval --ignore-missing-schemas results/*.yaml
 echo " *** istioctl validation results ***"
