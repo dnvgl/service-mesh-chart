@@ -113,8 +113,10 @@ spec:
         - name: opa-istio
           image: {{ .Values.opa.image }}
           imagePullPolicy: IfNotPresent
+{{- if .Values.containerSecurityContext }}
           securityContext:
             {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+{{- end }}
           args:
           - run
           - --server
