@@ -91,6 +91,10 @@ spec:
         - name: {{ .name }}
           image: {{ .image.full }}
           imagePullPolicy: {{ .image.pullPolicy }}
+{{- if .Values.init.containerSecurityContext }}
+          securityContext:
+            {{- toYaml .Values.init.containerSecurityContext | nindent 12 }}
+{{- end }}
 {{- if .envVariables }}
           env:
 {{- with .envVariables }}
@@ -113,9 +117,9 @@ spec:
         - name: opa-istio
           image: {{ .Values.opa.image }}
           imagePullPolicy: IfNotPresent
-{{- if .Values.containerSecurityContext }}
+{{- if .Values.opa.containerSecurityContext }}
           securityContext:
-            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+            {{- toYaml .Values.opa.containerSecurityContext | nindent 12 }}
 {{- end }}
           args:
           - run

@@ -89,6 +89,14 @@ opa:
   # set to true to enable opa.  requires config in a config map called opa-istio-config and policy in a config map called opa-policy
   enabled: false
   image: openpolicyagent/opa:0.28.0-istio
+  containerSecurityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: 
+    # allowPrivilegeEscalation: false
+
 
 hpa:
   enabled: false
@@ -356,7 +364,13 @@ initContainers: []
   #     requests:
   #       cpu: "500m"
   #       memory: "256Mi"
-
+init:
+  containerSecurityContext: {}
+      # capabilities:
+      #   drop:
+      #   - ALL
+      # readOnlyRootFilesystem: true
+      # runAsNonRoot: true
 # Advanced: Raw YAML for additional init containers requiring full control
 initContainersDefinitions: []
 
