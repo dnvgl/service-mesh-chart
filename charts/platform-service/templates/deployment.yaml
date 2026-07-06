@@ -113,6 +113,8 @@ spec:
         - name: opa-istio
           image: {{ .Values.opa.image }}
           imagePullPolicy: IfNotPresent
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           args:
           - run
           - --server
@@ -125,7 +127,6 @@ spec:
             name: opa-istio-config
           - mountPath: /policy
             name: opa-policy
-
           livenessProbe:
             exec:
               command:
