@@ -91,6 +91,10 @@ spec:
         - name: {{ .name }}
           image: {{ .image.full }}
           imagePullPolicy: {{ .image.pullPolicy }}
+{{- if .initContainerSecurityContext }}
+          securityContext:
+            {{- toYaml .initContainerSecurityContext | nindent 12 }}
+{{- end }}
 {{- if .envVariables }}
           env:
 {{- with .envVariables }}
