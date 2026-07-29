@@ -26,6 +26,7 @@ spec:
         app.kubernetes.io/instance: test-release
         version: v1
         state: stateful
+        sidecar.opa-istio.io/inject: "true"
         label1: "1"
         label2: "2"
       annotations:
@@ -51,6 +52,37 @@ spec:
               memory: 256Mi
       terminationGracePeriodSeconds: 30
       containers:
+        - name: opa-istio
+          image: openpolicyagent/opa:0.28.0-istio
+          imagePullPolicy: IfNotPresent
+          args:
+            - run
+            - --server
+            - --addr=localhost:8181
+            - --diagnostic-addr=0.0.0.0:8282
+            - --config-file=/config/config.yaml
+            - /policy/policy.rego
+          volumeMounts:
+          - mountPath: /config
+            name: opa-istio-config
+          - mountPath: /policy
+            name: opa-policy
+          livenessProbe:
+            exec:
+              command:
+              - "/app/opa_envoy_linux_amd64"
+              - "eval"
+              - "1"
+          readinessProbe:
+            exec:
+              command:
+              - "/app/opa_envoy_linux_amd64"
+              - "eval"
+              - "1"
+
+          env:
+
+
         - name: test
           image: "test.io/some/repository:latest"
           imagePullPolicy: IfNotPresent
@@ -102,6 +134,13 @@ spec:
           resources:
             {}
       volumes:
+
+      - name: opa-istio-config
+        configMap:
+          name: opa-istio-config
+      - name: opa-policy
+        configMap:
+          name: opa-policy
 
       - name: service-secrets
         secret:

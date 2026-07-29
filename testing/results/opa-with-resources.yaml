@@ -57,18 +57,17 @@ spec:
           image: openpolicyagent/opa:0.28.0-istio
           imagePullPolicy: IfNotPresent
           args:
-          - run
-          - --server
-          - --addr=localhost:8181
-          - --diagnostic-addr=0.0.0.0:8282
-          - --config-file=/config/config.yaml
-          - /policy/policy.rego
+            - run
+            - --server
+            - --addr=localhost:8181
+            - --diagnostic-addr=0.0.0.0:8282
+            - --config-file=/config/config.yaml
+            - /policy/policy.rego
           volumeMounts:
           - mountPath: /config
             name: opa-istio-config
           - mountPath: /policy
             name: opa-policy
-
           livenessProbe:
             exec:
               command:
