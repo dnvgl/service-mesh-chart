@@ -136,3 +136,25 @@ requestAuthentication:
       jwksUri: "https://jwksuri/discovery/v2.0/keys"
       audiences: ["test-audience"]
       forwardOriginalToken: true
+opa:
+  enabled: true
+  image: openpolicyagent/opa:0.28.0-istio
+  # args:
+  # - run
+  # - --server
+  # - --addr=localhost:8181
+  # - --diagnostic-addr=0.0.0.0:8282
+  # - --config-file=/config/config.yaml
+  # - /policy/policy.rego
+  # livenessProbe:
+  #   exec:
+  #     command:
+  #     - "/opa"
+  #     - "eval"
+  #     - "1"
+  # readinessProbe:
+  #   exec:
+  #     command:
+  #     - "/opa"
+  #     - "eval"
+  #     - "1"

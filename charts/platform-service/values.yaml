@@ -101,6 +101,25 @@ opa:
   #   capabilities:
   #     drop:
   #       - ALL
+  args:
+  - run
+  - --server
+  - --addr=localhost:8181
+  - --diagnostic-addr=0.0.0.0:8282
+  - --config-file=/config/config.yaml
+  - /policy/policy.rego
+  livenessProbe:
+    exec:
+      command:
+      - "/app/opa_envoy_linux_amd64"
+      - "eval"
+      - "1"
+  readinessProbe:
+    exec:
+      command:
+      - "/app/opa_envoy_linux_amd64"
+      - "eval"
+      - "1"
 hpa:
   enabled: false
   maxReplicas: 3
