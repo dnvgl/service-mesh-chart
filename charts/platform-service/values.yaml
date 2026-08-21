@@ -31,6 +31,9 @@ image:
     enabled: false
     interval: 1m0s
     provider: azure
+    # Reference to a secret containing credentials for the image registry
+    #secretRef:
+    #  name: registry-credentials
     #filterTags:
     #  pattern: '^dev-(?P<build>.*)'
     #  extract: '$build'

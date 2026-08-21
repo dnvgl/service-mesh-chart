@@ -98,6 +98,11 @@ echo `date` > results/run-date.txt
     > results/default-image-automation.yaml
 
 ./generate-test-chart.sh \
+    --set image.fluxAutomation.enabled=true,image.fluxAutomation.secretRef.name=registry-credentials \
+    --show-only templates/image-repository.yaml \
+    > results/image-automation-secret-ref.yaml
+
+./generate-test-chart.sh \
     --set image.fluxAutomation.enabled=true,image.fluxAutomation.filterTags.pattern='^dev-(?P<build>.*)',image.fluxAutomation.filterTags.extract='$build',image.fluxAutomation.policy.semver.range='> 0' \
     --show-only templates/image-policy.yaml \
     --show-only templates/image-repository.yaml \
