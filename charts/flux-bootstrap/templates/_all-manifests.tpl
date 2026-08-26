@@ -19,7 +19,6 @@
 {{ with index .Values $prodOrNonprod }}
 
 {{- /* Save values provided only at prod/nonprod level and defaults */}}
-{{- $repoURL := print "ssh://" (.repoURL | default $values.repoURL) | replace "https://github.com" "git@github.com" | replace ":v3" "/v3" }}
 {{- $fluxSshKeyVaultUrl := (.fluxSshKeyVaultUrl | default $values.fluxSshKeyVaultUrl) }}
 {{- $branch := (.branch | default $values.branch) }}
 {{- $workloadIdentityClientId := .workloadIdentityClientId }}
@@ -35,6 +34,7 @@
   (eq (.shortRegion|default $values.shortRegion) $values.shortRegion)
   (eq (.clusterColour|default $values.clusterColour) $values.clusterColour)
 }}
+{{- $repoURL := print "ssh://" (.repoURL | default $values.repoURL) | replace "https://github.com" "git@github.com" | replace ":v3" "/v3" }}
 
 
 {{- /* Dictionary of required values for templates*/}}
