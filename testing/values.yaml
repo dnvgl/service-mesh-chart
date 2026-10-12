@@ -51,6 +51,11 @@ defaultRouting:
     settings:
       attempts: 3
 
+  headers:
+    response:
+      remove:
+        - X-Foo-Bar
+
   annotations:
     f5xc/priority: "2"
 

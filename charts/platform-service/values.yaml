@@ -184,7 +184,6 @@ defaultRouting:
     host: my-mirror-service
     # percentage of traffic to mirror (0-100). Defaults to 100 if not specified
     # mirrorPercentage: 100
-    
 
   # Load balancer policy
   # Also supported are:
@@ -210,7 +209,13 @@ defaultRouting:
   #   allowHeaders:
   #     - X-Foo-Bar
   #   maxAge: "24h"
-  
+
+  # Manipulate request/response headers on the route. See https://istio.io/latest/docs/reference/config/networking/virtual-service/#Headers
+  # headers:
+  #   response:
+  #     remove:
+  #       - X-Foo-Bar
+
   # Annotations for virtualservice
   annotations: {}
 

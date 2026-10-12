@@ -56,6 +56,10 @@ spec:
         - GET
         allowOrigins:
         - exact: http://.
+      headers:
+        response:
+          remove:
+          - X-Foo-Bar
       match:
       - uri:
           prefix: /prefix1/
@@ -104,6 +108,10 @@ spec:
         - GET
         allowOrigins:
         - exact: http://.
+      headers:
+        response:
+          remove:
+          - X-Foo-Bar
       match:
       - uri:
           prefix: /prefix1/
