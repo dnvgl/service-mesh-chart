@@ -172,7 +172,7 @@ http:
     mirror:
       host: {{required "host is required" $.Values.defaultRouting.mirror.host }}
   {{- if $.Values.defaultRouting.mirror.mirrorPercentage }}
-    mirrorPercentage: 
+    mirrorPercentage:
       value: {{ $.Values.defaultRouting.mirror.mirrorPercentage }}
   {{- end }}
 {{- end }}
