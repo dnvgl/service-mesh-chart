@@ -51,6 +51,10 @@ spec:
     - route:
       - destination:
           host: "test.test-ns.svc.cluster.local"
+      headers:
+        response:
+          remove:
+          - X-Foo-Bar
       match:
       - uri:
           prefix: /prefix1/
@@ -94,6 +98,10 @@ spec:
     - route:
       - destination:
           host: "test.test-ns.svc.cluster.local"
+      headers:
+        response:
+          remove:
+          - X-Foo-Bar
       match:
       - uri:
           prefix: /prefix1/

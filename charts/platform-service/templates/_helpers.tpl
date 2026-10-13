@@ -134,6 +134,10 @@ http:
 {{- if $.Values.defaultRouting.corsPolicy }}
     corsPolicy:
 {{ $.Values.defaultRouting.corsPolicy | toYaml | trim | indent 6 }}
+{{- end }}
+{{- if $.Values.defaultRouting.headers }}
+    headers:
+{{ $.Values.defaultRouting.headers | toYaml | trim | indent 6 }}
 {{- end -}}
 
   {{- if not $.Values.defaultRouting.catchAll }}
@@ -168,7 +172,7 @@ http:
     mirror:
       host: {{required "host is required" $.Values.defaultRouting.mirror.host }}
   {{- if $.Values.defaultRouting.mirror.mirrorPercentage }}
-    mirrorPercentage: 
+    mirrorPercentage:
       value: {{ $.Values.defaultRouting.mirror.mirrorPercentage }}
   {{- end }}
 {{- end }}
