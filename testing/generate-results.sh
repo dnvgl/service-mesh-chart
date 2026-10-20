@@ -122,6 +122,26 @@ echo `date` > results/run-date.txt
     --set workloadIdentityClientId="123abc" \
     > results/workload-identity.yaml
 
+
+./generate-test-chart.sh \
+    --set hpa.enabled=true \
+    --set hpa.targetMemoryUtilizationPercentage=70 \
+    --show-only templates/horizontal-pod-autoscaler.yaml \
+    > results/hpa-with-memory.yaml
+
+./generate-test-chart.sh \
+    --set hpa.enabled=true \
+    --set hpa.targetCPUUtilizationPercentage=80 \
+    --show-only templates/horizontal-pod-autoscaler.yaml \
+    > results/hpa-with-cpu.yaml
+
+./generate-test-chart.sh \
+    --set hpa.enabled=true \
+    --set hpa.targetCPUUtilizationPercentage=60 \
+    --set hpa.targetMemoryUtilizationPercentage=70 \
+    --show-only templates/horizontal-pod-autoscaler.yaml \
+    > results/hpa-with-cpu-and-memory.yaml
+
 ./generate-test-chart.sh \
     --set defaultRouting.retries.enabled=true \
     --set oneDomainPerVirtualService=true  \
