@@ -16,9 +16,6 @@ additionalPodAnnotations: {}
   # sidecar.istio.io/inject: "false"
 
 os:
-  # Set to "windows" for Windows workloads. Other OS names are passed through to the Pod spec.
-  name: ""
-  # Deprecated compatibility switch; prefer name: windows.
   windows: false
 
 image:

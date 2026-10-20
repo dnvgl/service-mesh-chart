@@ -30,20 +30,35 @@ echo `date` > results/run-date.txt
     > results/mergeAppMetrics.yaml
 
 ./generate-test-chart.sh \
-    --set os.name=windows \
+    --set os.windows=true \
     --set securityContext.fsGroup=1000 \
     --set securityContext.runAsNonRoot=true \
     --set containerSecurityContext.runAsUser=1001 \
     --set containerSecurityContext.allowPrivilegeEscalation=false \
+    --set containerSecurityContext.capabilities.drop[0]=ALL \
+    --set containerSecurityContext.readOnlyRootFilesystem=true \
+    --set containerSecurityContext.privileged=true \
+    --set containerSecurityContext.procMount=Unmasked \
     --set opa.containerSecurityContext.runAsGroup=1002 \
     --set opa.containerSecurityContext.readOnlyRootFilesystem=true \
     --set opa.containerSecurityContext.allowPrivilegeEscalation=false \
+    --set opa.containerSecurityContext.capabilities.drop[0]=ALL \
+    --set opa.containerSecurityContext.privileged=true \
+    --set opa.containerSecurityContext.procMount=Unmasked \
     --set initContainers[0].initContainerSecurityContext.runAsUser=1003 \
     --set initContainers[0].initContainerSecurityContext.allowPrivilegeEscalation=false \
+    --set initContainers[0].initContainerSecurityContext.capabilities.drop[0]=ALL \
+    --set initContainers[0].initContainerSecurityContext.readOnlyRootFilesystem=true \
+    --set initContainers[0].initContainerSecurityContext.privileged=true \
+    --set initContainers[0].initContainerSecurityContext.procMount=Unmasked \
     --set initContainersDefinitions[0].name=custom \
     --set initContainersDefinitions[0].image=busybox \
     --set initContainersDefinitions[0].securityContext.runAsUser=1004 \
     --set initContainersDefinitions[0].securityContext.allowPrivilegeEscalation=false \
+    --set initContainersDefinitions[0].securityContext.capabilities.drop[0]=ALL \
+    --set initContainersDefinitions[0].securityContext.readOnlyRootFilesystem=true \
+    --set initContainersDefinitions[0].securityContext.privileged=true \
+    --set initContainersDefinitions[0].securityContext.procMount=Unmasked \
     --show-only templates/deployment.yaml \
     > results/windows-workload.yaml
 

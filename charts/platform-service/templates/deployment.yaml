@@ -7,7 +7,7 @@
   {{ .Values.image.repository }}:{{ .Values.image.tag }}
 {{- end -}}
 {{- end -}}
-{{- $isWindows := or (eq .Values.os.name "windows") .Values.os.windows -}}
+{{- $isWindows := and .Values.os.windows -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -80,10 +80,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- if .Values.os.name }}
-      os:
-        name: {{ .Values.os.name }}
-      {{- else if $isWindows }}
+      {{- if $isWindows }}
       os:
         name: windows
       {{- end }}
@@ -91,7 +88,7 @@ spec:
       {{- $podSecurityContext := .Values.securityContext }}
       {{- if $isWindows }}
       {{- /* Fields rejected by the API server for Windows Pods */}}
-      {{- $podSecurityContext = omit $podSecurityContext "seLinuxOptions" "seccompProfile" "fsGroup" "fsGroupChangePolicy" "sysctls" "runAsUser" "runAsGroup" "supplementalGroups" "allowPrivilegeEscalation" }}
+      {{- $podSecurityContext = omit $podSecurityContext "seLinuxOptions" "seccompProfile" "fsGroup" "fsGroupChangePolicy" "sysctls" "runAsUser" "runAsGroup" "supplementalGroups" }}
       {{- end }}
       {{- if not (empty $podSecurityContext) }}
       securityContext:
@@ -106,7 +103,7 @@ spec:
           imagePullPolicy: {{ .image.pullPolicy }}
 {{- $initContainerSecurityContext := .initContainerSecurityContext }}
 {{- if $isWindows }}
-{{- $initContainerSecurityContext = omit $initContainerSecurityContext "seLinuxOptions" "seccompProfile" "fsGroup" "fsGroupChangePolicy" "sysctls" "runAsUser" "runAsGroup" "supplementalGroups" "allowPrivilegeEscalation" }}
+{{- $initContainerSecurityContext = omit $initContainerSecurityContext "seLinuxOptions" "seccompProfile" "capabilities" "readOnlyRootFilesystem" "privileged" "allowPrivilegeEscalation" "procMount" "runAsUser" "runAsGroup" }}
 {{- end }}
 {{- if $initContainerSecurityContext }}
           securityContext:
@@ -129,7 +126,12 @@ spec:
       {{- range .Values.initContainersDefinitions }}
       {{- $initContainer := deepCopy . }}
       {{- if $initContainer.securityContext }}
-      {{- $_ := set $initContainer "securityContext" (omit $initContainer.securityContext "seLinuxOptions" "seccompProfile" "capabilities" "readOnlyRootFilesystem" "privileged" "allowPrivilegeEscalation" "procMount" "runAsUser" "runAsGroup") }}
+      {{- $initContainerSecurityContext := omit $initContainer.securityContext "seLinuxOptions" "seccompProfile" "capabilities" "readOnlyRootFilesystem" "privileged" "allowPrivilegeEscalation" "procMount" "runAsUser" "runAsGroup" }}
+      {{- if $initContainerSecurityContext }}
+      {{- $_ := set $initContainer "securityContext" $initContainerSecurityContext }}
+      {{- else }}
+      {{- $_ := unset $initContainer "securityContext" }}
+      {{- end }}
       {{- end }}
       {{- toYaml (list $initContainer) | nindent 8 }}
       {{- end }}
@@ -140,7 +142,7 @@ spec:
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       containers:
-{{- if .Values.opa.enabled }}
+{{- if and .Values.opa.enabled }}
         - name: opa-istio
           image: {{ .Values.opa.image }}
           imagePullPolicy: IfNotPresent
@@ -240,7 +242,7 @@ spec:
 {{- end }}
 {{- $containerSecurityContext := .Values.containerSecurityContext }}
 {{- if $isWindows }}
-{{- $containerSecurityContext = omit $containerSecurityContext "seLinuxOptions" "seccompProfile" "fsGroup" "fsGroupChangePolicy" "sysctls" "runAsUser" "runAsGroup" "supplementalGroups" "allowPrivilegeEscalation" }}
+{{- $containerSecurityContext = omit $containerSecurityContext "seLinuxOptions" "seccompProfile" "capabilities" "readOnlyRootFilesystem" "privileged" "allowPrivilegeEscalation" "procMount" "runAsUser" "runAsGroup" }}
 {{- end }}
 {{- if $containerSecurityContext }}
           securityContext:
