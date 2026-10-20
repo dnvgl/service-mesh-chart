@@ -1,0 +1,155 @@
+---
+# Source: platform-service/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: test
+      app.kubernetes.io/instance: test-release
+  template:
+    metadata:
+      labels:
+        app: test
+        app.kubernetes.io/name: test
+        helm.sh/chart: platform-service-test
+        app.kubernetes.io/instance: test-release
+        version: v1
+        state: stateful
+        sidecar.opa-istio.io/inject: "true"
+        session-management: backend
+        label1: "1"
+        label2: "2"
+      annotations:
+        anno1: "1"
+        anno2: "2"
+    spec:
+      os:
+        name: windows
+      serviceAccountName: test
+      securityContext:
+        runAsNonRoot: true
+      initContainers:
+        - name: data-migrationjob
+          image: test/test:build-1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ENV1
+              value: "123"
+            - name: ENV2
+              value: "234"
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+            requests:
+              cpu: 500m
+              memory: 256Mi
+        - image: busybox
+          name: custom
+          securityContext: {}
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: opa-istio
+          image: openpolicyagent/opa:0.28.0-istio
+          imagePullPolicy: IfNotPresent
+          args:
+            - run
+            - --server
+            - --addr=localhost:8181
+            - --diagnostic-addr=0.0.0.0:8282
+            - --config-file=/config/config.yaml
+            - /policy/policy.rego
+          volumeMounts:
+          - mountPath: /config
+            name: opa-istio-config
+          - mountPath: /policy
+            name: opa-policy
+          livenessProbe:
+            exec:
+              command:
+              - "/app/opa_envoy_linux_amd64"
+              - "eval"
+              - "1"
+          readinessProbe:
+            exec:
+              command:
+              - "/app/opa_envoy_linux_amd64"
+              - "eval"
+              - "1"
+
+          env:
+
+
+        - name: test
+          image: "test.io/some/repository:latest"
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: baseLevel
+              value: "only set at base"
+            - name: definedInBaseAndDuplicatedInOverride
+              value: "sharedValue"
+            - name: definedInBaseAndOverridden
+              value: "baseValue"
+            - name: definedInBaseAndOverriddenValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+            - name: onlyDefinedInBaseValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 80
+            successThreshold: 3
+          startupProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /health/startup
+              port: 80
+            periodSeconds: 10
+          volumeMounts:
+            - name: service-secrets
+              mountPath: /secrets
+
+          resources:
+            {}
+      volumes:
+
+      - name: opa-istio-config
+        configMap:
+          name: opa-istio-config
+      - name: opa-policy
+        configMap:
+          name: opa-policy
+
+      - name: service-secrets
+        secret:
+          secretName: test-secrets

@@ -30,6 +30,24 @@ echo `date` > results/run-date.txt
     > results/mergeAppMetrics.yaml
 
 ./generate-test-chart.sh \
+    --set os.name=windows \
+    --set securityContext.fsGroup=1000 \
+    --set securityContext.runAsNonRoot=true \
+    --set containerSecurityContext.runAsUser=1001 \
+    --set containerSecurityContext.allowPrivilegeEscalation=false \
+    --set opa.containerSecurityContext.runAsGroup=1002 \
+    --set opa.containerSecurityContext.readOnlyRootFilesystem=true \
+    --set opa.containerSecurityContext.allowPrivilegeEscalation=false \
+    --set initContainers[0].initContainerSecurityContext.runAsUser=1003 \
+    --set initContainers[0].initContainerSecurityContext.allowPrivilegeEscalation=false \
+    --set initContainersDefinitions[0].name=custom \
+    --set initContainersDefinitions[0].image=busybox \
+    --set initContainersDefinitions[0].securityContext.runAsUser=1004 \
+    --set initContainersDefinitions[0].securityContext.allowPrivilegeEscalation=false \
+    --show-only templates/deployment.yaml \
+    > results/windows-workload.yaml
+
+./generate-test-chart.sh \
     --set deploymentOnly=true \
     > results/deployment-only.yaml
 

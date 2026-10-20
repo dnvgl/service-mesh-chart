@@ -7,6 +7,7 @@
   {{ .Values.image.repository }}:{{ .Values.image.tag }}
 {{- end -}}
 {{- end -}}
+{{- $isWindows := or (eq .Values.os.name "windows") .Values.os.windows -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -79,10 +80,22 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- if .Values.os.name }}
+      os:
+        name: {{ .Values.os.name }}
+      {{- else if $isWindows }}
+      os:
+        name: windows
+      {{- end }}
       serviceAccountName: {{ include "platform-service.serviceAccountName" . }}
-      {{- if not (empty .Values.securityContext) }}
+      {{- $podSecurityContext := .Values.securityContext }}
+      {{- if $isWindows }}
+      {{- /* Fields rejected by the API server for Windows Pods */}}
+      {{- $podSecurityContext = omit $podSecurityContext "seLinuxOptions" "seccompProfile" "fsGroup" "fsGroupChangePolicy" "sysctls" "runAsUser" "runAsGroup" "supplementalGroups" "allowPrivilegeEscalation" }}
+      {{- end }}
+      {{- if not (empty $podSecurityContext) }}
       securityContext:
-        {{- toYaml .Values.securityContext | nindent 8 }}
+        {{- toYaml $podSecurityContext | nindent 8 }}
       {{- end }}
       {{- if or .Values.initContainers .Values.initContainersDefinitions }}
       initContainers:
@@ -91,9 +104,13 @@ spec:
         - name: {{ .name }}
           image: {{ .image.full }}
           imagePullPolicy: {{ .image.pullPolicy }}
-{{- if .initContainerSecurityContext }}
+{{- $initContainerSecurityContext := .initContainerSecurityContext }}
+{{- if $isWindows }}
+{{- $initContainerSecurityContext = omit $initContainerSecurityContext "seLinuxOptions" "seccompProfile" "fsGroup" "fsGroupChangePolicy" "sysctls" "runAsUser" "runAsGroup" "supplementalGroups" "allowPrivilegeEscalation" }}
+{{- end }}
+{{- if $initContainerSecurityContext }}
           securityContext:
-            {{- toYaml .initContainerSecurityContext | nindent 12 }}
+            {{- toYaml $initContainerSecurityContext | nindent 12 }}
 {{- end }}
 {{- if .envVariables }}
           env:
@@ -108,7 +125,17 @@ spec:
       {{- end }}
 {{- end }}
 {{- if .Values.initContainersDefinitions }}
+{{- if $isWindows }}
+      {{- range .Values.initContainersDefinitions }}
+      {{- $initContainer := deepCopy . }}
+      {{- if $initContainer.securityContext }}
+      {{- $_ := set $initContainer "securityContext" (omit $initContainer.securityContext "seLinuxOptions" "seccompProfile" "capabilities" "readOnlyRootFilesystem" "privileged" "allowPrivilegeEscalation" "procMount" "runAsUser" "runAsGroup") }}
+      {{- end }}
+      {{- toYaml (list $initContainer) | nindent 8 }}
+      {{- end }}
+{{- else }}
       {{- toYaml .Values.initContainersDefinitions | nindent 8 }}
+{{- end }}
 {{- end }}
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
@@ -117,9 +144,13 @@ spec:
         - name: opa-istio
           image: {{ .Values.opa.image }}
           imagePullPolicy: IfNotPresent
-{{- if .Values.opa.containerSecurityContext }}
+{{- $opaContainerSecurityContext := .Values.opa.containerSecurityContext }}
+{{- if $isWindows }}
+{{- $opaContainerSecurityContext = omit $opaContainerSecurityContext "seLinuxOptions" "seccompProfile" "capabilities" "readOnlyRootFilesystem" "privileged" "allowPrivilegeEscalation" "procMount" "runAsUser" "runAsGroup" }}
+{{- end }}
+{{- if $opaContainerSecurityContext }}
           securityContext:
-            {{- toYaml .Values.opa.containerSecurityContext | nindent 12 }}
+            {{- toYaml $opaContainerSecurityContext | nindent 12 }}
 {{- end }}
 {{- if .Values.opa.args }}
           args:
@@ -207,9 +238,13 @@ spec:
 {{- if .Values.workingDir }}
           workingDir: {{ .Values.workingDir }}
 {{- end }}
-{{- if .Values.containerSecurityContext }}
+{{- $containerSecurityContext := .Values.containerSecurityContext }}
+{{- if $isWindows }}
+{{- $containerSecurityContext = omit $containerSecurityContext "seLinuxOptions" "seccompProfile" "fsGroup" "fsGroupChangePolicy" "sysctls" "runAsUser" "runAsGroup" "supplementalGroups" "allowPrivilegeEscalation" }}
+{{- end }}
+{{- if $containerSecurityContext }}
           securityContext:
-            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+            {{- toYaml $containerSecurityContext | nindent 12 }}
 {{- end }}
           ports:
           {{- if .Values.defaultRouting.tcpEnabled }}
