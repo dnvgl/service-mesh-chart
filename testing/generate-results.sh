@@ -30,6 +30,28 @@ echo `date` > results/run-date.txt
     > results/mergeAppMetrics.yaml
 
 ./generate-test-chart.sh \
+    --set os.windows=true \
+    --set securityContext.fsGroup=1000 \
+    --set securityContext.runAsNonRoot=true \
+    --set containerSecurityContext.runAsUser=1001 \
+    --set containerSecurityContext.allowPrivilegeEscalation=false \
+    --set containerSecurityContext.capabilities.drop[0]=ALL \
+    --set containerSecurityContext.readOnlyRootFilesystem=true \
+    --set containerSecurityContext.privileged=true \
+    --set opa.containerSecurityContext.readOnlyRootFilesystem=true \
+    --set opa.containerSecurityContext.privileged=true \
+    --set opa.containerSecurityContext.procMount=Unmasked \
+    --set initContainers[0].initContainerSecurityContext.readOnlyRootFilesystem=true \
+    --set initContainers[0].initContainerSecurityContext.privileged=true \
+    --set initContainers[0].initContainerSecurityContext.procMount=Unmasked \
+    --set initContainersDefinitions[0].name=custom \
+    --set initContainersDefinitions[0].image=busybox \
+    --set initContainersDefinitions[0].securityContext.runAsUser=1004 \
+    --set initContainersDefinitions[0].securityContext.allowPrivilegeEscalation=false \
+    --show-only templates/deployment.yaml \
+    > results/windows-workload.yaml
+
+./generate-test-chart.sh \
     --set deploymentOnly=true \
     > results/deployment-only.yaml
 
@@ -121,6 +143,26 @@ echo `date` > results/run-date.txt
 ./generate-test-chart.sh \
     --set workloadIdentityClientId="123abc" \
     > results/workload-identity.yaml
+
+
+./generate-test-chart.sh \
+    --set hpa.enabled=true \
+    --set hpa.targetMemoryUtilizationPercentage=70 \
+    --show-only templates/horizontal-pod-autoscaler.yaml \
+    > results/hpa-with-memory.yaml
+
+./generate-test-chart.sh \
+    --set hpa.enabled=true \
+    --set hpa.targetCPUUtilizationPercentage=80 \
+    --show-only templates/horizontal-pod-autoscaler.yaml \
+    > results/hpa-with-cpu.yaml
+
+./generate-test-chart.sh \
+    --set hpa.enabled=true \
+    --set hpa.targetCPUUtilizationPercentage=60 \
+    --set hpa.targetMemoryUtilizationPercentage=70 \
+    --show-only templates/horizontal-pod-autoscaler.yaml \
+    > results/hpa-with-cpu-and-memory.yaml
 
 ./generate-test-chart.sh \
     --set defaultRouting.retries.enabled=true \

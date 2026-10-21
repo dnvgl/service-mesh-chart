@@ -15,6 +15,9 @@ additionalPodLabels: {}
 additionalPodAnnotations: {}
   # sidecar.istio.io/inject: "false"
 
+os:
+  windows: false
+
 image:
   # registry: platformteam.azurecr.io (ignored if not specified)
   registry:
@@ -123,10 +126,14 @@ opa:
       - "/app/opa_envoy_linux_amd64"
       - "eval"
       - "1"
+# Application auto-scaling config
+# https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
 hpa:
   enabled: false
   maxReplicas: 3
   minReplicas: 1
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
 
 defaultRouting:
   # Generate default virtual services and destination rules
