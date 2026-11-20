@@ -1,0 +1,494 @@
+---
+# Source: platform-service/templates/network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test-release-network-policy
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  podSelector:
+    matchLabels:
+      app: test
+      version: v1
+  policyTypes:
+    - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          istio: pilot
+      namespaceSelector:
+        matchLabels:
+          istio-operator-managed: Reconcile
+  - from:
+    - podSelector:
+        matchLabels:
+          istio: ingressgateway
+      namespaceSelector:
+        matchLabels:
+          istio-operator-managed: Reconcile
+  - from:
+    - podSelector:
+        matchLabels:
+          app: consumer
+    ports:
+    - protocol: TCP
+      port: 80
+---
+# Source: platform-service/templates/service-account.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+automountServiceAccountToken: false
+---
+# Source: platform-service/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  type: 
+  ports:
+    - port: 8000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: test
+    app: test
+---
+# Source: platform-service/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: test
+      app.kubernetes.io/instance: test-release
+  template:
+    metadata:
+      labels:
+        app: test
+        app.kubernetes.io/name: test
+        helm.sh/chart: platform-service-test
+        app.kubernetes.io/instance: test-release
+        version: v1
+        state: stateful
+        sidecar.opa-istio.io/inject: "true"
+        session-management: backend
+        label1: "1"
+        label2: "2"
+      annotations:
+        anno1: "1"
+        anno2: "2"
+    spec:
+      serviceAccountName: test
+      initContainers:
+        - name: data-migrationjob
+          image: test/test:build-1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ENV1
+              value: "123"
+            - name: ENV2
+              value: "234"
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+            requests:
+              cpu: 500m
+              memory: 256Mi
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: opa-istio
+          image: openpolicyagent/opa:0.28.0-istio
+          imagePullPolicy: IfNotPresent
+          args:
+            - run
+            - --server
+            - --addr=localhost:8181
+            - --diagnostic-addr=0.0.0.0:8282
+            - --config-file=/config/config.yaml
+            - /policy/policy.rego
+          volumeMounts:
+          - mountPath: /config
+            name: opa-istio-config
+          - mountPath: /policy
+            name: opa-policy
+          livenessProbe:
+            exec:
+              command:
+              - "/app/opa_envoy_linux_amd64"
+              - "eval"
+              - "1"
+          readinessProbe:
+            exec:
+              command:
+              - "/app/opa_envoy_linux_amd64"
+              - "eval"
+              - "1"
+
+          env:
+
+
+        - name: test
+          image: "test.io/some/repository:latest"
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: baseLevel
+              value: "only set at base"
+            - name: definedInBaseAndDuplicatedInOverride
+              value: "sharedValue"
+            - name: definedInBaseAndOverridden
+              value: "baseValue"
+            - name: definedInBaseAndOverriddenValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+            - name: onlyDefinedInBaseValue
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: base-secret
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 80
+            successThreshold: 3
+          startupProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /health/startup
+              port: 80
+            periodSeconds: 10
+          volumeMounts:
+            - name: service-secrets
+              mountPath: /secrets
+
+          resources:
+            {}
+      volumes:
+
+      - name: opa-istio-config
+        configMap:
+          name: opa-istio-config
+      - name: opa-policy
+        configMap:
+          name: opa-policy
+
+      - name: service-secrets
+        secret:
+          secretName: test-secrets
+---
+# Source: platform-service/templates/authorizationPolicy.yaml
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: test-release
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  selector:
+    matchLabels:
+      app: test
+      version: v1
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/myns/sa/consumersp"]
+  - from:
+    - source:
+        principals: ["cluster.local/ns/test-ns/sa/testsp"]
+        requestPrincipals: ["*"]
+  - from:
+    - source:
+        namespaces: ["istio-system"]
+        requestPrincipals: ["*"]
+---
+# Source: platform-service/templates/destinationrules.yaml
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: test-release-destinationrule
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  host: test.test-ns.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM
+    tls:
+      mode: ISTIO_MUTUAL
+---
+# Source: platform-service/templates/requestAuthentication.yaml
+apiVersion: security.istio.io/v1
+kind: RequestAuthentication
+metadata:
+  name: test-release
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  selector:
+    matchLabels:
+      app: test
+      version: v1
+  jwtRules:
+  - audiences:
+    - test-audience
+    forwardOriginalToken: true
+    issuer: https://login.microsoftonline.com/abcd/v2.0/
+    jwksUri: https://jwksuri/discovery/v2.0/keys
+---
+# Source: platform-service/templates/vertical-pod-autoscaler.yaml
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: test-release
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: test-release
+  updatePolicy:
+    updateMode: "InPlace"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "test"
+        controlledResources:
+        - cpu
+        - memory
+        controlledValues: RequestsAndLimits
+        maxAllowed:
+          cpu: 2
+          memory: 2Gi
+        minAllowed:
+          cpu: 1m
+          memory: 10Mi
+---
+# Source: platform-service/templates/virtualservice-internal.yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: test-int
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+  annotations:
+    f5xc/priority: "2"
+spec:
+  hosts:
+    - "myhost.green.we.nonprod.kubeit-int.dnv.com"
+    - "myhost.blue.we.nonprod.kubeit-int.dnv.com"
+  gateways:
+    - istio-system/global-internaluse-gateway  
+  http:
+    # redirect on prefixes without trailing slashes
+    - match:
+      - uri:
+          exact: /prefix1
+      redirect:
+        uri: /prefix1/
+    - match:
+      - uri:
+          exact: /prefix2
+      redirect:
+        uri: /prefix2/
+    # routes to service
+    - route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+      headers:
+        response:
+          remove:
+          - X-Foo-Bar
+      match:
+      - uri:
+          prefix: /prefix1/
+      - uri:
+          prefix: /prefix2/
+      rewrite:
+        uri: /
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: test
+spec:
+  hosts:
+  - test.test-ns.svc.cluster.local
+  gateways:
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: "test.test-ns.svc.cluster.local"    
+    retries:
+      attempts: 3
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: mysubdomain1-mydomain-com-test-release-ext
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+  annotations:
+    f5xc/priority: "2"
+spec:
+  hosts:
+    - mysubdomain1.mydomain.com
+  gateways:
+    - istio-system/global-https-internal-default-gateway  
+  http:
+    # redirect on prefixes without trailing slashes
+    - match:
+      - uri:
+          exact: /prefix1
+      redirect:
+        uri: /prefix1/
+    - match:
+      - uri:
+          exact: /prefix2
+      redirect:
+        uri: /prefix2/
+    # routes to service
+    - route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+      headers:
+        response:
+          remove:
+          - X-Foo-Bar
+      match:
+      - uri:
+          prefix: /prefix1/
+      - uri:
+          prefix: /prefix2/
+      rewrite:
+        uri: /
+---
+# Source: platform-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: mysubdomain2-mydomain-com-test-release-ext
+  labels:
+    app: test
+    app.kubernetes.io/name: test
+    helm.sh/chart: platform-service-test
+    app.kubernetes.io/instance: test-release
+    version: v1
+    state: stateful
+  annotations:
+    f5xc/priority: "2"
+spec:
+  hosts:
+    - mysubdomain2.mydomain.com
+  gateways:
+    - istio-system/global-https-internal-default-gateway  
+  http:
+    # redirect on prefixes without trailing slashes
+    - match:
+      - uri:
+          exact: /prefix1
+      redirect:
+        uri: /prefix1/
+    - match:
+      - uri:
+          exact: /prefix2
+      redirect:
+        uri: /prefix2/
+    # routes to service
+    - route:
+      - destination:
+          host: "test.test-ns.svc.cluster.local"
+      headers:
+        response:
+          remove:
+          - X-Foo-Bar
+      match:
+      - uri:
+          prefix: /prefix1/
+      - uri:
+          prefix: /prefix2/
+      rewrite:
+        uri: /
