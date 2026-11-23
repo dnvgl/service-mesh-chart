@@ -183,11 +183,6 @@ echo `date` > results/run-date.txt
      --show-only templates/deployment.yaml \
      > results/vs-tcp.yaml
 
-./generate-test-chart.sh \
-    --set vpa.enabled=true \
-    --set vpa.containerPolicies.mainContainer.minAllowed.cpu="1m",vpa.containerPolicies.mainContainer.minAllowed.memory="10Mi" \
-    > results/vpa-enabled.yaml
-
 echo " *** kubeval results ***"
 kubeval --ignore-missing-schemas results/*.yaml
 echo " *** istioctl validation results ***"
