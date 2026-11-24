@@ -112,6 +112,15 @@ entries:
   platform-service:
   - apiVersion: v1
     appVersion: "1.1"
+    created: "2026-11-24T04:39:27.990431817Z"
+    description: Platform service chart
+    digest: 753c7baa37754e04a12137e01b97dbf2cef56f2a9e3a1fe4b8d1af32a55b1a87
+    name: platform-service
+    urls:
+    - https://github.com/dnvgl/service-mesh-chart/releases/download/platform-service-1.5.16/platform-service-1.5.16.tgz
+    version: 1.5.16
+  - apiVersion: v1
+    appVersion: "1.1"
     created: "2026-11-20T14:53:57.998289067Z"
     description: Platform service chart
     digest: 1cf2ff791e0448825128330b7f3116181532141d89db687936c169835a4182a1
