@@ -319,7 +319,7 @@ spec:
     kind: Deployment
     name: test-release
   updatePolicy:
-    updateMode: "InPlace"
+    updateMode: "InPlaceOrRecreate"
   resourcePolicy:
     containerPolicies:
       - containerName: "test"

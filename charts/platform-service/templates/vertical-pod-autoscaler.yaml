@@ -16,10 +16,6 @@ spec:
     {{- with .Values.vpa.minReplicas }}
     minReplicas: {{ . }}
     {{- end }}
-  {{- with .Values.vpa.startupBoost }}
-  startupBoost:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
   {{- with .Values.vpa.containerPolicies }}
   resourcePolicy:
     containerPolicies:
